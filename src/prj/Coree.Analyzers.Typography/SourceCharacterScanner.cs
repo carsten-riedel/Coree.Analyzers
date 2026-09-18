@@ -47,71 +47,22 @@ namespace Coree.Analyzers.Typography
                 options.TryGetValue("build_property." + excludesPropertyName, out excludes);
                 string projectDirectory;
                 options.TryGetValue("build_property.MSBuildProjectDirectory", out projectDirectory);
+                var compiledPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var tree in startContext.Compilation.SyntaxTrees)
+                {
+                    ProjectDirectoryTextFiles.AddSeenPath(compiledPaths, tree.FilePath);
+                }
+
                 startContext.RegisterAdditionalFileAction(fileContext =>
-                    ReportEachMatch(fileContext, rule, characters, includes, excludes, projectDirectory));
-                startContext.RegisterCompilationEndAction(endContext =>
-                    ReportProjectDirectoryMatches(
-                        endContext,
+                    ReportEachMatch(
+                        fileContext,
                         rule,
                         characters,
                         includes,
                         excludes,
-                        projectDirectory));
+                        projectDirectory,
+                        compiledPaths));
             });
-        }
-
-        internal static void ReportProjectDirectoryMatches(
-            CompilationAnalysisContext context,
-            DiagnosticDescriptor rule,
-            string characters,
-            string includes,
-            string excludes,
-            string projectDirectory)
-        {
-            if (string.IsNullOrWhiteSpace(projectDirectory))
-            {
-                return;
-            }
-
-            projectDirectory = ProjectDirectoryTextFiles.NormalizeFullPath(projectDirectory);
-            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            foreach (var tree in context.Compilation.SyntaxTrees)
-            {
-                ProjectDirectoryTextFiles.AddSeenPath(seen, tree.FilePath);
-            }
-
-            foreach (var extra in context.Options.AdditionalFiles)
-            {
-                ProjectDirectoryTextFiles.AddSeenPath(seen, extra.Path);
-            }
-
-            foreach (var path in ProjectDirectoryTextFiles.EnumerateFiles(projectDirectory))
-            {
-                context.CancellationToken.ThrowIfCancellationRequested();
-                if (!seen.Add(ProjectDirectoryTextFiles.NormalizeFullPath(path)))
-                {
-                    continue;
-                }
-
-                if (!AdditionalFilePatterns.IsSelected(path, includes, excludes, projectDirectory))
-                {
-                    continue;
-                }
-
-                var text = ProjectDirectoryTextFiles.TryReadText(path);
-                if (text == null)
-                {
-                    continue;
-                }
-
-                var fullPath = ProjectDirectoryTextFiles.NormalizeFullPath(path);
-                ReportEachMatch(
-                    text,
-                    span => Location.Create(fullPath, span, text.Lines.GetLinePositionSpan(span)),
-                    rule,
-                    characters,
-                    diagnostic => context.ReportDiagnostic(diagnostic));
-            }
         }
 
         internal static SourceText OrEmpty(SourceText text)
@@ -144,15 +95,26 @@ namespace Coree.Analyzers.Typography
             string characters,
             string includes,
             string excludes,
-            string projectDirectory)
+            string projectDirectory,
+            HashSet<string> compiledPaths)
         {
             var file = context.AdditionalFile;
+            if (ProjectDirectoryTextFiles.IsAlreadyCompiled(compiledPaths, file.Path))
+            {
+                return;
+            }
+
             if (!AdditionalFilePatterns.IsSelected(file.Path, includes, excludes, projectDirectory))
             {
                 return;
             }
 
             var text = OrEmpty(file.GetText(context.CancellationToken));
+            if (ProjectDirectoryTextFiles.ContainsNul(text))
+            {
+                return;
+            }
+
             ReportEachMatch(
                 text,
                 span => Location.Create(file.Path, span, text.Lines.GetLinePositionSpan(span)),

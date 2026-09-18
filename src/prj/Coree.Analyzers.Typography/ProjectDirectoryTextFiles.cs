@@ -1,9 +1,7 @@
 #nullable disable
-#pragma warning disable RS1035 // Walks the consuming project directory when include globs are set.
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 using Microsoft.CodeAnalysis.Text;
 
@@ -24,17 +22,45 @@ namespace Coree.Analyzers.Typography
                 || name.Equals(".vs", StringComparison.OrdinalIgnoreCase);
         }
 
-        internal static bool LooksBinary(byte[] bytes)
+        internal static bool HasIgnoredDirectorySegment(string relativePath)
         {
-            if (bytes == null)
+            if (string.IsNullOrWhiteSpace(relativePath))
             {
-                return true;
+                return false;
             }
 
-            var limit = bytes.Length < 512 ? bytes.Length : 512;
+            var normalized = relativePath.Replace('\\', '/');
+            var start = 0;
+            for (var i = 0; i <= normalized.Length; i++)
+            {
+                if (i != normalized.Length && normalized[i] != '/')
+                {
+                    continue;
+                }
+
+                var length = i - start;
+                if (length > 0 && IsIgnoredDirectoryName(normalized.Substring(start, length)))
+                {
+                    return true;
+                }
+
+                start = i + 1;
+            }
+
+            return false;
+        }
+
+        internal static bool ContainsNul(SourceText text)
+        {
+            if (text == null)
+            {
+                return false;
+            }
+
+            var limit = text.Length < 512 ? text.Length : 512;
             for (var i = 0; i < limit; i++)
             {
-                if (bytes[i] == 0)
+                if (text[i] == '\0')
                 {
                     return true;
                 }
@@ -70,79 +96,14 @@ namespace Coree.Analyzers.Typography
             seen.Add(NormalizeFullPath(path));
         }
 
-        internal static bool TryGetDirectoryEntries(string directory, out string[] files, out string[] directories)
+        internal static bool IsAlreadyCompiled(HashSet<string> compiledPaths, string path)
         {
-            files = Array.Empty<string>();
-            directories = Array.Empty<string>();
-            try
-            {
-                files = Directory.GetFiles(directory);
-                directories = Directory.GetDirectories(directory);
-                return true;
-            }
-            catch (Exception)
+            if (compiledPaths == null || string.IsNullOrWhiteSpace(path))
             {
                 return false;
             }
-        }
 
-        internal static SourceText TryReadText(string path)
-        {
-            byte[] bytes;
-            try
-            {
-                bytes = File.ReadAllBytes(path);
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-
-            if (LooksBinary(bytes))
-            {
-                return null;
-            }
-
-            using (var stream = new MemoryStream(bytes))
-            {
-                return SourceText.From(stream, Encoding.UTF8);
-            }
-        }
-
-        internal static IEnumerable<string> EnumerateFiles(string projectDirectory)
-        {
-            if (string.IsNullOrWhiteSpace(projectDirectory))
-            {
-                yield break;
-            }
-
-            var stack = new Stack<string>();
-            stack.Push(projectDirectory);
-            while (stack.Count > 0)
-            {
-                var directory = stack.Pop();
-                string[] files;
-                string[] directories;
-                if (!TryGetDirectoryEntries(directory, out files, out directories))
-                {
-                    continue;
-                }
-
-                for (var i = 0; i < files.Length; i++)
-                {
-                    yield return files[i];
-                }
-
-                for (var i = 0; i < directories.Length; i++)
-                {
-                    if (IsIgnoredDirectoryName(Path.GetFileName(directories[i])))
-                    {
-                        continue;
-                    }
-
-                    stack.Push(directories[i]);
-                }
-            }
+            return compiledPaths.Contains(NormalizeFullPath(path));
         }
     }
 }

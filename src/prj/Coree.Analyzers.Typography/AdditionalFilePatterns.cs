@@ -13,6 +13,11 @@ namespace Coree.Analyzers.Typography
             }
 
             var relative = ToRelativePath(path, projectDirectory);
+            if (ProjectDirectoryTextFiles.HasIgnoredDirectorySegment(relative))
+            {
+                return false;
+            }
+
             if (!AnyMatch(relative, includes))
             {
                 return false;

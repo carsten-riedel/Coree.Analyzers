@@ -106,6 +106,11 @@ namespace Coree.Analyzers.Typography.Tests
                 "**/*.txt",
                 "sub/*.txt",
                 @"C:\proj"));
+            Assert.IsFalse(AdditionalFilePatterns.IsSelected(
+                @"C:\proj\bin\out.txt",
+                "**",
+                null,
+                @"C:\proj"));
         }
     }
 }
