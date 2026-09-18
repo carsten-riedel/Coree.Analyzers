@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace Coree.Analyzers.Typography
 {
     /// <summary>
-    /// Sample analyzer: warns when C# source or matching additional files contain typographic quotation marks
+    /// Sample analyzer: warns when C# source or matching files under the project directory contain typographic quotation marks
     /// (curly quotes and guillemets), not ASCII <c>"</c> or <c>'</c>.
     /// Replace this type with your own diagnostic analyzer.
     /// </summary>

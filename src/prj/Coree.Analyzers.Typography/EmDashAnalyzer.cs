@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace Coree.Analyzers.Typography
 {
     /// <summary>
-    /// Sample analyzer: warns when C# source or matching additional files contain an em dash (U+2014).
+    /// Sample analyzer: warns when C# source or matching files under the project directory contain an em dash (U+2014).
     /// Replace this type with your own diagnostic analyzer.
     /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]

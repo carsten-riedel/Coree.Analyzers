@@ -25,14 +25,10 @@
   </PropertyGroup>
 
   <!-- Sample analyzer severity: warning (default), error, message, or off. -->
-  <!-- Additional files: includes minus excludes, globs relative to this project. Empty includes skip that scan. -->
+  <!-- Default includes is every file under this project. Empty includes skip that scan. -->
   <PropertyGroup>
     <EmDashAnalyzerSeverity>warning</EmDashAnalyzerSeverity>
     <SmartQuotesAnalyzerSeverity>warning</SmartQuotesAnalyzerSeverity>
-    <EmDashAnalyzerIncludes>*.txt;*.csproj</EmDashAnalyzerIncludes>
-    <EmDashAnalyzerExcludes></EmDashAnalyzerExcludes>
-    <SmartQuotesAnalyzerIncludes>*.txt;*.csproj</SmartQuotesAnalyzerIncludes>
-    <SmartQuotesAnalyzerExcludes></SmartQuotesAnalyzerExcludes>
   </PropertyGroup>
 
   <!-- Load the in-repo analyzer at compile time. Do not reference it as a library. -->

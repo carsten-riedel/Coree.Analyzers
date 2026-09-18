@@ -15,7 +15,7 @@ namespace Coree.Analyzers.Typography.DebugHost
             // (warning, error, message, or off).
             // Change EmDashAnalyzerIncludes / SmartQuotesAnalyzerIncludes
             // and EmDashAnalyzerExcludes / SmartQuotesAnalyzerExcludes
-            // (semicolon-separated globs; empty includes skip additional files).
+            // (semicolon-separated globs; default is ** under this csproj; empty includes skip extra files).
             // ASCII hyphen and quotes do not report.
             Console.WriteLine("1-2");
             Console.WriteLine("\"hello\"");

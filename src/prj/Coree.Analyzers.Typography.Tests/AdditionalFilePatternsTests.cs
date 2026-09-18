@@ -54,6 +54,7 @@ namespace Coree.Analyzers.Typography.Tests
             Assert.IsFalse(AdditionalFilePatterns.IsMatch("sub/deep/notes.txt", "sub/*.txt"));
             Assert.IsTrue(AdditionalFilePatterns.IsMatch("sub/deep/notes.txt", "sub/**/*.txt"));
             Assert.IsTrue(AdditionalFilePatterns.IsMatch("dir/file", "**"));
+            Assert.IsTrue(AdditionalFilePatterns.IsSelected(@"C:\proj\docs\notes.md", "**", null, @"C:\proj"));
             Assert.IsFalse(AdditionalFilePatterns.IsMatch("dir/file", "*"));
             Assert.IsFalse(AdditionalFilePatterns.IsMatch("notes.txt", "other/**/*.txt"));
         }

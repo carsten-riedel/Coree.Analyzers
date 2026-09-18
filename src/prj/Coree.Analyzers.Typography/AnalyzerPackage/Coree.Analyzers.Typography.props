@@ -4,16 +4,20 @@
     Values: warning (default), error, message, or off.
     Additional files: EmDashAnalyzerIncludes / EmDashAnalyzerExcludes and the SmartQuotes pair.
     Includes are semicolon-separated globs relative to the consuming project directory.
-    Excludes are subtracted from that analyzer's includes. Demo includes: *.txt;*.csproj.
-    Empty includes disable additional-file scanning. The analyzer also skips additional files when includes are unset.
+    Default includes is ** (every file under the csproj directory). The analyzer walks the project
+    directory itself so pack projects without Compile items still get diagnostics. bin, obj, .git,
+    and .vs are always skipped. ** is not dumped into AdditionalFiles (binaries / nupkg size).
+    Excludes are subtracted from that analyzer's includes.
+    Empty includes disable extra-file scanning (additional files and the directory walk).
+    The analyzer also skips extra files when includes are unset.
     CompilerVisibleProperty is required or the compiler does not pass the values to the analyzer.
     EditorConfig treats ';' as a comment, so a target rewrites the compiler-visible copies with '|'.
   -->
   <PropertyGroup>
     <EmDashAnalyzerSeverity Condition="'$(EmDashAnalyzerSeverity)' == ''">warning</EmDashAnalyzerSeverity>
     <SmartQuotesAnalyzerSeverity Condition="'$(SmartQuotesAnalyzerSeverity)' == ''">warning</SmartQuotesAnalyzerSeverity>
-    <EmDashAnalyzerIncludes Condition="'$(EmDashAnalyzerIncludes)' == ''">*.txt;*.csproj</EmDashAnalyzerIncludes>
-    <SmartQuotesAnalyzerIncludes Condition="'$(SmartQuotesAnalyzerIncludes)' == ''">*.txt;*.csproj</SmartQuotesAnalyzerIncludes>
+    <EmDashAnalyzerIncludes Condition="'$(EmDashAnalyzerIncludes)' == ''">**</EmDashAnalyzerIncludes>
+    <SmartQuotesAnalyzerIncludes Condition="'$(SmartQuotesAnalyzerIncludes)' == ''">**</SmartQuotesAnalyzerIncludes>
   </PropertyGroup>
   <ItemGroup>
     <CompilerVisibleProperty Include="EmDashAnalyzerSeverity" />
@@ -27,12 +31,12 @@
   <Target Name="AddTypographyAdditionalFiles"
           BeforeTargets="GenerateMSBuildEditorConfigFileCore;CoreCompile">
     <ItemGroup>
-      <_EmDashAnalyzerIncludeGlob Include="$(EmDashAnalyzerIncludes)" Condition="'$(EmDashAnalyzerIncludes)' != ''" />
+      <_EmDashAnalyzerIncludeGlob Include="$(EmDashAnalyzerIncludes)" Condition="'$(EmDashAnalyzerIncludes)' != '' AND '$(EmDashAnalyzerIncludes)' != '**' AND '$(EmDashAnalyzerIncludes)' != '**/*' AND '$(EmDashAnalyzerIncludes)' != '**\*'" />
       <_EmDashAnalyzerExcludeGlob Include="$(EmDashAnalyzerExcludes)" Condition="'$(EmDashAnalyzerExcludes)' != ''" />
       <_EmDashAnalyzerExcludeGlob Include="bin\**;obj\**" />
       <_EmDashAnalyzerAdditionalFile Include="@(_EmDashAnalyzerIncludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')"
                                      Exclude="@(_EmDashAnalyzerExcludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')" />
-      <_SmartQuotesAnalyzerIncludeGlob Include="$(SmartQuotesAnalyzerIncludes)" Condition="'$(SmartQuotesAnalyzerIncludes)' != ''" />
+      <_SmartQuotesAnalyzerIncludeGlob Include="$(SmartQuotesAnalyzerIncludes)" Condition="'$(SmartQuotesAnalyzerIncludes)' != '' AND '$(SmartQuotesAnalyzerIncludes)' != '**' AND '$(SmartQuotesAnalyzerIncludes)' != '**/*' AND '$(SmartQuotesAnalyzerIncludes)' != '**\*'" />
       <_SmartQuotesAnalyzerExcludeGlob Include="$(SmartQuotesAnalyzerExcludes)" Condition="'$(SmartQuotesAnalyzerExcludes)' != ''" />
       <_SmartQuotesAnalyzerExcludeGlob Include="bin\**;obj\**" />
       <_SmartQuotesAnalyzerAdditionalFile Include="@(_SmartQuotesAnalyzerIncludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')"
