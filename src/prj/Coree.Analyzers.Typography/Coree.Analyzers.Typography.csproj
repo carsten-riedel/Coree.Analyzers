@@ -1,0 +1,140 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Analyzer packages must load in Visual Studio and `dotnet`. netstandard2.0 is that host surface. -->
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <!-- C# language features and debugging configuration -->
+  <PropertyGroup>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <DebugType>embedded</DebugType>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <!-- XML documentation file -->
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <!-- GlobalAnalyzerConfigFiles is what Roslyn reads. Visible=false so VS does not show that item twice. -->
+  <!-- None+Link is Solution Explorer only. Disk path stays next to the csproj: Properties/ would change analyzer scope. -->
+  <!-- EnforceCodeStyleInBuild is required or IDE1006 stays IDE-only and `dotnet build` ignores the file. -->
+  <!-- OptimizeImplicitlyTriggeredBuild=false: VS Test Explorer / F5 must not skip analyzers (dotnet test does not). -->
+  <PropertyGroup>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <OptimizeImplicitlyTriggeredBuild>false</OptimizeImplicitlyTriggeredBuild>
+  </PropertyGroup>
+  <ItemGroup>
+    <GlobalAnalyzerConfigFiles Include="$(MSBuildProjectDirectory)\.project.editor.globalconfig" Visible="false" />
+    <None Remove=".project.editor.globalconfig" />
+    <None Include=".project.editor.globalconfig" Link="Properties\.project.editor.globalconfig" />
+  </ItemGroup>
+
+  <!-- SDK CA rule set. Always written; omitted AnalysisMode switch means Recommended. -->
+  <PropertyGroup>
+    <AnalysisMode>Recommended</AnalysisMode>
+  </PropertyGroup>
+
+  <!-- Restore NuGetAudit is already on. High (NU1903) and critical (NU1904) fail restore. Low/moderate stay warnings. -->
+  <PropertyGroup>
+    <WarningsAsErrors>$(WarningsAsErrors);NU1903;NU1904</WarningsAsErrors>
+  </PropertyGroup>
+
+  <!-- Packaging: analyzer nupkg (analyzers/dotnet/cs), not a lib/ class library. -->
+  <!-- EnablePackageValidation looks for lib/ TFMs; this package has none. NU5128 is that missing lib group. -->
+  <PropertyGroup>
+    <AnalyzerPackageSourcePath>$(MSBuildProjectDirectory)\AnalyzerPackage</AnalyzerPackageSourcePath>
+    <IsPackable>true</IsPackable>
+    <IsPublishable>false</IsPublishable>
+    <PublishRelease>true</PublishRelease>
+    <IsTestProject>false</IsTestProject>
+    <PackAsTool>false</PackAsTool>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <EnablePackageValidation>false</EnablePackageValidation>
+    <IsRoslynComponent>true</IsRoslynComponent>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <!-- NU5128: no lib/ group. RS2008: no AnalyzerReleases markdown; Public API baseline is the PublicApiAnalyzers switch. -->
+    <NoWarn>$(NoWarn);NU5128;RS2008</NoWarn>
+  </PropertyGroup>
+
+  <!-- SDK defaults stay. CheckEol: true for exe, skipped for Library. InvariantGlobalization unset = cultures on. -->
+  <PropertyGroup>
+    <CheckEolTargetFramework>$(CheckEolTargetFramework)</CheckEolTargetFramework>
+    <InvariantGlobalization>$(InvariantGlobalization)</InvariantGlobalization>
+  </PropertyGroup>
+
+  <!-- Versioning: Nerdbank -->
+  <PropertyGroup>
+    <GitVersionBaseDirectory>$(MSBuildProjectDirectory)\Properties</GitVersionBaseDirectory>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Nerdbank.GitVersioning" Version="3.10.94">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- Package metadata -->
+  <!-- https://learn.microsoft.com/en-us/nuget/create-packages/package-authoring-best-practices -->
+  <PropertyGroup>
+    <Authors>Carsten Riedel</Authors>
+    <Owners>Carsten Riedel</Owners>
+    <Company></Company>
+    <Copyright>Copyright © 2026 Carsten Riedel</Copyright>
+    <PackageId>Coree.Analyzers.Typography</PackageId>
+    <PackageTags>dotnet;roslyn;analyzer</PackageTags>
+    <PackageProjectUrl></PackageProjectUrl>
+    <RepositoryUrl></RepositoryUrl>
+    <RepositoryType></RepositoryType>
+    <!-- NuGet gallery blurb. CDATA is optional and keeps multiline text. -->
+    <Description><![CDATA[]]></Description>
+    <PackageReadmeFile>Readme.md</PackageReadmeFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageIcon>Icon-128x128.png</PackageIcon>
+    <!-- Read multiline release notes from a separate source file so this project file stays compact. -->
+    <PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)\Properties\NugetMetadata\PackageReleaseNotes.txt"))</PackageReleaseNotes>
+  </PropertyGroup>
+
+  <!-- NuGet package metadata from Properties/NugetMetadata is packed as package content. PackageReleaseNotes.txt is consumed for PackageReleaseNotes and is not packed as a loose file. -->
+  <!-- Standard licenses use PackageLicenseExpression and create no License.txt. -->
+  <!-- Custom: pack License.txt as PackageLicenseFile. PackagePath empty: nupkg root / docs/, not Properties/. -->
+  <ItemGroup>
+    <None Include="$(MSBuildProjectDirectory)\Properties\NugetMetadata\**\*" Pack="true" PackagePath="" Exclude="$(MSBuildProjectDirectory)\Properties\NugetMetadata\License.txt;$(MSBuildProjectDirectory)\Properties\NugetMetadata\PackageReleaseNotes.txt" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <PackageOutputPath Condition=" '$(PackageOutputPath)' == '' ">$(MSBuildProjectDirectory)\bin\Pack</PackageOutputPath>
+  </PropertyGroup>
+
+  <!-- Roslyn compile-time only. The IDE / `dotnet` host already has CodeAnalysis; do not pack it as a dependency. -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+
+  <!-- Keep Git configuration on disk without showing it as a project item -->
+  <ItemGroup>
+    <None Remove=".gitignore" />
+  </ItemGroup>
+
+  <!-- Disk path stays .config/: that is where `dotnet tool` looks. Link is Solution Explorer only. -->
+  <ItemGroup>
+    <None Remove=".config\dotnet-tools.json" />
+    <None Include=".config\dotnet-tools.json" Link="Properties\dotnet-tools.json" />
+  </ItemGroup>
+
+  <!-- Source Link git state as properties (SDK 8+). Target hooks GenerateAssemblyInfo. -->
+  <Import Project="Properties/Build/SourceControlState.targets" />
+  <Import Project="Properties/Build/PackAsAnalyzer.targets" />
+
+</Project>

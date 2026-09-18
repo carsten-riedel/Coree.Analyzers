@@ -1,0 +1,14 @@
+<Solution>
+  <!-- Paths are relative to this file's final location.
+       PlaceSolution SlnFolder      → src/sln/Coree.Analyzers.Typography/Coree.Analyzers.Typography.slnx
+       PlaceSolution BesideCsproj  → src/prj/Coree.Analyzers.Typography/Coree.Analyzers.Typography.slnx
+       PlaceSolution RepoRoot       → repo root, so src/prj/ and src/sln/. -->
+  <Folder Name="/sln/Coree.Analyzers.Typography/">
+    <File Path="Readme.md" />
+  </Folder>
+  <Folder Name="/prj/">
+    <Project Path="../../prj/Coree.Analyzers.Typography.Tests/Coree.Analyzers.Typography.Tests.csproj" />
+    <Project Path="../../prj/Coree.Analyzers.Typography/Coree.Analyzers.Typography.csproj" />
+    <Project Path="../../prj/Coree.Analyzers.Typography.DebugHost/Coree.Analyzers.Typography.DebugHost.csproj" />
+  </Folder>
+</Solution>

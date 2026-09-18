@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Coree.Analyzers.Typography": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "..\\Coree.Analyzers.Typography.DebugHost\\Coree.Analyzers.Typography.DebugHost.csproj"
+    }
+  }
+}
