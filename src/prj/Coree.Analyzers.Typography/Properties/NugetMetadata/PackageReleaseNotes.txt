@@ -1,3 +1,11 @@
-0.1.0 (2026-09-18)
+1.0.0 (2026-09-19)
 
- - Project creation.
+ - Initial release.
+ - CTYED001 flags en dash (U+2013) and em dash (U+2014).
+ - CTYQM001 flags typographic quotation marks (curly quotes and guillemets).
+ - CTYAP001 flags typographic apostrophe / closing single quotation mark (U+2019).
+ - CTYEL001 flags horizontal ellipsis (U+2026).
+ - CTYMN001 flags minus sign (U+2212).
+ - ASCII hyphen, quotes, apostrophe, and periods stay silent.
+ - Scans C# and matching extra files (Includes minus Excludes plus AdditionalExcludes).
+ - Default severity is warning; set warning, error, message, or off per analyzer.

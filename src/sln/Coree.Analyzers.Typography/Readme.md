@@ -46,7 +46,7 @@ Coverlet measures only the analyzer assembly (`[Coree.Analyzers.Typography]*`) a
 dotnet pack
 ```
 
-Creates one `.nupkg` in `src/prj/Coree.Analyzers.Typography/bin/Pack/` with the analyzer under `analyzers/dotnet/cs` (not `lib/`) and `Coree.Analyzers.Typography.props` under `build/` and `buildTransitive/` (`EmDashAnalyzerSeverity`, `SmartQuotesAnalyzerSeverity`, `ApostropheAnalyzerSeverity`, `EmDashAnalyzerIncludes`, `EmDashAnalyzerExcludes`, `EmDashAnalyzerAdditionalExcludes`, `SmartQuotesAnalyzerIncludes`, `SmartQuotesAnalyzerExcludes`, `SmartQuotesAnalyzerAdditionalExcludes`, `ApostropheAnalyzerIncludes`, `ApostropheAnalyzerExcludes`, `ApostropheAnalyzerAdditionalExcludes`). Test, DebugHost, and optional benchmark projects are not packed.
+Creates one `.nupkg` in `src/prj/Coree.Analyzers.Typography/bin/Pack/` with the analyzer under `analyzers/dotnet/cs` (not `lib/`) and `Coree.Analyzers.Typography.props` plus per-analyzer `.props` files under `build/` and `buildTransitive/` (`EmDashAnalyzerSeverity`, `SmartQuotesAnalyzerSeverity`, `ApostropheAnalyzerSeverity`, `EllipsisAnalyzerSeverity`, `MinusAnalyzerSeverity`, `EmDashAnalyzerIncludes`, `EmDashAnalyzerExcludes`, `EmDashAnalyzerAdditionalExcludes`, `SmartQuotesAnalyzerIncludes`, `SmartQuotesAnalyzerExcludes`, `SmartQuotesAnalyzerAdditionalExcludes`, `ApostropheAnalyzerIncludes`, `ApostropheAnalyzerExcludes`, `ApostropheAnalyzerAdditionalExcludes`, `EllipsisAnalyzerIncludes`, `EllipsisAnalyzerExcludes`, `EllipsisAnalyzerAdditionalExcludes`, `MinusAnalyzerIncludes`, `MinusAnalyzerExcludes`, `MinusAnalyzerAdditionalExcludes`). Test, DebugHost, and optional benchmark projects are not packed.
 
 Restore fails this analyzer package on high (`NU1903`) and critical (`NU1904`) vulnerable packages. Low and moderate stay warnings. `NugetReport` next to the tests lists that package’s packages (txt/json) and is still info-only.
 
@@ -77,10 +77,10 @@ To break in the analyzer, install the **.NET Compiler Platform SDK** Visual Stud
 
 1. Set `Coree.Analyzers.Typography` as the startup project (not `Coree.Analyzers.Typography.DebugHost`).
 2. Select the `Coree.Analyzers.Typography` launch profile (Roslyn Component).
-3. Set a breakpoint in `EmDashAnalyzer`, `SmartQuotesAnalyzer`, or `ApostropheAnalyzer`.
+3. Set a breakpoint in `EmDashAnalyzer`, `SmartQuotesAnalyzer`, `ApostropheAnalyzer`, `EllipsisAnalyzer`, or `MinusAnalyzer`.
 4. Press F5. Visual Studio compiles `Coree.Analyzers.Typography.DebugHost` and attaches to that compilation.
 
-`Coree.Analyzers.Typography.DebugHost` is only the compile target. The em dash in `"1—2"` reports CTYED001; the typographic quotes in `"“hello”"` report CTYQM001; the typographic apostrophe in `"it’s"` reports CTYAP001. ASCII `"1-2"`, `"hello"`, and `"it's"` do not. Files under the host project directory (including `SampleTypography.txt` and the host csproj) are scanned for the same IDs when the include properties match. F5 / `dotnet run` on the console only runs `Main`; it does not attach to the analyzer.
+`Coree.Analyzers.Typography.DebugHost` is only the compile target. En/em dashes in `"1—2"` / `"1–2"` report CTYED001; typographic quotes in `"“hello”"` report CTYQM001; typographic apostrophe in `"it’s"` reports CTYAP001; ellipsis in `"…"` reports CTYEL001; minus sign in `"x−y"` reports CTYMN001. ASCII `"1-2"`, `"hello"`, `"it's"`, `"..."`, and `"x-y"` do not. Files under the host project directory (including `SampleTypography.txt` and the host csproj) are scanned for the same IDs when the include properties match. F5 / `dotnet run` on the console only runs `Main`; it does not attach to the analyzer.
 
 Severity, includes, excludes, and additional excludes are MSBuild properties on the compile target. Includes minus (Excludes + AdditionalExcludes). Setting Excludes replaces the defaults; AdditionalExcludes is always added. `bin` / `obj` / `.git` / `.vs` stay excluded. Empty includes skip extra-file scanning. The analyzer nupkg ships `build/` and `buildTransitive/` props so PackageReference consumers get the same knobs. DebugHost imports that props file because it uses a project analyzer reference, not the nupkg.
 

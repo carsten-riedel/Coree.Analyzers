@@ -1,7 +1,3 @@
-<p align="center">
-  <img alt="Coree" src="https://raw.githubusercontent.com/carsten-riedel/Coree.Analyzers/main/assets/brand.png" width="128">
-</p>
-
 # Coree.Analyzers
 
 <!-- Maintenance note: Keep this README aligned with the repository README for shared prose, examples, headings, badges, and feature descriptions. Use absolute NuGet/GitHub URLs here where the repository README can use repository-relative links; otherwise keep shared content in sync. -->
@@ -12,9 +8,9 @@
 
 [![NuGet Version](https://img.shields.io/nuget/v/Coree.Analyzers.Typography?label=NuGet&logo=nuget)](https://www.nuget.org/packages/Coree.Analyzers.Typography) [![NuGet Downloads](https://img.shields.io/nuget/dt/Coree.Analyzers.Typography?label=Downloads&logo=nuget)](https://www.nuget.org/packages/Coree.Analyzers.Typography) [![Build Status](https://img.shields.io/github/actions/workflow/status/carsten-riedel/Coree.Analyzers/cicd.yml?branch=main&label=build)](https://github.com/carsten-riedel/Coree.Analyzers/actions/workflows/cicd.yml) [![Targets](https://img.shields.io/badge/targets-netstandard2.0-512BD4?logo=dotnet&logoColor=white)](https://www.nuget.org/packages/Coree.Analyzers.Typography) [![License](https://img.shields.io/github/license/carsten-riedel/Coree.Analyzers?logo=mit)](https://github.com/carsten-riedel/Coree.Analyzers/blob/main/LICENSE)
 
-Word processors leave em dashes, curly quotes, and typographic apostrophes in source. Compilers do not care. Reviewers do.
+Word processors leave en/em dashes, curly quotes, typographic apostrophes, ellipses, and minus signs in source. Compilers do not care. Reviewers do.
 
-This package catches those characters at compile time — in C# and in the extra project files you actually ship. ASCII hyphens, quotes, and apostrophes stay silent. Default severity is warning; you decide whether that is noise, a gate, or off.
+This package catches those characters at compile time — in C# and in the extra project files you actually ship. ASCII hyphens, quotes, apostrophes, and periods stay silent. Default severity is warning; you decide whether that is noise, a gate, or off.
 
 ```bash
 dotnet add package Coree.Analyzers.Typography
@@ -26,9 +22,11 @@ The nupkg is a development dependency: the analyzer under `analyzers/dotnet/cs`,
 
 | Id | What it flags |
 | --- | --- |
-| **CTYED001** | Em dash (U+2014) |
+| **CTYED001** | En dash (U+2013) and em dash (U+2014) |
 | **CTYQM001** | Typographic quotation marks (curly quotes and guillemets) |
 | **CTYAP001** | Typographic apostrophe / closing single quotation mark (U+2019) |
+| **CTYEL001** | Horizontal ellipsis (U+2026) |
+| **CTYMN001** | Minus sign (U+2212) |
 
 C# syntax trees are always in scope. Matching files under the project directory are added as `AdditionalFiles` so Visual Studio can bind the same diagnostics `dotnet build` prints. Paths that are neither a syntax tree nor an additional file pin to the `.csproj` in Visual Studio.
 
@@ -48,6 +46,8 @@ Defaults (you do not have to set these):
   <EmDashAnalyzerSeverity>warning</EmDashAnalyzerSeverity>
   <SmartQuotesAnalyzerSeverity>warning</SmartQuotesAnalyzerSeverity>
   <ApostropheAnalyzerSeverity>warning</ApostropheAnalyzerSeverity>
+  <EllipsisAnalyzerSeverity>warning</EllipsisAnalyzerSeverity>
+  <MinusAnalyzerSeverity>warning</MinusAnalyzerSeverity>
   <EmDashAnalyzerIncludes>**</EmDashAnalyzerIncludes>
   <EmDashAnalyzerExcludes>
     bin\**;obj\**;.git\**;.vs\**;**\*.dll;**\*.exe;**\*.pdb;**\*.png;**\*.jpg;**\*.jpeg;**\*.gif;**\*.bmp;**\*.ico;**\*.nupkg;**\*.snupkg;**\*.zip;**\*.7z;**\*.snk;**\*.woff;**\*.woff2;**\*.ttf;**\*.eot;**\*.otf;**\*.pdf;**\*.resources;**\*.cache;**\*.suo;**\*.user;**\*.bin;**\*.so;**\*.dylib;**\*.winmd;**\*.db;**\*.sqlite;**\*.sqlite3;**\*.dat;**\*.pfx;**\*.cer;**\*.p12;**\*.wasm
@@ -60,6 +60,14 @@ Defaults (you do not have to set these):
   <ApostropheAnalyzerExcludes>
     bin\**;obj\**;.git\**;.vs\**;**\*.dll;**\*.exe;**\*.pdb;**\*.png;**\*.jpg;**\*.jpeg;**\*.gif;**\*.bmp;**\*.ico;**\*.nupkg;**\*.snupkg;**\*.zip;**\*.7z;**\*.snk;**\*.woff;**\*.woff2;**\*.ttf;**\*.eot;**\*.otf;**\*.pdf;**\*.resources;**\*.cache;**\*.suo;**\*.user;**\*.bin;**\*.so;**\*.dylib;**\*.winmd;**\*.db;**\*.sqlite;**\*.sqlite3;**\*.dat;**\*.pfx;**\*.cer;**\*.p12;**\*.wasm
   </ApostropheAnalyzerExcludes>
+  <EllipsisAnalyzerIncludes>**</EllipsisAnalyzerIncludes>
+  <EllipsisAnalyzerExcludes>
+    bin\**;obj\**;.git\**;.vs\**;**\*.dll;**\*.exe;**\*.pdb;**\*.png;**\*.jpg;**\*.jpeg;**\*.gif;**\*.bmp;**\*.ico;**\*.nupkg;**\*.snupkg;**\*.zip;**\*.7z;**\*.snk;**\*.woff;**\*.woff2;**\*.ttf;**\*.eot;**\*.otf;**\*.pdf;**\*.resources;**\*.cache;**\*.suo;**\*.user;**\*.bin;**\*.so;**\*.dylib;**\*.winmd;**\*.db;**\*.sqlite;**\*.sqlite3;**\*.dat;**\*.pfx;**\*.cer;**\*.p12;**\*.wasm
+  </EllipsisAnalyzerExcludes>
+  <MinusAnalyzerIncludes>**</MinusAnalyzerIncludes>
+  <MinusAnalyzerExcludes>
+    bin\**;obj\**;.git\**;.vs\**;**\*.dll;**\*.exe;**\*.pdb;**\*.png;**\*.jpg;**\*.jpeg;**\*.gif;**\*.bmp;**\*.ico;**\*.nupkg;**\*.snupkg;**\*.zip;**\*.7z;**\*.snk;**\*.woff;**\*.woff2;**\*.ttf;**\*.eot;**\*.otf;**\*.pdf;**\*.resources;**\*.cache;**\*.suo;**\*.user;**\*.bin;**\*.so;**\*.dylib;**\*.winmd;**\*.db;**\*.sqlite;**\*.sqlite3;**\*.dat;**\*.pfx;**\*.cer;**\*.p12;**\*.wasm
+  </MinusAnalyzerExcludes>
 </PropertyGroup>
 ```
 
@@ -83,6 +91,7 @@ Replace the default exclude list to scan `.dat` / `.resources`, and fail the bui
   </EmDashAnalyzerExcludes>
 </PropertyGroup>
 ```
+
 
 Repository: [https://github.com/carsten-riedel/Coree.Analyzers](https://github.com/carsten-riedel/Coree.Analyzers)
 

@@ -11,24 +11,32 @@ namespace Coree.Analyzers.Typography.DebugHost
             // Visual Studio needs the .NET Compiler Platform SDK component.
             // F5 on this console only runs Main; it does not attach to the analyzer.
 
-            // Change EmDashAnalyzerSeverity / SmartQuotesAnalyzerSeverity / ApostropheAnalyzerSeverity
-            // (warning, error, message, or off).
-            // Change EmDashAnalyzerIncludes / SmartQuotesAnalyzerIncludes / ApostropheAnalyzerIncludes,
-            // EmDashAnalyzerExcludes / SmartQuotesAnalyzerExcludes / ApostropheAnalyzerExcludes,
+            // Change EmDashAnalyzerSeverity / SmartQuotesAnalyzerSeverity / ApostropheAnalyzerSeverity /
+            // EllipsisAnalyzerSeverity / MinusAnalyzerSeverity (warning, error, message, or off).
+            // Change EmDashAnalyzerIncludes / SmartQuotesAnalyzerIncludes / ApostropheAnalyzerIncludes /
+            // EllipsisAnalyzerIncludes / MinusAnalyzerIncludes,
+            // EmDashAnalyzerExcludes / SmartQuotesAnalyzerExcludes / ApostropheAnalyzerExcludes /
+            // EllipsisAnalyzerExcludes / MinusAnalyzerExcludes,
             // and the matching AdditionalExcludes properties
             // (Includes minus Excludes plus AdditionalExcludes; setting Excludes replaces
             // the default list; AdditionalExcludes is always added; empty includes skip
             // extra files; bin/obj/.git/.vs always stay out).
-            // ASCII hyphen, quotes, and apostrophe do not report.
+            // ASCII hyphen, quotes, apostrophe, periods, and hyphen-minus do not report.
             Console.WriteLine("1-2");
             Console.WriteLine("\"hello\"");
             Console.WriteLine("it's");
+            Console.WriteLine("...");
+            Console.WriteLine("x-y");
 
-            // Em dash reports CTYED001; typographic quotes report CTYQM001;
-            // typographic apostrophe reports CTYAP001.
+            // En/em dash reports CTYED001; typographic quotes report CTYQM001;
+            // typographic apostrophe reports CTYAP001; ellipsis reports CTYEL001;
+            // minus sign reports CTYMN001.
             Console.WriteLine("1—2");
+            Console.WriteLine("1–2");
             Console.WriteLine("“hello”");
             Console.WriteLine("it’s");
+            Console.WriteLine("…");
+            Console.WriteLine("x−y");
         }
     }
 }

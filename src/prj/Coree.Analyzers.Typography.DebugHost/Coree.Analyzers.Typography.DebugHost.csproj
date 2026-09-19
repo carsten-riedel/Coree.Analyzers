@@ -30,6 +30,8 @@
     <EmDashAnalyzerSeverity>warning</EmDashAnalyzerSeverity>
     <SmartQuotesAnalyzerSeverity>warning</SmartQuotesAnalyzerSeverity>
     <ApostropheAnalyzerSeverity>warning</ApostropheAnalyzerSeverity>
+    <EllipsisAnalyzerSeverity>warning</EllipsisAnalyzerSeverity>
+    <MinusAnalyzerSeverity>warning</MinusAnalyzerSeverity>
   </PropertyGroup>
 
   <!-- Load the in-repo analyzer at compile time. Do not reference it as a library. -->
@@ -39,7 +41,7 @@
                       ReferenceOutputAssembly="false" />
   </ItemGroup>
 
-  <!-- Additional-file sample: 1—2, “hello”, and it’s. -->
+  <!-- Additional-file sample: dashes, quotes, apostrophe, ellipsis, minus. -->
   <ItemGroup>
     <None Include="SampleTypography.txt" />
   </ItemGroup>

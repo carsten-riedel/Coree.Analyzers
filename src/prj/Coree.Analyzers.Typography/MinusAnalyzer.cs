@@ -5,36 +5,36 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace Coree.Analyzers.Typography
 {
     /// <summary>
-    /// Warns when C# source or matching files under the project directory contain a typographic
-    /// en dash (U+2013) or em dash (U+2014), not ASCII hyphen-minus.
+    /// Warns when C# source or matching files under the project directory contain a minus sign
+    /// (U+2212), not ASCII hyphen-minus.
     /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    public sealed class EmDashAnalyzer : DiagnosticAnalyzer
+    public sealed class MinusAnalyzer : DiagnosticAnalyzer
     {
         /// <summary>
-        /// Diagnostic identifier for the typographic dash rule.
+        /// Diagnostic identifier for the minus sign rule.
         /// </summary>
-        public const string DiagnosticId = "CTYED001";
+        public const string DiagnosticId = "CTYMN001";
 
-        internal const string SeverityPropertyName = "EmDashAnalyzerSeverity";
+        internal const string SeverityPropertyName = "MinusAnalyzerSeverity";
 
-        internal const string IncludesPropertyName = "EmDashAnalyzerIncludes";
+        internal const string IncludesPropertyName = "MinusAnalyzerIncludes";
 
-        internal const string ExcludesPropertyName = "EmDashAnalyzerExcludes";
+        internal const string ExcludesPropertyName = "MinusAnalyzerExcludes";
 
-        internal const string AdditionalExcludesPropertyName = "EmDashAnalyzerAdditionalExcludes";
+        internal const string AdditionalExcludesPropertyName = "MinusAnalyzerAdditionalExcludes";
 
-        // – —
-        private const string EmDashCharacters = "\u2013\u2014";
+        // −
+        private const string MinusCharacters = "\u2212";
 
         private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(
             DiagnosticId,
-            "Source contains a typographic dash",
-            "Source contains a typographic en dash or em dash (U+2013 / U+2014). Use ASCII hyphen-minus.",
+            "Source contains a minus sign",
+            "Source contains a minus sign (U+2212). Use ASCII hyphen-minus.",
             "Typography",
             DiagnosticSeverity.Warning,
             isEnabledByDefault: true,
-            description: "Copy-paste from word processors often inserts en or em dashes instead of ASCII hyphen-minus (U+002D).");
+            description: "Copy-paste from word processors often inserts U+2212 instead of ASCII hyphen-minus (U+002D).");
 
         private static readonly DiagnosticDescriptor ErrorRule =
             AnalyzerSeverity.WithSeverity(Rule, DiagnosticSeverity.Error);
@@ -58,7 +58,7 @@ namespace Coree.Analyzers.Typography
                 Rule,
                 ErrorRule,
                 InfoRule,
-                EmDashCharacters,
+                MinusCharacters,
                 SeverityPropertyName,
                 IncludesPropertyName,
                 ExcludesPropertyName,

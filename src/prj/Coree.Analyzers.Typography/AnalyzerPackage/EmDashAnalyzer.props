@@ -1,0 +1,41 @@
+<Project>
+  <PropertyGroup>
+    <EmDashAnalyzerSeverity Condition="'$(EmDashAnalyzerSeverity)' == ''">warning</EmDashAnalyzerSeverity>
+    <EmDashAnalyzerIncludes Condition="'$(EmDashAnalyzerIncludes)' == ''">**</EmDashAnalyzerIncludes>
+    <EmDashAnalyzerExcludes Condition="'$(EmDashAnalyzerExcludes)' == ''">$(_TypographyDefaultExcludes)</EmDashAnalyzerExcludes>
+  </PropertyGroup>
+  <ItemGroup>
+    <CompilerVisibleProperty Include="EmDashAnalyzerSeverity" />
+    <CompilerVisibleProperty Include="EmDashAnalyzerIncludes" />
+    <CompilerVisibleProperty Include="EmDashAnalyzerExcludes" />
+    <CompilerVisibleProperty Include="EmDashAnalyzerAdditionalExcludes" />
+  </ItemGroup>
+  <Target Name="AddEmDashAnalyzerAdditionalFiles"
+          BeforeTargets="GenerateMSBuildEditorConfigFileCore;CoreCompile">
+    <PropertyGroup>
+      <EmDashAnalyzerExcludes Condition="'$(EmDashAnalyzerExcludes)' != ''">$([System.String]::Copy('$(EmDashAnalyzerExcludes)').Trim())</EmDashAnalyzerExcludes>
+      <EmDashAnalyzerAdditionalExcludes Condition="'$(EmDashAnalyzerAdditionalExcludes)' != ''">$([System.String]::Copy('$(EmDashAnalyzerAdditionalExcludes)').Trim())</EmDashAnalyzerAdditionalExcludes>
+      <_TypographyEmDashIsAllFiles Condition="'$(EmDashAnalyzerIncludes)' == '**' OR '$(EmDashAnalyzerIncludes)' == '**/*' OR '$(EmDashAnalyzerIncludes)' == '**\*'">true</_TypographyEmDashIsAllFiles>
+    </PropertyGroup>
+    <ItemGroup>
+      <_EmDashExcludeGlob Include="$(EmDashAnalyzerExcludes)" Condition="'$(EmDashAnalyzerExcludes)' != ''" />
+      <_EmDashExcludeGlob Include="$(EmDashAnalyzerAdditionalExcludes)" Condition="'$(EmDashAnalyzerAdditionalExcludes)' != ''" />
+      <_EmDashExcludeGlob Include="$(_TypographyAlwaysFolderExcludes)" />
+      <_EmDashAnalyzerAdditionalFile Include="$(MSBuildProjectDirectory)\**\*"
+                                     Exclude="@(_EmDashExcludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')"
+                                     Condition="'$(_TypographyEmDashIsAllFiles)' == 'true'" />
+      <_EmDashAnalyzerIncludeGlob Include="$(EmDashAnalyzerIncludes)" Condition="'$(EmDashAnalyzerIncludes)' != '' AND '$(_TypographyEmDashIsAllFiles)' != 'true'" />
+      <_EmDashAnalyzerAdditionalFile Include="@(_EmDashAnalyzerIncludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')"
+                                     Exclude="@(_EmDashExcludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')" />
+      <AdditionalFiles Include="@(_EmDashAnalyzerAdditionalFile)" />
+      <_EmDashExcludeGlob Remove="@(_EmDashExcludeGlob)" />
+      <_EmDashAnalyzerIncludeGlob Remove="@(_EmDashAnalyzerIncludeGlob)" />
+      <_EmDashAnalyzerAdditionalFile Remove="@(_EmDashAnalyzerAdditionalFile)" />
+    </ItemGroup>
+    <PropertyGroup>
+      <EmDashAnalyzerIncludes Condition="'$(EmDashAnalyzerIncludes)' != ''">$([System.String]::Copy('$(EmDashAnalyzerIncludes)').Replace(';','|'))</EmDashAnalyzerIncludes>
+      <EmDashAnalyzerExcludes Condition="'$(EmDashAnalyzerExcludes)' != ''">$([System.String]::Copy('$(EmDashAnalyzerExcludes)').Replace(';','|'))</EmDashAnalyzerExcludes>
+      <EmDashAnalyzerAdditionalExcludes Condition="'$(EmDashAnalyzerAdditionalExcludes)' != ''">$([System.String]::Copy('$(EmDashAnalyzerAdditionalExcludes)').Replace(';','|'))</EmDashAnalyzerAdditionalExcludes>
+    </PropertyGroup>
+  </Target>
+</Project>

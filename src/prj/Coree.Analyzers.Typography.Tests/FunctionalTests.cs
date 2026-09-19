@@ -11,8 +11,11 @@ namespace Coree.Analyzers.Typography.Tests
     public class FunctionalTests
     {
         private const string EmDashSource = "class C { string s = \"a\u2014b\"; }";
+        private const string EnDashSource = "class C { string s = \"a\u2013b\"; }";
         private const string QuoteSource = "class C { string s = \"x\u201Cy\"; }";
         private const string ApostropheSource = "class C { string s = \"x\u2019y\"; }";
+        private const string EllipsisSource = "class C { string s = \"x\u2026y\"; }";
+        private const string MinusSource = "class C { string s = \"x\u2212y\"; }";
 
         [TestMethod]
         public async Task EmDashInStringReportsDiagnostic()
@@ -29,6 +32,16 @@ namespace Coree.Analyzers.Typography.Tests
         {
             const string test = "class C { string s = \"a-b\"; }";
             await CSharpAnalyzerVerifier<EmDashAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(test);
+        }
+
+        [TestMethod]
+        public async Task EnDashInStringReportsDiagnostic()
+        {
+            var expected = DiagnosticResult
+                .CompilerWarning(EmDashAnalyzer.DiagnosticId)
+                .WithSpan(1, 24, 1, 25);
+
+            await CSharpAnalyzerVerifier<EmDashAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(EnDashSource, expected);
         }
 
         [TestMethod]
@@ -63,6 +76,40 @@ namespace Coree.Analyzers.Typography.Tests
         {
             const string test = "class C { string s = \"it's\"; }";
             await CSharpAnalyzerVerifier<ApostropheAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(test);
+        }
+
+        [TestMethod]
+        public async Task HorizontalEllipsisInStringReportsDiagnostic()
+        {
+            var expected = DiagnosticResult
+                .CompilerWarning(EllipsisAnalyzer.DiagnosticId)
+                .WithSpan(1, 24, 1, 25);
+
+            await CSharpAnalyzerVerifier<EllipsisAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(EllipsisSource, expected);
+        }
+
+        [TestMethod]
+        public async Task AsciiPeriodsReportNoEllipsisDiagnostic()
+        {
+            const string test = "class C { string s = \"x...y\"; }";
+            await CSharpAnalyzerVerifier<EllipsisAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(test);
+        }
+
+        [TestMethod]
+        public async Task MinusSignInStringReportsDiagnostic()
+        {
+            var expected = DiagnosticResult
+                .CompilerWarning(MinusAnalyzer.DiagnosticId)
+                .WithSpan(1, 24, 1, 25);
+
+            await CSharpAnalyzerVerifier<MinusAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(MinusSource, expected);
+        }
+
+        [TestMethod]
+        public async Task AsciiHyphenReportsNoMinusDiagnostic()
+        {
+            const string test = "class C { string s = \"x-y\"; }";
+            await CSharpAnalyzerVerifier<MinusAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(test);
         }
 
         [TestMethod]
@@ -116,6 +163,34 @@ namespace Coree.Analyzers.Typography.Tests
         }
 
         [TestMethod]
+        public async Task EllipsisSeverityErrorReportsError()
+        {
+            var expected = DiagnosticResult
+                .CompilerError(EllipsisAnalyzer.DiagnosticId)
+                .WithSpan(1, 24, 1, 25);
+
+            await VerifyWithSeverityAsync<EllipsisAnalyzer>(
+                EllipsisSource,
+                EllipsisAnalyzer.SeverityPropertyName,
+                "error",
+                expected);
+        }
+
+        [TestMethod]
+        public async Task MinusSeverityErrorReportsError()
+        {
+            var expected = DiagnosticResult
+                .CompilerError(MinusAnalyzer.DiagnosticId)
+                .WithSpan(1, 24, 1, 25);
+
+            await VerifyWithSeverityAsync<MinusAnalyzer>(
+                MinusSource,
+                MinusAnalyzer.SeverityPropertyName,
+                "error",
+                expected);
+        }
+
+        [TestMethod]
         public async Task EmDashInMatchingAdditionalFileReportsDiagnostic()
         {
             var expected = DiagnosticResult
@@ -157,6 +232,36 @@ namespace Coree.Analyzers.Typography.Tests
                 "*.txt",
                 "sample.txt",
                 "x\u2019y",
+                expected);
+        }
+
+        [TestMethod]
+        public async Task EllipsisInMatchingAdditionalFileReportsDiagnostic()
+        {
+            var expected = DiagnosticResult
+                .CompilerWarning(EllipsisAnalyzer.DiagnosticId)
+                .WithSpan("sample.txt", 1, 2, 1, 3);
+
+            await VerifyWithAdditionalFileAsync<EllipsisAnalyzer>(
+                EllipsisAnalyzer.IncludesPropertyName,
+                "*.txt",
+                "sample.txt",
+                "x\u2026y",
+                expected);
+        }
+
+        [TestMethod]
+        public async Task MinusInMatchingAdditionalFileReportsDiagnostic()
+        {
+            var expected = DiagnosticResult
+                .CompilerWarning(MinusAnalyzer.DiagnosticId)
+                .WithSpan("sample.txt", 1, 2, 1, 3);
+
+            await VerifyWithAdditionalFileAsync<MinusAnalyzer>(
+                MinusAnalyzer.IncludesPropertyName,
+                "*.txt",
+                "sample.txt",
+                "x\u2212y",
                 expected);
         }
 
@@ -372,6 +477,34 @@ namespace Coree.Analyzers.Typography.Tests
                 "docs/**",
                 "docs/notes.md",
                 "x\u2019y");
+        }
+
+        [TestMethod]
+        public async Task EllipsisAdditionalExcludesSkipMatchingFile()
+        {
+            await VerifyWithAdditionalFileAsync<EllipsisAnalyzer>(
+                EllipsisAnalyzer.IncludesPropertyName,
+                "**",
+                string.Empty,
+                string.Empty,
+                EllipsisAnalyzer.AdditionalExcludesPropertyName,
+                "docs/**",
+                "docs/notes.md",
+                "x\u2026y");
+        }
+
+        [TestMethod]
+        public async Task MinusAdditionalExcludesSkipMatchingFile()
+        {
+            await VerifyWithAdditionalFileAsync<MinusAnalyzer>(
+                MinusAnalyzer.IncludesPropertyName,
+                "**",
+                string.Empty,
+                string.Empty,
+                MinusAnalyzer.AdditionalExcludesPropertyName,
+                "docs/**",
+                "docs/notes.md",
+                "x\u2212y");
         }
 
         [TestMethod]

@@ -1,0 +1,41 @@
+<Project>
+  <PropertyGroup>
+    <EllipsisAnalyzerSeverity Condition="'$(EllipsisAnalyzerSeverity)' == ''">warning</EllipsisAnalyzerSeverity>
+    <EllipsisAnalyzerIncludes Condition="'$(EllipsisAnalyzerIncludes)' == ''">**</EllipsisAnalyzerIncludes>
+    <EllipsisAnalyzerExcludes Condition="'$(EllipsisAnalyzerExcludes)' == ''">$(_TypographyDefaultExcludes)</EllipsisAnalyzerExcludes>
+  </PropertyGroup>
+  <ItemGroup>
+    <CompilerVisibleProperty Include="EllipsisAnalyzerSeverity" />
+    <CompilerVisibleProperty Include="EllipsisAnalyzerIncludes" />
+    <CompilerVisibleProperty Include="EllipsisAnalyzerExcludes" />
+    <CompilerVisibleProperty Include="EllipsisAnalyzerAdditionalExcludes" />
+  </ItemGroup>
+  <Target Name="AddEllipsisAnalyzerAdditionalFiles"
+          BeforeTargets="GenerateMSBuildEditorConfigFileCore;CoreCompile">
+    <PropertyGroup>
+      <EllipsisAnalyzerExcludes Condition="'$(EllipsisAnalyzerExcludes)' != ''">$([System.String]::Copy('$(EllipsisAnalyzerExcludes)').Trim())</EllipsisAnalyzerExcludes>
+      <EllipsisAnalyzerAdditionalExcludes Condition="'$(EllipsisAnalyzerAdditionalExcludes)' != ''">$([System.String]::Copy('$(EllipsisAnalyzerAdditionalExcludes)').Trim())</EllipsisAnalyzerAdditionalExcludes>
+      <_TypographyEllipsisIsAllFiles Condition="'$(EllipsisAnalyzerIncludes)' == '**' OR '$(EllipsisAnalyzerIncludes)' == '**/*' OR '$(EllipsisAnalyzerIncludes)' == '**\*'">true</_TypographyEllipsisIsAllFiles>
+    </PropertyGroup>
+    <ItemGroup>
+      <_EllipsisExcludeGlob Include="$(EllipsisAnalyzerExcludes)" Condition="'$(EllipsisAnalyzerExcludes)' != ''" />
+      <_EllipsisExcludeGlob Include="$(EllipsisAnalyzerAdditionalExcludes)" Condition="'$(EllipsisAnalyzerAdditionalExcludes)' != ''" />
+      <_EllipsisExcludeGlob Include="$(_TypographyAlwaysFolderExcludes)" />
+      <_EllipsisAnalyzerAdditionalFile Include="$(MSBuildProjectDirectory)\**\*"
+                                       Exclude="@(_EllipsisExcludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')"
+                                       Condition="'$(_TypographyEllipsisIsAllFiles)' == 'true'" />
+      <_EllipsisAnalyzerIncludeGlob Include="$(EllipsisAnalyzerIncludes)" Condition="'$(EllipsisAnalyzerIncludes)' != '' AND '$(_TypographyEllipsisIsAllFiles)' != 'true'" />
+      <_EllipsisAnalyzerAdditionalFile Include="@(_EllipsisAnalyzerIncludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')"
+                                       Exclude="@(_EllipsisExcludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')" />
+      <AdditionalFiles Include="@(_EllipsisAnalyzerAdditionalFile)" />
+      <_EllipsisExcludeGlob Remove="@(_EllipsisExcludeGlob)" />
+      <_EllipsisAnalyzerIncludeGlob Remove="@(_EllipsisAnalyzerIncludeGlob)" />
+      <_EllipsisAnalyzerAdditionalFile Remove="@(_EllipsisAnalyzerAdditionalFile)" />
+    </ItemGroup>
+    <PropertyGroup>
+      <EllipsisAnalyzerIncludes Condition="'$(EllipsisAnalyzerIncludes)' != ''">$([System.String]::Copy('$(EllipsisAnalyzerIncludes)').Replace(';','|'))</EllipsisAnalyzerIncludes>
+      <EllipsisAnalyzerExcludes Condition="'$(EllipsisAnalyzerExcludes)' != ''">$([System.String]::Copy('$(EllipsisAnalyzerExcludes)').Replace(';','|'))</EllipsisAnalyzerExcludes>
+      <EllipsisAnalyzerAdditionalExcludes Condition="'$(EllipsisAnalyzerAdditionalExcludes)' != ''">$([System.String]::Copy('$(EllipsisAnalyzerAdditionalExcludes)').Replace(';','|'))</EllipsisAnalyzerAdditionalExcludes>
+    </PropertyGroup>
+  </Target>
+</Project>

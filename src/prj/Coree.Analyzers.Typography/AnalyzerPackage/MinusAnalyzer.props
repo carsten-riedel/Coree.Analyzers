@@ -1,0 +1,41 @@
+<Project>
+  <PropertyGroup>
+    <MinusAnalyzerSeverity Condition="'$(MinusAnalyzerSeverity)' == ''">warning</MinusAnalyzerSeverity>
+    <MinusAnalyzerIncludes Condition="'$(MinusAnalyzerIncludes)' == ''">**</MinusAnalyzerIncludes>
+    <MinusAnalyzerExcludes Condition="'$(MinusAnalyzerExcludes)' == ''">$(_TypographyDefaultExcludes)</MinusAnalyzerExcludes>
+  </PropertyGroup>
+  <ItemGroup>
+    <CompilerVisibleProperty Include="MinusAnalyzerSeverity" />
+    <CompilerVisibleProperty Include="MinusAnalyzerIncludes" />
+    <CompilerVisibleProperty Include="MinusAnalyzerExcludes" />
+    <CompilerVisibleProperty Include="MinusAnalyzerAdditionalExcludes" />
+  </ItemGroup>
+  <Target Name="AddMinusAnalyzerAdditionalFiles"
+          BeforeTargets="GenerateMSBuildEditorConfigFileCore;CoreCompile">
+    <PropertyGroup>
+      <MinusAnalyzerExcludes Condition="'$(MinusAnalyzerExcludes)' != ''">$([System.String]::Copy('$(MinusAnalyzerExcludes)').Trim())</MinusAnalyzerExcludes>
+      <MinusAnalyzerAdditionalExcludes Condition="'$(MinusAnalyzerAdditionalExcludes)' != ''">$([System.String]::Copy('$(MinusAnalyzerAdditionalExcludes)').Trim())</MinusAnalyzerAdditionalExcludes>
+      <_TypographyMinusIsAllFiles Condition="'$(MinusAnalyzerIncludes)' == '**' OR '$(MinusAnalyzerIncludes)' == '**/*' OR '$(MinusAnalyzerIncludes)' == '**\*'">true</_TypographyMinusIsAllFiles>
+    </PropertyGroup>
+    <ItemGroup>
+      <_MinusExcludeGlob Include="$(MinusAnalyzerExcludes)" Condition="'$(MinusAnalyzerExcludes)' != ''" />
+      <_MinusExcludeGlob Include="$(MinusAnalyzerAdditionalExcludes)" Condition="'$(MinusAnalyzerAdditionalExcludes)' != ''" />
+      <_MinusExcludeGlob Include="$(_TypographyAlwaysFolderExcludes)" />
+      <_MinusAnalyzerAdditionalFile Include="$(MSBuildProjectDirectory)\**\*"
+                                    Exclude="@(_MinusExcludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')"
+                                    Condition="'$(_TypographyMinusIsAllFiles)' == 'true'" />
+      <_MinusAnalyzerIncludeGlob Include="$(MinusAnalyzerIncludes)" Condition="'$(MinusAnalyzerIncludes)' != '' AND '$(_TypographyMinusIsAllFiles)' != 'true'" />
+      <_MinusAnalyzerAdditionalFile Include="@(_MinusAnalyzerIncludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')"
+                                    Exclude="@(_MinusExcludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')" />
+      <AdditionalFiles Include="@(_MinusAnalyzerAdditionalFile)" />
+      <_MinusExcludeGlob Remove="@(_MinusExcludeGlob)" />
+      <_MinusAnalyzerIncludeGlob Remove="@(_MinusAnalyzerIncludeGlob)" />
+      <_MinusAnalyzerAdditionalFile Remove="@(_MinusAnalyzerAdditionalFile)" />
+    </ItemGroup>
+    <PropertyGroup>
+      <MinusAnalyzerIncludes Condition="'$(MinusAnalyzerIncludes)' != ''">$([System.String]::Copy('$(MinusAnalyzerIncludes)').Replace(';','|'))</MinusAnalyzerIncludes>
+      <MinusAnalyzerExcludes Condition="'$(MinusAnalyzerExcludes)' != ''">$([System.String]::Copy('$(MinusAnalyzerExcludes)').Replace(';','|'))</MinusAnalyzerExcludes>
+      <MinusAnalyzerAdditionalExcludes Condition="'$(MinusAnalyzerAdditionalExcludes)' != ''">$([System.String]::Copy('$(MinusAnalyzerAdditionalExcludes)').Replace(';','|'))</MinusAnalyzerAdditionalExcludes>
+    </PropertyGroup>
+  </Target>
+</Project>

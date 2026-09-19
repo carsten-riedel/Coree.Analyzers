@@ -9,98 +9,18 @@
     Empty includes disable extra-file scanning. C# syntax trees stay in scope either way.
     CompilerVisibleProperty is required or the compiler does not pass the values to the analyzer.
     EditorConfig treats ';' as a comment, so a target rewrites the compiler-visible copies with '|'.
+    This file is the nupkg entry (build/ and buildTransitive/). Per-analyzer files sit next to it.
   -->
   <PropertyGroup>
     <_TypographyDefaultExcludes>bin\**;obj\**;.git\**;.vs\**;**\*.dll;**\*.exe;**\*.pdb;**\*.png;**\*.jpg;**\*.jpeg;**\*.gif;**\*.bmp;**\*.ico;**\*.nupkg;**\*.snupkg;**\*.zip;**\*.7z;**\*.snk;**\*.woff;**\*.woff2;**\*.ttf;**\*.eot;**\*.otf;**\*.pdf;**\*.resources;**\*.cache;**\*.suo;**\*.user;**\*.bin;**\*.so;**\*.dylib;**\*.winmd;**\*.db;**\*.sqlite;**\*.sqlite3;**\*.dat;**\*.pfx;**\*.cer;**\*.p12;**\*.wasm</_TypographyDefaultExcludes>
-    <EmDashAnalyzerSeverity Condition="'$(EmDashAnalyzerSeverity)' == ''">warning</EmDashAnalyzerSeverity>
-    <SmartQuotesAnalyzerSeverity Condition="'$(SmartQuotesAnalyzerSeverity)' == ''">warning</SmartQuotesAnalyzerSeverity>
-    <ApostropheAnalyzerSeverity Condition="'$(ApostropheAnalyzerSeverity)' == ''">warning</ApostropheAnalyzerSeverity>
-    <EmDashAnalyzerIncludes Condition="'$(EmDashAnalyzerIncludes)' == ''">**</EmDashAnalyzerIncludes>
-    <SmartQuotesAnalyzerIncludes Condition="'$(SmartQuotesAnalyzerIncludes)' == ''">**</SmartQuotesAnalyzerIncludes>
-    <ApostropheAnalyzerIncludes Condition="'$(ApostropheAnalyzerIncludes)' == ''">**</ApostropheAnalyzerIncludes>
-    <EmDashAnalyzerExcludes Condition="'$(EmDashAnalyzerExcludes)' == ''">$(_TypographyDefaultExcludes)</EmDashAnalyzerExcludes>
-    <SmartQuotesAnalyzerExcludes Condition="'$(SmartQuotesAnalyzerExcludes)' == ''">$(_TypographyDefaultExcludes)</SmartQuotesAnalyzerExcludes>
-    <ApostropheAnalyzerExcludes Condition="'$(ApostropheAnalyzerExcludes)' == ''">$(_TypographyDefaultExcludes)</ApostropheAnalyzerExcludes>
+    <_TypographyAlwaysFolderExcludes>bin\**;obj\**;.git\**;.vs\**</_TypographyAlwaysFolderExcludes>
   </PropertyGroup>
   <ItemGroup>
-    <CompilerVisibleProperty Include="EmDashAnalyzerSeverity" />
-    <CompilerVisibleProperty Include="SmartQuotesAnalyzerSeverity" />
-    <CompilerVisibleProperty Include="ApostropheAnalyzerSeverity" />
-    <CompilerVisibleProperty Include="EmDashAnalyzerIncludes" />
-    <CompilerVisibleProperty Include="EmDashAnalyzerExcludes" />
-    <CompilerVisibleProperty Include="EmDashAnalyzerAdditionalExcludes" />
-    <CompilerVisibleProperty Include="SmartQuotesAnalyzerIncludes" />
-    <CompilerVisibleProperty Include="SmartQuotesAnalyzerExcludes" />
-    <CompilerVisibleProperty Include="SmartQuotesAnalyzerAdditionalExcludes" />
-    <CompilerVisibleProperty Include="ApostropheAnalyzerIncludes" />
-    <CompilerVisibleProperty Include="ApostropheAnalyzerExcludes" />
-    <CompilerVisibleProperty Include="ApostropheAnalyzerAdditionalExcludes" />
     <CompilerVisibleProperty Include="MSBuildProjectDirectory" />
   </ItemGroup>
-  <Target Name="AddTypographyAdditionalFiles"
-          BeforeTargets="GenerateMSBuildEditorConfigFileCore;CoreCompile">
-    <PropertyGroup>
-      <EmDashAnalyzerExcludes Condition="'$(EmDashAnalyzerExcludes)' != ''">$([System.String]::Copy('$(EmDashAnalyzerExcludes)').Trim())</EmDashAnalyzerExcludes>
-      <EmDashAnalyzerAdditionalExcludes Condition="'$(EmDashAnalyzerAdditionalExcludes)' != ''">$([System.String]::Copy('$(EmDashAnalyzerAdditionalExcludes)').Trim())</EmDashAnalyzerAdditionalExcludes>
-      <SmartQuotesAnalyzerExcludes Condition="'$(SmartQuotesAnalyzerExcludes)' != ''">$([System.String]::Copy('$(SmartQuotesAnalyzerExcludes)').Trim())</SmartQuotesAnalyzerExcludes>
-      <SmartQuotesAnalyzerAdditionalExcludes Condition="'$(SmartQuotesAnalyzerAdditionalExcludes)' != ''">$([System.String]::Copy('$(SmartQuotesAnalyzerAdditionalExcludes)').Trim())</SmartQuotesAnalyzerAdditionalExcludes>
-      <ApostropheAnalyzerExcludes Condition="'$(ApostropheAnalyzerExcludes)' != ''">$([System.String]::Copy('$(ApostropheAnalyzerExcludes)').Trim())</ApostropheAnalyzerExcludes>
-      <ApostropheAnalyzerAdditionalExcludes Condition="'$(ApostropheAnalyzerAdditionalExcludes)' != ''">$([System.String]::Copy('$(ApostropheAnalyzerAdditionalExcludes)').Trim())</ApostropheAnalyzerAdditionalExcludes>
-      <_TypographyEmDashIsAllFiles Condition="'$(EmDashAnalyzerIncludes)' == '**' OR '$(EmDashAnalyzerIncludes)' == '**/*' OR '$(EmDashAnalyzerIncludes)' == '**\*'">true</_TypographyEmDashIsAllFiles>
-      <_TypographySmartQuotesIsAllFiles Condition="'$(SmartQuotesAnalyzerIncludes)' == '**' OR '$(SmartQuotesAnalyzerIncludes)' == '**/*' OR '$(SmartQuotesAnalyzerIncludes)' == '**\*'">true</_TypographySmartQuotesIsAllFiles>
-      <_TypographyApostropheIsAllFiles Condition="'$(ApostropheAnalyzerIncludes)' == '**' OR '$(ApostropheAnalyzerIncludes)' == '**/*' OR '$(ApostropheAnalyzerIncludes)' == '**\*'">true</_TypographyApostropheIsAllFiles>
-    </PropertyGroup>
-    <ItemGroup>
-      <_TypographyAlwaysFolderExclude Include="bin\**;obj\**;.git\**;.vs\**" />
-      <_EmDashExcludeGlob Include="$(EmDashAnalyzerExcludes)" Condition="'$(EmDashAnalyzerExcludes)' != ''" />
-      <_EmDashExcludeGlob Include="$(EmDashAnalyzerAdditionalExcludes)" Condition="'$(EmDashAnalyzerAdditionalExcludes)' != ''" />
-      <_EmDashExcludeGlob Include="@(_TypographyAlwaysFolderExclude)" />
-      <_SmartQuotesExcludeGlob Include="$(SmartQuotesAnalyzerExcludes)" Condition="'$(SmartQuotesAnalyzerExcludes)' != ''" />
-      <_SmartQuotesExcludeGlob Include="$(SmartQuotesAnalyzerAdditionalExcludes)" Condition="'$(SmartQuotesAnalyzerAdditionalExcludes)' != ''" />
-      <_SmartQuotesExcludeGlob Include="@(_TypographyAlwaysFolderExclude)" />
-      <_ApostropheExcludeGlob Include="$(ApostropheAnalyzerExcludes)" Condition="'$(ApostropheAnalyzerExcludes)' != ''" />
-      <_ApostropheExcludeGlob Include="$(ApostropheAnalyzerAdditionalExcludes)" Condition="'$(ApostropheAnalyzerAdditionalExcludes)' != ''" />
-      <_ApostropheExcludeGlob Include="@(_TypographyAlwaysFolderExclude)" />
-      <_EmDashAnalyzerAdditionalFile Include="$(MSBuildProjectDirectory)\**\*"
-                                     Exclude="@(_EmDashExcludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')"
-                                     Condition="'$(_TypographyEmDashIsAllFiles)' == 'true'" />
-      <_EmDashAnalyzerIncludeGlob Include="$(EmDashAnalyzerIncludes)" Condition="'$(EmDashAnalyzerIncludes)' != '' AND '$(_TypographyEmDashIsAllFiles)' != 'true'" />
-      <_EmDashAnalyzerAdditionalFile Include="@(_EmDashAnalyzerIncludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')"
-                                     Exclude="@(_EmDashExcludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')" />
-      <_SmartQuotesAnalyzerAdditionalFile Include="$(MSBuildProjectDirectory)\**\*"
-                                          Exclude="@(_SmartQuotesExcludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')"
-                                          Condition="'$(_TypographySmartQuotesIsAllFiles)' == 'true'" />
-      <_SmartQuotesAnalyzerIncludeGlob Include="$(SmartQuotesAnalyzerIncludes)" Condition="'$(SmartQuotesAnalyzerIncludes)' != '' AND '$(_TypographySmartQuotesIsAllFiles)' != 'true'" />
-      <_SmartQuotesAnalyzerAdditionalFile Include="@(_SmartQuotesAnalyzerIncludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')"
-                                          Exclude="@(_SmartQuotesExcludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')" />
-      <_ApostropheAnalyzerAdditionalFile Include="$(MSBuildProjectDirectory)\**\*"
-                                         Exclude="@(_ApostropheExcludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')"
-                                         Condition="'$(_TypographyApostropheIsAllFiles)' == 'true'" />
-      <_ApostropheAnalyzerIncludeGlob Include="$(ApostropheAnalyzerIncludes)" Condition="'$(ApostropheAnalyzerIncludes)' != '' AND '$(_TypographyApostropheIsAllFiles)' != 'true'" />
-      <_ApostropheAnalyzerAdditionalFile Include="@(_ApostropheAnalyzerIncludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')"
-                                         Exclude="@(_ApostropheExcludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')" />
-      <AdditionalFiles Include="@(_EmDashAnalyzerAdditionalFile);@(_SmartQuotesAnalyzerAdditionalFile);@(_ApostropheAnalyzerAdditionalFile)" />
-      <_TypographyAlwaysFolderExclude Remove="@(_TypographyAlwaysFolderExclude)" />
-      <_EmDashExcludeGlob Remove="@(_EmDashExcludeGlob)" />
-      <_SmartQuotesExcludeGlob Remove="@(_SmartQuotesExcludeGlob)" />
-      <_ApostropheExcludeGlob Remove="@(_ApostropheExcludeGlob)" />
-      <_EmDashAnalyzerIncludeGlob Remove="@(_EmDashAnalyzerIncludeGlob)" />
-      <_EmDashAnalyzerAdditionalFile Remove="@(_EmDashAnalyzerAdditionalFile)" />
-      <_SmartQuotesAnalyzerIncludeGlob Remove="@(_SmartQuotesAnalyzerIncludeGlob)" />
-      <_SmartQuotesAnalyzerAdditionalFile Remove="@(_SmartQuotesAnalyzerAdditionalFile)" />
-      <_ApostropheAnalyzerIncludeGlob Remove="@(_ApostropheAnalyzerIncludeGlob)" />
-      <_ApostropheAnalyzerAdditionalFile Remove="@(_ApostropheAnalyzerAdditionalFile)" />
-    </ItemGroup>
-    <PropertyGroup>
-      <EmDashAnalyzerIncludes Condition="'$(EmDashAnalyzerIncludes)' != ''">$([System.String]::Copy('$(EmDashAnalyzerIncludes)').Replace(';','|'))</EmDashAnalyzerIncludes>
-      <EmDashAnalyzerExcludes Condition="'$(EmDashAnalyzerExcludes)' != ''">$([System.String]::Copy('$(EmDashAnalyzerExcludes)').Replace(';','|'))</EmDashAnalyzerExcludes>
-      <EmDashAnalyzerAdditionalExcludes Condition="'$(EmDashAnalyzerAdditionalExcludes)' != ''">$([System.String]::Copy('$(EmDashAnalyzerAdditionalExcludes)').Replace(';','|'))</EmDashAnalyzerAdditionalExcludes>
-      <SmartQuotesAnalyzerIncludes Condition="'$(SmartQuotesAnalyzerIncludes)' != ''">$([System.String]::Copy('$(SmartQuotesAnalyzerIncludes)').Replace(';','|'))</SmartQuotesAnalyzerIncludes>
-      <SmartQuotesAnalyzerExcludes Condition="'$(SmartQuotesAnalyzerExcludes)' != ''">$([System.String]::Copy('$(SmartQuotesAnalyzerExcludes)').Replace(';','|'))</SmartQuotesAnalyzerExcludes>
-      <SmartQuotesAnalyzerAdditionalExcludes Condition="'$(SmartQuotesAnalyzerAdditionalExcludes)' != ''">$([System.String]::Copy('$(SmartQuotesAnalyzerAdditionalExcludes)').Replace(';','|'))</SmartQuotesAnalyzerAdditionalExcludes>
-      <ApostropheAnalyzerIncludes Condition="'$(ApostropheAnalyzerIncludes)' != ''">$([System.String]::Copy('$(ApostropheAnalyzerIncludes)').Replace(';','|'))</ApostropheAnalyzerIncludes>
-      <ApostropheAnalyzerExcludes Condition="'$(ApostropheAnalyzerExcludes)' != ''">$([System.String]::Copy('$(ApostropheAnalyzerExcludes)').Replace(';','|'))</ApostropheAnalyzerExcludes>
-      <ApostropheAnalyzerAdditionalExcludes Condition="'$(ApostropheAnalyzerAdditionalExcludes)' != ''">$([System.String]::Copy('$(ApostropheAnalyzerAdditionalExcludes)').Replace(';','|'))</ApostropheAnalyzerAdditionalExcludes>
-    </PropertyGroup>
-  </Target>
+  <Import Project="$(MSBuildThisFileDirectory)EmDashAnalyzer.props" />
+  <Import Project="$(MSBuildThisFileDirectory)SmartQuotesAnalyzer.props" />
+  <Import Project="$(MSBuildThisFileDirectory)ApostropheAnalyzer.props" />
+  <Import Project="$(MSBuildThisFileDirectory)EllipsisAnalyzer.props" />
+  <Import Project="$(MSBuildThisFileDirectory)MinusAnalyzer.props" />
 </Project>

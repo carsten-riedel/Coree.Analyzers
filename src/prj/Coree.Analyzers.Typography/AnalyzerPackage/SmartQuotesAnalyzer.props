@@ -1,0 +1,41 @@
+<Project>
+  <PropertyGroup>
+    <SmartQuotesAnalyzerSeverity Condition="'$(SmartQuotesAnalyzerSeverity)' == ''">warning</SmartQuotesAnalyzerSeverity>
+    <SmartQuotesAnalyzerIncludes Condition="'$(SmartQuotesAnalyzerIncludes)' == ''">**</SmartQuotesAnalyzerIncludes>
+    <SmartQuotesAnalyzerExcludes Condition="'$(SmartQuotesAnalyzerExcludes)' == ''">$(_TypographyDefaultExcludes)</SmartQuotesAnalyzerExcludes>
+  </PropertyGroup>
+  <ItemGroup>
+    <CompilerVisibleProperty Include="SmartQuotesAnalyzerSeverity" />
+    <CompilerVisibleProperty Include="SmartQuotesAnalyzerIncludes" />
+    <CompilerVisibleProperty Include="SmartQuotesAnalyzerExcludes" />
+    <CompilerVisibleProperty Include="SmartQuotesAnalyzerAdditionalExcludes" />
+  </ItemGroup>
+  <Target Name="AddSmartQuotesAnalyzerAdditionalFiles"
+          BeforeTargets="GenerateMSBuildEditorConfigFileCore;CoreCompile">
+    <PropertyGroup>
+      <SmartQuotesAnalyzerExcludes Condition="'$(SmartQuotesAnalyzerExcludes)' != ''">$([System.String]::Copy('$(SmartQuotesAnalyzerExcludes)').Trim())</SmartQuotesAnalyzerExcludes>
+      <SmartQuotesAnalyzerAdditionalExcludes Condition="'$(SmartQuotesAnalyzerAdditionalExcludes)' != ''">$([System.String]::Copy('$(SmartQuotesAnalyzerAdditionalExcludes)').Trim())</SmartQuotesAnalyzerAdditionalExcludes>
+      <_TypographySmartQuotesIsAllFiles Condition="'$(SmartQuotesAnalyzerIncludes)' == '**' OR '$(SmartQuotesAnalyzerIncludes)' == '**/*' OR '$(SmartQuotesAnalyzerIncludes)' == '**\*'">true</_TypographySmartQuotesIsAllFiles>
+    </PropertyGroup>
+    <ItemGroup>
+      <_SmartQuotesExcludeGlob Include="$(SmartQuotesAnalyzerExcludes)" Condition="'$(SmartQuotesAnalyzerExcludes)' != ''" />
+      <_SmartQuotesExcludeGlob Include="$(SmartQuotesAnalyzerAdditionalExcludes)" Condition="'$(SmartQuotesAnalyzerAdditionalExcludes)' != ''" />
+      <_SmartQuotesExcludeGlob Include="$(_TypographyAlwaysFolderExcludes)" />
+      <_SmartQuotesAnalyzerAdditionalFile Include="$(MSBuildProjectDirectory)\**\*"
+                                          Exclude="@(_SmartQuotesExcludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')"
+                                          Condition="'$(_TypographySmartQuotesIsAllFiles)' == 'true'" />
+      <_SmartQuotesAnalyzerIncludeGlob Include="$(SmartQuotesAnalyzerIncludes)" Condition="'$(SmartQuotesAnalyzerIncludes)' != '' AND '$(_TypographySmartQuotesIsAllFiles)' != 'true'" />
+      <_SmartQuotesAnalyzerAdditionalFile Include="@(_SmartQuotesAnalyzerIncludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')"
+                                          Exclude="@(_SmartQuotesExcludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')" />
+      <AdditionalFiles Include="@(_SmartQuotesAnalyzerAdditionalFile)" />
+      <_SmartQuotesExcludeGlob Remove="@(_SmartQuotesExcludeGlob)" />
+      <_SmartQuotesAnalyzerIncludeGlob Remove="@(_SmartQuotesAnalyzerIncludeGlob)" />
+      <_SmartQuotesAnalyzerAdditionalFile Remove="@(_SmartQuotesAnalyzerAdditionalFile)" />
+    </ItemGroup>
+    <PropertyGroup>
+      <SmartQuotesAnalyzerIncludes Condition="'$(SmartQuotesAnalyzerIncludes)' != ''">$([System.String]::Copy('$(SmartQuotesAnalyzerIncludes)').Replace(';','|'))</SmartQuotesAnalyzerIncludes>
+      <SmartQuotesAnalyzerExcludes Condition="'$(SmartQuotesAnalyzerExcludes)' != ''">$([System.String]::Copy('$(SmartQuotesAnalyzerExcludes)').Replace(';','|'))</SmartQuotesAnalyzerExcludes>
+      <SmartQuotesAnalyzerAdditionalExcludes Condition="'$(SmartQuotesAnalyzerAdditionalExcludes)' != ''">$([System.String]::Copy('$(SmartQuotesAnalyzerAdditionalExcludes)').Replace(';','|'))</SmartQuotesAnalyzerAdditionalExcludes>
+    </PropertyGroup>
+  </Target>
+</Project>

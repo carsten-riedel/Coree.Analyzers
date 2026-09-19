@@ -3,17 +3,17 @@
     Analyzer nupkgs put the assembly under analyzers/dotnet/cs, not lib/.
     IncludeBuildOutput is false on the csproj so the SDK does not also write lib/{tfm}/.
     This target runs during pack of netstandard2.0.
-    AnalyzerPackage/Coree.Analyzers.Typography.props is the consumer MSBuild surface
-    (severity and additional-file include/exclude glob properties).
+    AnalyzerPackage/Coree.Analyzers.Typography.props is the nupkg entry (build/ and
+    buildTransitive/). Per-analyzer .props files next to it are imported from that entry.
   -->
   <PropertyGroup>
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackAsAnalyzer</TargetsForTfmSpecificContentInPackage>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="$(AnalyzerPackageSourcePath)\Coree.Analyzers.Typography.props" />
-    <!-- Show one physical copy in Visual Studio under AnalyzerPackage; the second package projection stays hidden. -->
-    <None Include="$(AnalyzerPackageSourcePath)\Coree.Analyzers.Typography.props" Pack="true" PackagePath="build\" Visible="true" />
-    <None Include="$(AnalyzerPackageSourcePath)\Coree.Analyzers.Typography.props" Pack="true" PackagePath="buildTransitive\" Visible="false" />
+    <None Remove="$(AnalyzerPackageSourcePath)\**\*.props" />
+    <!-- Show disk copies under AnalyzerPackage; the buildTransitive pack projection stays hidden. -->
+    <None Include="$(AnalyzerPackageSourcePath)\**\*.props" Pack="true" PackagePath="build\" Visible="true" />
+    <None Include="$(AnalyzerPackageSourcePath)\**\*.props" Pack="true" PackagePath="buildTransitive\" Visible="false" />
   </ItemGroup>
   <Target Name="PackAsAnalyzer">
     <ItemGroup>

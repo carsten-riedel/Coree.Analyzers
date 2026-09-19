@@ -1,0 +1,41 @@
+<Project>
+  <PropertyGroup>
+    <ApostropheAnalyzerSeverity Condition="'$(ApostropheAnalyzerSeverity)' == ''">warning</ApostropheAnalyzerSeverity>
+    <ApostropheAnalyzerIncludes Condition="'$(ApostropheAnalyzerIncludes)' == ''">**</ApostropheAnalyzerIncludes>
+    <ApostropheAnalyzerExcludes Condition="'$(ApostropheAnalyzerExcludes)' == ''">$(_TypographyDefaultExcludes)</ApostropheAnalyzerExcludes>
+  </PropertyGroup>
+  <ItemGroup>
+    <CompilerVisibleProperty Include="ApostropheAnalyzerSeverity" />
+    <CompilerVisibleProperty Include="ApostropheAnalyzerIncludes" />
+    <CompilerVisibleProperty Include="ApostropheAnalyzerExcludes" />
+    <CompilerVisibleProperty Include="ApostropheAnalyzerAdditionalExcludes" />
+  </ItemGroup>
+  <Target Name="AddApostropheAnalyzerAdditionalFiles"
+          BeforeTargets="GenerateMSBuildEditorConfigFileCore;CoreCompile">
+    <PropertyGroup>
+      <ApostropheAnalyzerExcludes Condition="'$(ApostropheAnalyzerExcludes)' != ''">$([System.String]::Copy('$(ApostropheAnalyzerExcludes)').Trim())</ApostropheAnalyzerExcludes>
+      <ApostropheAnalyzerAdditionalExcludes Condition="'$(ApostropheAnalyzerAdditionalExcludes)' != ''">$([System.String]::Copy('$(ApostropheAnalyzerAdditionalExcludes)').Trim())</ApostropheAnalyzerAdditionalExcludes>
+      <_TypographyApostropheIsAllFiles Condition="'$(ApostropheAnalyzerIncludes)' == '**' OR '$(ApostropheAnalyzerIncludes)' == '**/*' OR '$(ApostropheAnalyzerIncludes)' == '**\*'">true</_TypographyApostropheIsAllFiles>
+    </PropertyGroup>
+    <ItemGroup>
+      <_ApostropheExcludeGlob Include="$(ApostropheAnalyzerExcludes)" Condition="'$(ApostropheAnalyzerExcludes)' != ''" />
+      <_ApostropheExcludeGlob Include="$(ApostropheAnalyzerAdditionalExcludes)" Condition="'$(ApostropheAnalyzerAdditionalExcludes)' != ''" />
+      <_ApostropheExcludeGlob Include="$(_TypographyAlwaysFolderExcludes)" />
+      <_ApostropheAnalyzerAdditionalFile Include="$(MSBuildProjectDirectory)\**\*"
+                                         Exclude="@(_ApostropheExcludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')"
+                                         Condition="'$(_TypographyApostropheIsAllFiles)' == 'true'" />
+      <_ApostropheAnalyzerIncludeGlob Include="$(ApostropheAnalyzerIncludes)" Condition="'$(ApostropheAnalyzerIncludes)' != '' AND '$(_TypographyApostropheIsAllFiles)' != 'true'" />
+      <_ApostropheAnalyzerAdditionalFile Include="@(_ApostropheAnalyzerIncludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')"
+                                         Exclude="@(_ApostropheExcludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')" />
+      <AdditionalFiles Include="@(_ApostropheAnalyzerAdditionalFile)" />
+      <_ApostropheExcludeGlob Remove="@(_ApostropheExcludeGlob)" />
+      <_ApostropheAnalyzerIncludeGlob Remove="@(_ApostropheAnalyzerIncludeGlob)" />
+      <_ApostropheAnalyzerAdditionalFile Remove="@(_ApostropheAnalyzerAdditionalFile)" />
+    </ItemGroup>
+    <PropertyGroup>
+      <ApostropheAnalyzerIncludes Condition="'$(ApostropheAnalyzerIncludes)' != ''">$([System.String]::Copy('$(ApostropheAnalyzerIncludes)').Replace(';','|'))</ApostropheAnalyzerIncludes>
+      <ApostropheAnalyzerExcludes Condition="'$(ApostropheAnalyzerExcludes)' != ''">$([System.String]::Copy('$(ApostropheAnalyzerExcludes)').Replace(';','|'))</ApostropheAnalyzerExcludes>
+      <ApostropheAnalyzerAdditionalExcludes Condition="'$(ApostropheAnalyzerAdditionalExcludes)' != ''">$([System.String]::Copy('$(ApostropheAnalyzerAdditionalExcludes)').Replace(';','|'))</ApostropheAnalyzerAdditionalExcludes>
+    </PropertyGroup>
+  </Target>
+</Project>

@@ -1,4 +1,6 @@
-ASCII hyphen, quotes, and apostrophe: 1-2 "hello" it's
-Em dash (CTYED001): 1—2
+ASCII hyphen, quotes, apostrophe, periods: 1-2 "hello" it's ...
+Em/en dash (CTYED001): 1—2 1–2
 Typographic quotes (CTYQM001): “hello”
 Typographic apostrophe (CTYAP001): it’s
+Horizontal ellipsis (CTYEL001): …
+Minus sign (CTYMN001): x−y
