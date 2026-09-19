@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="Coree" src="https://raw.githubusercontent.com/carsten-riedel/Coree.Analyzers/main/assets/Icon-128x128.png" width="128">
+  <img alt="Coree" src="https://raw.githubusercontent.com/carsten-riedel/Coree.Analyzers/main/assets/brand.png" width="128">
 </p>
 
 # Coree.Analyzers
