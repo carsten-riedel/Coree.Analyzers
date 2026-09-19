@@ -3,9 +3,14 @@
 </p>
 
 # Coree.Analyzers
+
+<!-- Maintenance note: Keep this README aligned with the repository README for shared prose, examples, headings, badges, and feature descriptions. Use absolute NuGet/GitHub URLs here where the repository README can use repository-relative links; otherwise keep shared content in sync. -->
+
 .NET multi-analyzer repository. Each package is independently packable. **Coree.Analyzers.Typography** is the first analyzer; it will not necessarily be the last.
 
 ## Coree.Analyzers.Typography
+
+[![NuGet Version](https://img.shields.io/nuget/v/Coree.Analyzers.Typography?label=NuGet&logo=nuget)](https://www.nuget.org/packages/Coree.Analyzers.Typography) [![NuGet Downloads](https://img.shields.io/nuget/dt/Coree.Analyzers.Typography?label=Downloads&logo=nuget)](https://www.nuget.org/packages/Coree.Analyzers.Typography) [![Build Status](https://img.shields.io/github/actions/workflow/status/carsten-riedel/Coree.Analyzers/cicd.yml?branch=main&label=build)](https://github.com/carsten-riedel/Coree.Analyzers/actions/workflows/cicd.yml) [![Targets](https://img.shields.io/badge/targets-netstandard2.0-512BD4?logo=dotnet&logoColor=white)](https://www.nuget.org/packages/Coree.Analyzers.Typography) [![License](https://img.shields.io/github/license/carsten-riedel/Coree.Analyzers?logo=mit)](https://github.com/carsten-riedel/Coree.Analyzers/blob/main/LICENSE)
 
 Word processors leave em dashes, curly quotes, and typographic apostrophes in source. Compilers do not care. Reviewers do.
 
