@@ -46,7 +46,7 @@ Coverlet measures only the analyzer assembly (`[Coree.Analyzers.Typography]*`) a
 dotnet pack
 ```
 
-Creates one `.nupkg` in `src/prj/Coree.Analyzers.Typography/bin/Pack/` with the analyzer under `analyzers/dotnet/cs` (not `lib/`) and `Coree.Analyzers.Typography.props` under `build/` and `buildTransitive/` (`EmDashAnalyzerSeverity`, `SmartQuotesAnalyzerSeverity`, `EmDashAnalyzerIncludes`, `EmDashAnalyzerExcludes`, `SmartQuotesAnalyzerIncludes`, `SmartQuotesAnalyzerExcludes`). Test, DebugHost, and optional benchmark projects are not packed.
+Creates one `.nupkg` in `src/prj/Coree.Analyzers.Typography/bin/Pack/` with the analyzer under `analyzers/dotnet/cs` (not `lib/`) and `Coree.Analyzers.Typography.props` under `build/` and `buildTransitive/` (`EmDashAnalyzerSeverity`, `SmartQuotesAnalyzerSeverity`, `ApostropheAnalyzerSeverity`, `EmDashAnalyzerIncludes`, `EmDashAnalyzerExcludes`, `EmDashAnalyzerAdditionalExcludes`, `SmartQuotesAnalyzerIncludes`, `SmartQuotesAnalyzerExcludes`, `SmartQuotesAnalyzerAdditionalExcludes`, `ApostropheAnalyzerIncludes`, `ApostropheAnalyzerExcludes`, `ApostropheAnalyzerAdditionalExcludes`). Test, DebugHost, and optional benchmark projects are not packed.
 
 Restore fails this analyzer package on high (`NU1903`) and critical (`NU1904`) vulnerable packages. Low and moderate stay warnings. `NugetReport` next to the tests lists that package’s packages (txt/json) and is still info-only.
 
@@ -77,12 +77,12 @@ To break in the analyzer, install the **.NET Compiler Platform SDK** Visual Stud
 
 1. Set `Coree.Analyzers.Typography` as the startup project (not `Coree.Analyzers.Typography.DebugHost`).
 2. Select the `Coree.Analyzers.Typography` launch profile (Roslyn Component).
-3. Set a breakpoint in `EmDashAnalyzer` or `SmartQuotesAnalyzer`.
+3. Set a breakpoint in `EmDashAnalyzer`, `SmartQuotesAnalyzer`, or `ApostropheAnalyzer`.
 4. Press F5. Visual Studio compiles `Coree.Analyzers.Typography.DebugHost` and attaches to that compilation.
 
-`Coree.Analyzers.Typography.DebugHost` is only the compile target. The em dash in `"1—2"` reports EMD001; the typographic quotes in `"“hello”"` report TSQ001. ASCII `"1-2"` and `"hello"` do not. Files under the host project directory (including `SampleTypography.txt` and the host csproj) are scanned for the same IDs when the include properties match. F5 / `dotnet run` on the console only runs `Main`; it does not attach to the analyzer.
+`Coree.Analyzers.Typography.DebugHost` is only the compile target. The em dash in `"1—2"` reports CTYED001; the typographic quotes in `"“hello”"` report CTYQM001; the typographic apostrophe in `"it’s"` reports CTYAP001. ASCII `"1-2"`, `"hello"`, and `"it's"` do not. Files under the host project directory (including `SampleTypography.txt` and the host csproj) are scanned for the same IDs when the include properties match. F5 / `dotnet run` on the console only runs `Main`; it does not attach to the analyzer.
 
-Severity is an MSBuild property on the compile target (`EmDashAnalyzerSeverity`, `SmartQuotesAnalyzerSeverity`): `warning` (default), `error`, `message`, or `off`. Include globs are `EmDashAnalyzerIncludes` / `EmDashAnalyzerExcludes` and the SmartQuotes pair (semicolon-separated, project directory; default includes `**`, every file under the csproj added as AdditionalFiles so Visual Studio can bind the same diagnostics `dotnet build` prints; empty includes skip that scan; excludes subtract from that analyzer's includes; `bin` / `obj` / `.git` / `.vs` and common binaries are always skipped). The analyzer nupkg ships `build/` and `buildTransitive/` props so PackageReference consumers get the same knobs. DebugHost imports that props file because it uses a project analyzer reference, not the nupkg.
+Severity, includes, excludes, and additional excludes are MSBuild properties on the compile target. Includes minus (Excludes + AdditionalExcludes). Setting Excludes replaces the defaults; AdditionalExcludes is always added. `bin` / `obj` / `.git` / `.vs` stay excluded. Empty includes skip extra-file scanning. The analyzer nupkg ships `build/` and `buildTransitive/` props so PackageReference consumers get the same knobs. DebugHost imports that props file because it uses a project analyzer reference, not the nupkg.
 
 For stepping without F5, debug `FunctionalTests` from Test Explorer.
 

@@ -14,13 +14,15 @@ namespace Coree.Analyzers.Typography
         /// <summary>
         /// Diagnostic identifier for the sample em dash rule.
         /// </summary>
-        public const string DiagnosticId = "EMD001";
+        public const string DiagnosticId = "CTYED001";
 
         internal const string SeverityPropertyName = "EmDashAnalyzerSeverity";
 
         internal const string IncludesPropertyName = "EmDashAnalyzerIncludes";
 
         internal const string ExcludesPropertyName = "EmDashAnalyzerExcludes";
+
+        internal const string AdditionalExcludesPropertyName = "EmDashAnalyzerAdditionalExcludes";
 
         private const string EmDashCharacters = "\u2014";
 
@@ -58,7 +60,8 @@ namespace Coree.Analyzers.Typography
                 EmDashCharacters,
                 SeverityPropertyName,
                 IncludesPropertyName,
-                ExcludesPropertyName);
+                ExcludesPropertyName,
+                AdditionalExcludesPropertyName);
         }
     }
 }

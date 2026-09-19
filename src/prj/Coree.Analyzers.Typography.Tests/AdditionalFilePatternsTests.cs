@@ -111,6 +111,26 @@ namespace Coree.Analyzers.Typography.Tests
                 "**",
                 null,
                 @"C:\proj"));
+            Assert.IsFalse(AdditionalFilePatterns.IsSelected(
+                @"C:\proj\data.dat",
+                "**",
+                "\r\n  **/*.dat;**/*.resources  \n",
+                @"C:\proj"));
+            Assert.IsTrue(AdditionalFilePatterns.IsSelected(
+                @"C:\proj\data.dat",
+                "**",
+                "**/*.dll;**/*.png",
+                @"C:\proj"));
+        }
+
+        [TestMethod]
+        public void JoinPatternsConcatenatesAndTrims()
+        {
+            Assert.AreEqual(null, AdditionalFilePatterns.JoinPatterns(null, null));
+            Assert.AreEqual(null, AdditionalFilePatterns.JoinPatterns("  ", string.Empty));
+            Assert.AreEqual("**/*.dat", AdditionalFilePatterns.JoinPatterns(null, " **/*.dat "));
+            Assert.AreEqual("**/*.dll", AdditionalFilePatterns.JoinPatterns(" **/*.dll ", "  "));
+            Assert.AreEqual("**/*.dll;**/*.dat", AdditionalFilePatterns.JoinPatterns(" **/*.dll ", " **/*.dat "));
         }
     }
 }

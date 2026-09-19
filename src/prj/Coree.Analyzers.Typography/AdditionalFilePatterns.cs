@@ -31,6 +31,28 @@ namespace Coree.Analyzers.Typography
             return true;
         }
 
+        internal static string JoinPatterns(string left, string right)
+        {
+            var hasLeft = !string.IsNullOrWhiteSpace(left);
+            var hasRight = !string.IsNullOrWhiteSpace(right);
+            if (!hasLeft && !hasRight)
+            {
+                return null;
+            }
+
+            if (!hasLeft)
+            {
+                return right.Trim();
+            }
+
+            if (!hasRight)
+            {
+                return left.Trim();
+            }
+
+            return left.Trim() + ";" + right.Trim();
+        }
+
         internal static bool AnyMatch(string relativePath, string patterns)
         {
             if (string.IsNullOrWhiteSpace(relativePath) || string.IsNullOrWhiteSpace(patterns))

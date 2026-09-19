@@ -5,37 +5,36 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace Coree.Analyzers.Typography
 {
     /// <summary>
-    /// Sample analyzer: warns when C# source or matching files under the project directory contain typographic quotation marks
-    /// (curly quotes and guillemets), not ASCII <c>"</c> or <c>'</c>.
-    /// Replace this type with your own diagnostic analyzer.
+    /// Warns when C# source or matching files under the project directory contain a typographic apostrophe
+    /// / closing single quotation mark (U+2019), not ASCII <c>'</c>.
     /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    public sealed class SmartQuotesAnalyzer : DiagnosticAnalyzer
+    public sealed class ApostropheAnalyzer : DiagnosticAnalyzer
     {
         /// <summary>
-        /// Diagnostic identifier for the sample typographic quote rule.
+        /// Diagnostic identifier for the typographic apostrophe rule.
         /// </summary>
-        public const string DiagnosticId = "CTYQM001";
+        public const string DiagnosticId = "CTYAP001";
 
-        internal const string SeverityPropertyName = "SmartQuotesAnalyzerSeverity";
+        internal const string SeverityPropertyName = "ApostropheAnalyzerSeverity";
 
-        internal const string IncludesPropertyName = "SmartQuotesAnalyzerIncludes";
+        internal const string IncludesPropertyName = "ApostropheAnalyzerIncludes";
 
-        internal const string ExcludesPropertyName = "SmartQuotesAnalyzerExcludes";
+        internal const string ExcludesPropertyName = "ApostropheAnalyzerExcludes";
 
-        internal const string AdditionalExcludesPropertyName = "SmartQuotesAnalyzerAdditionalExcludes";
+        internal const string AdditionalExcludesPropertyName = "ApostropheAnalyzerAdditionalExcludes";
 
-        // “ ” „ ‟ « »
-        private const string TypographicQuoteCharacters = "\u201C\u201D\u201E\u201F\u00AB\u00BB";
+        // ’
+        private const string ApostropheCharacters = "\u2019";
 
         private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(
             DiagnosticId,
-            "Source contains a typographic quote",
-            "Source contains a typographic quotation mark. Use ASCII double quote or apostrophe.",
+            "Source contains a typographic apostrophe",
+            "Source contains a typographic apostrophe or closing single quotation mark (U+2019). Use ASCII apostrophe.",
             "Typography",
             DiagnosticSeverity.Warning,
             isEnabledByDefault: true,
-            description: "Copy-paste from word processors often inserts curly quotes or guillemets instead of ASCII quotes.");
+            description: "Copy-paste from word processors often inserts U+2019 instead of ASCII apostrophe (U+0027).");
 
         private static readonly DiagnosticDescriptor ErrorRule =
             AnalyzerSeverity.WithSeverity(Rule, DiagnosticSeverity.Error);
@@ -59,7 +58,7 @@ namespace Coree.Analyzers.Typography
                 Rule,
                 ErrorRule,
                 InfoRule,
-                TypographicQuoteCharacters,
+                ApostropheCharacters,
                 SeverityPropertyName,
                 IncludesPropertyName,
                 ExcludesPropertyName,

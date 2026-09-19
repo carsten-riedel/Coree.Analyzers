@@ -25,10 +25,11 @@
   </PropertyGroup>
 
   <!-- Sample analyzer severity: warning (default), error, message, or off. -->
-  <!-- Default includes is every file under this project. Empty includes skip that scan. -->
+  <!-- Default includes **; default excludes skip bin/obj/.git/.vs and non-text payloads. Setting Excludes replaces that list. AdditionalExcludes is always added. Empty includes skip extra-file scanning. -->
   <PropertyGroup>
     <EmDashAnalyzerSeverity>warning</EmDashAnalyzerSeverity>
     <SmartQuotesAnalyzerSeverity>warning</SmartQuotesAnalyzerSeverity>
+    <ApostropheAnalyzerSeverity>warning</ApostropheAnalyzerSeverity>
   </PropertyGroup>
 
   <!-- Load the in-repo analyzer at compile time. Do not reference it as a library. -->
@@ -38,7 +39,7 @@
                       ReferenceOutputAssembly="false" />
   </ItemGroup>
 
-  <!-- Additional-file sample: 1—2 and “hello”. -->
+  <!-- Additional-file sample: 1—2, “hello”, and it’s. -->
   <ItemGroup>
     <None Include="SampleTypography.txt" />
   </ItemGroup>

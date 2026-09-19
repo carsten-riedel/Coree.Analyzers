@@ -17,7 +17,8 @@ namespace Coree.Analyzers.Typography
             string characters,
             string severityPropertyName,
             string includesPropertyName,
-            string excludesPropertyName)
+            string excludesPropertyName,
+            string additionalExcludesPropertyName)
         {
             context.RegisterCompilationStartAction(startContext =>
             {
@@ -45,6 +46,9 @@ namespace Coree.Analyzers.Typography
 
                 string excludes;
                 options.TryGetValue("build_property." + excludesPropertyName, out excludes);
+                string additionalExcludes;
+                options.TryGetValue("build_property." + additionalExcludesPropertyName, out additionalExcludes);
+                excludes = AdditionalFilePatterns.JoinPatterns(excludes, additionalExcludes);
                 string projectDirectory;
                 options.TryGetValue("build_property.MSBuildProjectDirectory", out projectDirectory);
                 var compiledPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);

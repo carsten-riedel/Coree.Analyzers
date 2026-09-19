@@ -12,6 +12,7 @@ namespace Coree.Analyzers.Typography.Tests
     {
         private const string EmDashSource = "class C { string s = \"a\u2014b\"; }";
         private const string QuoteSource = "class C { string s = \"x\u201Cy\"; }";
+        private const string ApostropheSource = "class C { string s = \"x\u2019y\"; }";
 
         [TestMethod]
         public async Task EmDashInStringReportsDiagnostic()
@@ -45,6 +46,23 @@ namespace Coree.Analyzers.Typography.Tests
         {
             const string test = "class C { string s = \"hello\"; }";
             await CSharpAnalyzerVerifier<SmartQuotesAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(test);
+        }
+
+        [TestMethod]
+        public async Task TypographicApostropheInStringReportsDiagnostic()
+        {
+            var expected = DiagnosticResult
+                .CompilerWarning(ApostropheAnalyzer.DiagnosticId)
+                .WithSpan(1, 24, 1, 25);
+
+            await CSharpAnalyzerVerifier<ApostropheAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(ApostropheSource, expected);
+        }
+
+        [TestMethod]
+        public async Task AsciiApostropheReportsNoDiagnostic()
+        {
+            const string test = "class C { string s = \"it's\"; }";
+            await CSharpAnalyzerVerifier<ApostropheAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(test);
         }
 
         [TestMethod]
@@ -84,6 +102,20 @@ namespace Coree.Analyzers.Typography.Tests
         }
 
         [TestMethod]
+        public async Task ApostropheSeverityErrorReportsError()
+        {
+            var expected = DiagnosticResult
+                .CompilerError(ApostropheAnalyzer.DiagnosticId)
+                .WithSpan(1, 24, 1, 25);
+
+            await VerifyWithSeverityAsync<ApostropheAnalyzer>(
+                ApostropheSource,
+                ApostropheAnalyzer.SeverityPropertyName,
+                "error",
+                expected);
+        }
+
+        [TestMethod]
         public async Task EmDashInMatchingAdditionalFileReportsDiagnostic()
         {
             var expected = DiagnosticResult
@@ -110,6 +142,21 @@ namespace Coree.Analyzers.Typography.Tests
                 "*.txt",
                 "sample.txt",
                 "x\u201Cy",
+                expected);
+        }
+
+        [TestMethod]
+        public async Task ApostropheInMatchingAdditionalFileReportsDiagnostic()
+        {
+            var expected = DiagnosticResult
+                .CompilerWarning(ApostropheAnalyzer.DiagnosticId)
+                .WithSpan("sample.txt", 1, 2, 1, 3);
+
+            await VerifyWithAdditionalFileAsync<ApostropheAnalyzer>(
+                ApostropheAnalyzer.IncludesPropertyName,
+                "*.txt",
+                "sample.txt",
+                "x\u2019y",
                 expected);
         }
 
@@ -224,6 +271,110 @@ namespace Coree.Analyzers.Typography.Tests
         }
 
         [TestMethod]
+        public async Task DefaultStyleExcludesSkipDatAdditionalFile()
+        {
+            await VerifyWithAdditionalFileAsync<EmDashAnalyzer>(
+                EmDashAnalyzer.IncludesPropertyName,
+                "**",
+                EmDashAnalyzer.ExcludesPropertyName,
+                "**/*.dat|**/*.resources",
+                "data.dat",
+                "a\u2014b");
+        }
+
+        [TestMethod]
+        public async Task ReplacedExcludesAllowDatAdditionalFile()
+        {
+            var expected = DiagnosticResult
+                .CompilerWarning(EmDashAnalyzer.DiagnosticId)
+                .WithSpan("data.dat", 1, 2, 1, 3);
+
+            await VerifyWithAdditionalFileAsync<EmDashAnalyzer>(
+                EmDashAnalyzer.IncludesPropertyName,
+                "**",
+                EmDashAnalyzer.ExcludesPropertyName,
+                "**/*.dll|**/*.png",
+                "data.dat",
+                "a\u2014b",
+                expected);
+        }
+
+        [TestMethod]
+        public async Task AdditionalExcludesSkipMatchingFile()
+        {
+            await VerifyWithAdditionalFileAsync<EmDashAnalyzer>(
+                EmDashAnalyzer.IncludesPropertyName,
+                "**",
+                string.Empty,
+                string.Empty,
+                EmDashAnalyzer.AdditionalExcludesPropertyName,
+                "docs/**",
+                "docs/notes.md",
+                "a\u2014b");
+        }
+
+        [TestMethod]
+        public async Task AdditionalExcludesKeepUnrelatedFile()
+        {
+            var expected = DiagnosticResult
+                .CompilerWarning(EmDashAnalyzer.DiagnosticId)
+                .WithSpan("notes.md", 1, 2, 1, 3);
+
+            await VerifyWithAdditionalFileAsync<EmDashAnalyzer>(
+                EmDashAnalyzer.IncludesPropertyName,
+                "**",
+                string.Empty,
+                string.Empty,
+                EmDashAnalyzer.AdditionalExcludesPropertyName,
+                "docs/**",
+                "notes.md",
+                "a\u2014b",
+                expected);
+        }
+
+        [TestMethod]
+        public async Task ReplacedExcludesAndAdditionalExcludesBothApply()
+        {
+            await VerifyWithAdditionalFileAsync<EmDashAnalyzer>(
+                EmDashAnalyzer.IncludesPropertyName,
+                "**",
+                EmDashAnalyzer.ExcludesPropertyName,
+                "**/*.dll|**/*.png",
+                EmDashAnalyzer.AdditionalExcludesPropertyName,
+                "docs/**",
+                "docs/notes.md",
+                "a\u2014b");
+        }
+
+        [TestMethod]
+        public async Task SmartQuotesAdditionalExcludesSkipMatchingFile()
+        {
+            await VerifyWithAdditionalFileAsync<SmartQuotesAnalyzer>(
+                SmartQuotesAnalyzer.IncludesPropertyName,
+                "**",
+                string.Empty,
+                string.Empty,
+                SmartQuotesAnalyzer.AdditionalExcludesPropertyName,
+                "docs/**",
+                "docs/notes.md",
+                "x\u201Cy");
+        }
+
+        [TestMethod]
+        public async Task ApostropheAdditionalExcludesSkipMatchingFile()
+        {
+            await VerifyWithAdditionalFileAsync<ApostropheAnalyzer>(
+                ApostropheAnalyzer.IncludesPropertyName,
+                "**",
+                string.Empty,
+                string.Empty,
+                ApostropheAnalyzer.AdditionalExcludesPropertyName,
+                "docs/**",
+                "docs/notes.md",
+                "x\u2019y");
+        }
+
+        [TestMethod]
         public async Task AdditionalFileMatchingCompiledSourceReportsOnce()
         {
             var expected = DiagnosticResult
@@ -281,6 +432,8 @@ namespace Coree.Analyzers.Typography.Tests
                 includes,
                 string.Empty,
                 string.Empty,
+                string.Empty,
+                string.Empty,
                 additionalPath,
                 additionalContent,
                 expected);
@@ -296,6 +449,30 @@ namespace Coree.Analyzers.Typography.Tests
             params DiagnosticResult[] expected)
             where TAnalyzer : Microsoft.CodeAnalysis.Diagnostics.DiagnosticAnalyzer, new()
         {
+            await VerifyWithAdditionalFileAsync<TAnalyzer>(
+                includesPropertyName,
+                includes,
+                excludesPropertyName,
+                excludes,
+                string.Empty,
+                string.Empty,
+                additionalPath,
+                additionalContent,
+                expected);
+        }
+
+        private static async Task VerifyWithAdditionalFileAsync<TAnalyzer>(
+            string includesPropertyName,
+            string includes,
+            string excludesPropertyName,
+            string excludes,
+            string additionalExcludesPropertyName,
+            string additionalExcludes,
+            string additionalPath,
+            string additionalContent,
+            params DiagnosticResult[] expected)
+            where TAnalyzer : Microsoft.CodeAnalysis.Diagnostics.DiagnosticAnalyzer, new()
+        {
             var test = new CSharpAnalyzerTest<TAnalyzer, DefaultVerifier>
             {
                 TestCode = "class C { }",
@@ -306,6 +483,11 @@ namespace Coree.Analyzers.Typography.Tests
             if (!string.IsNullOrEmpty(excludesPropertyName))
             {
                 config += "build_property." + excludesPropertyName + " = " + excludes + "\n";
+            }
+
+            if (!string.IsNullOrEmpty(additionalExcludesPropertyName))
+            {
+                config += "build_property." + additionalExcludesPropertyName + " = " + additionalExcludes + "\n";
             }
 
             test.TestState.AnalyzerConfigFiles.Add(("/.globalconfig", config));

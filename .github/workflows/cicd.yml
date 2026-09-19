@@ -1,0 +1,85 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+# https://github.com/actions
+
+name: cicd.yml
+
+permissions:
+  # cicd.ps1 publishes the current reports to docs/reports/<channel>/ and DocFX to
+  # docs/docfx/<channel>/. The workflow still triggers automatically only for src/**
+  # changes, so the generated docs-only commit cannot recursively start another release.
+  contents: write
+  packages: write
+
+on:
+  push:
+    paths:
+      - 'src/**'
+    branches:
+      - 'master'
+      - 'main'
+      - 'hotfix'
+      - 'release'
+      - 'develop'
+      - 'bugfix'
+      - 'feature'
+      - 'master/**'
+      - 'main/**'
+      - 'hotfix/**'
+      - 'release/**'
+      - 'develop/**'
+      - 'bugfix/**'
+      - 'feature/**'
+  repository_dispatch:
+    types: 
+      - builddispatch
+  workflow_dispatch:
+
+jobs:
+
+  debug:
+    if: ${{ false }}   # <— disables the job without removing it
+    runs-on: windows-latest
+    steps:
+      - name: Checkout for Debug
+        uses: actions/checkout@v4
+      - name: Print GitHub Context
+        run: |
+          echo "Event Name: ${{ github.event_name }}"
+          echo "Committer Name: ${{ github.event.head_commit.committer.name }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "Actor: ${{ github.event.head_commit.committer.name }}"
+
+  builddeploy:
+    
+    if: (github.event_name == 'workflow_dispatch') || (github.event_name == 'repository_dispatch') || (github.event_name == 'push')
+ 
+    runs-on: windows-latest
+    
+    env:
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup-dotnet
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Diagnostic print enviroment vars
+      run: printenv
+
+    - name: Display dotnet version
+      run: dotnet --version    
+
+    - name: Display powershell core version
+      run: pwsh --version
+
+    - name: Workflow Build/Deploy
+      run: .github/workflows/cicd.ps1 -GitHubToken "${{ github.token }}" -NuGetApiKey "${{ secrets.NUGET_APIKEY }}" -IntTestNuGetApiKey "${{ secrets.INTTESTNUGET_APIKEY }}" -PowerShellGalleryApiKey "${{ secrets.POWERSHELLGALLERY_APIKEY }}"
+      shell: pwsh 
+

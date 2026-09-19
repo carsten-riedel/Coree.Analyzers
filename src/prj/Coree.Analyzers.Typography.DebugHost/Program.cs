@@ -11,18 +11,24 @@ namespace Coree.Analyzers.Typography.DebugHost
             // Visual Studio needs the .NET Compiler Platform SDK component.
             // F5 on this console only runs Main; it does not attach to the analyzer.
 
-            // Change EmDashAnalyzerSeverity / SmartQuotesAnalyzerSeverity on this csproj
+            // Change EmDashAnalyzerSeverity / SmartQuotesAnalyzerSeverity / ApostropheAnalyzerSeverity
             // (warning, error, message, or off).
-            // Change EmDashAnalyzerIncludes / SmartQuotesAnalyzerIncludes
-            // and EmDashAnalyzerExcludes / SmartQuotesAnalyzerExcludes
-            // (semicolon-separated globs; default is ** under this csproj; empty includes skip extra files).
-            // ASCII hyphen and quotes do not report.
+            // Change EmDashAnalyzerIncludes / SmartQuotesAnalyzerIncludes / ApostropheAnalyzerIncludes,
+            // EmDashAnalyzerExcludes / SmartQuotesAnalyzerExcludes / ApostropheAnalyzerExcludes,
+            // and the matching AdditionalExcludes properties
+            // (Includes minus Excludes plus AdditionalExcludes; setting Excludes replaces
+            // the default list; AdditionalExcludes is always added; empty includes skip
+            // extra files; bin/obj/.git/.vs always stay out).
+            // ASCII hyphen, quotes, and apostrophe do not report.
             Console.WriteLine("1-2");
             Console.WriteLine("\"hello\"");
+            Console.WriteLine("it's");
 
-            // Em dash reports EMD001; typographic quotes report TSQ001.
+            // Em dash reports CTYED001; typographic quotes report CTYQM001;
+            // typographic apostrophe reports CTYAP001.
             Console.WriteLine("1—2");
             Console.WriteLine("“hello”");
+            Console.WriteLine("it’s");
         }
     }
 }

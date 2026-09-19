@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "nuget-license": {
+      "version": "4.0.15",
+      "commands": [
+        "nuget-license"
+      ],
+      "rollForward": false
+    },
+    "docfx": {
+      "version": "2.78.5",
+      "commands": [
+        "docfx"
+      ],
+      "rollForward": false
+    },
+    "Eigenverft.Distributed.Drydock": {
+      "version": "0.1.20257.10053-dev",
+      "commands": [
+        "drydock"
+      ],
+      "rollForward": false
+    }
+  }
+}

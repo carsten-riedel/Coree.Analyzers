@@ -86,12 +86,16 @@
     <Company></Company>
     <Copyright>Copyright © 2026 Carsten Riedel</Copyright>
     <PackageId>Coree.Analyzers.Typography</PackageId>
-    <PackageTags>dotnet;roslyn;analyzer</PackageTags>
-    <PackageProjectUrl></PackageProjectUrl>
-    <RepositoryUrl></RepositoryUrl>
-    <RepositoryType></RepositoryType>
+    <PackageTags>dotnet;roslyn;analyzer;typography</PackageTags>
+    <PackageProjectUrl>https://github.com/carsten-riedel/Coree.Analyzers</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/carsten-riedel/Coree.Analyzers</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
     <!-- NuGet gallery blurb. CDATA is optional and keeps multiline text. -->
-    <Description><![CDATA[]]></Description>
+    <Description>
+      <![CDATA[
+        Roslyn analyzer for C# typography: flags em dashes (CTYED001, U+2014), typographic quotation marks (CTYQM001), and typographic apostrophes (CTYAP001, U+2019) in source and matching project files. Includes minus Excludes plus AdditionalExcludes; defaults are overwriteable MSBuild properties.
+	    ]]>
+    </Description>
     <PackageReadmeFile>Readme.md</PackageReadmeFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIcon>Icon-128x128.png</PackageIcon>

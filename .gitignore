@@ -1,8 +1,32 @@
-# Repository-root ignore (first create). Nested src/prj and src/sln .gitignore files still apply.
+# Nested src/prj and src/sln .gitignore files still apply.
+
+# .NET and Visual Studio build artifacts
+[Bb]in/
+[Oo]bj/
 .vs/
-bin/
-obj/
+[Dd]ebug/
+[Rr]elease/
+artifacts/
+TestResults/
+
+# User- and editor-specific files
 *.user
 *.suo
+*.userosscache
+*.sln.docstates
+.vscode/
 .DS_Store
 Thumbs.db
+
+# Sensitive file name patterns
+*[Ss][Ee][Cc][Rr][Ee][Tt]*
+
+# Local agent instruction files
+AGENTS.md
+AGENTS/
+.agents/**/*
+
+# CI/CD outputs
+output/
+.github/workflows/.config/docfx/build/docfx_local.json
+distribute.ps1
