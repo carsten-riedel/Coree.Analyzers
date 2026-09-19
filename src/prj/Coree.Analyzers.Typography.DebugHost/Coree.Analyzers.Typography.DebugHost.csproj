@@ -32,6 +32,7 @@
     <ApostropheAnalyzerSeverity>warning</ApostropheAnalyzerSeverity>
     <EllipsisAnalyzerSeverity>warning</EllipsisAnalyzerSeverity>
     <MinusAnalyzerSeverity>warning</MinusAnalyzerSeverity>
+    <NbspAnalyzerSeverity>warning</NbspAnalyzerSeverity>
   </PropertyGroup>
 
   <!-- Load the in-repo analyzer at compile time. Do not reference it as a library. -->
@@ -41,7 +42,7 @@
                       ReferenceOutputAssembly="false" />
   </ItemGroup>
 
-  <!-- Additional-file sample: dashes, quotes, apostrophe, ellipsis, minus. -->
+  <!-- Additional-file sample: dashes, quotes, apostrophe, ellipsis, minus, no-break space. -->
   <ItemGroup>
     <None Include="SampleTypography.txt" />
   </ItemGroup>

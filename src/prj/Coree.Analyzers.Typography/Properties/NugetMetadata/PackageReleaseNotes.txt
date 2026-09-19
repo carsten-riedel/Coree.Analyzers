@@ -6,6 +6,7 @@
  - CTYAP001 flags typographic apostrophe / closing single quotation mark (U+2019).
  - CTYEL001 flags horizontal ellipsis (U+2026).
  - CTYMN001 flags minus sign (U+2212).
- - ASCII hyphen, quotes, apostrophe, and periods stay silent.
+ - CTYNB001 flags no-break space (U+00A0) and narrow no-break space (U+202F).
+ - ASCII hyphen, quotes, apostrophe, periods, and space stay silent.
  - Scans C# and matching extra files (Includes minus Excludes plus AdditionalExcludes).
  - Default severity is warning; set warning, error, message, or off per analyzer.

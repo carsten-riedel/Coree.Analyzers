@@ -23,4 +23,5 @@
   <Import Project="$(MSBuildThisFileDirectory)ApostropheAnalyzer.props" />
   <Import Project="$(MSBuildThisFileDirectory)EllipsisAnalyzer.props" />
   <Import Project="$(MSBuildThisFileDirectory)MinusAnalyzer.props" />
+  <Import Project="$(MSBuildThisFileDirectory)NbspAnalyzer.props" />
 </Project>

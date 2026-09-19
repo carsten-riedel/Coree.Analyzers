@@ -12,31 +12,34 @@ namespace Coree.Analyzers.Typography.DebugHost
             // F5 on this console only runs Main; it does not attach to the analyzer.
 
             // Change EmDashAnalyzerSeverity / SmartQuotesAnalyzerSeverity / ApostropheAnalyzerSeverity /
-            // EllipsisAnalyzerSeverity / MinusAnalyzerSeverity (warning, error, message, or off).
+            // EllipsisAnalyzerSeverity / MinusAnalyzerSeverity / NbspAnalyzerSeverity (warning, error, message, or off).
             // Change EmDashAnalyzerIncludes / SmartQuotesAnalyzerIncludes / ApostropheAnalyzerIncludes /
-            // EllipsisAnalyzerIncludes / MinusAnalyzerIncludes,
+            // EllipsisAnalyzerIncludes / MinusAnalyzerIncludes / NbspAnalyzerIncludes,
             // EmDashAnalyzerExcludes / SmartQuotesAnalyzerExcludes / ApostropheAnalyzerExcludes /
-            // EllipsisAnalyzerExcludes / MinusAnalyzerExcludes,
+            // EllipsisAnalyzerExcludes / MinusAnalyzerExcludes / NbspAnalyzerExcludes,
             // and the matching AdditionalExcludes properties
             // (Includes minus Excludes plus AdditionalExcludes; setting Excludes replaces
             // the default list; AdditionalExcludes is always added; empty includes skip
             // extra files; bin/obj/.git/.vs always stay out).
-            // ASCII hyphen, quotes, apostrophe, periods, and hyphen-minus do not report.
+            // ASCII hyphen, quotes, apostrophe, periods, hyphen-minus, and space do not report.
             Console.WriteLine("1-2");
             Console.WriteLine("\"hello\"");
             Console.WriteLine("it's");
             Console.WriteLine("...");
             Console.WriteLine("x-y");
+            Console.WriteLine("x y");
 
             // En/em dash reports CTYED001; typographic quotes report CTYQM001;
             // typographic apostrophe reports CTYAP001; ellipsis reports CTYEL001;
-            // minus sign reports CTYMN001.
+            // minus sign reports CTYMN001; no-break space reports CTYNB001.
             Console.WriteLine("1—2");
             Console.WriteLine("1–2");
             Console.WriteLine("“hello”");
             Console.WriteLine("it’s");
             Console.WriteLine("…");
             Console.WriteLine("x−y");
+            Console.WriteLine("x y");
+            Console.WriteLine("x y");
         }
     }
 }

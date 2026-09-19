@@ -1,0 +1,41 @@
+<Project>
+  <PropertyGroup>
+    <NbspAnalyzerSeverity Condition="'$(NbspAnalyzerSeverity)' == ''">warning</NbspAnalyzerSeverity>
+    <NbspAnalyzerIncludes Condition="'$(NbspAnalyzerIncludes)' == ''">**</NbspAnalyzerIncludes>
+    <NbspAnalyzerExcludes Condition="'$(NbspAnalyzerExcludes)' == ''">$(_TypographyDefaultExcludes)</NbspAnalyzerExcludes>
+  </PropertyGroup>
+  <ItemGroup>
+    <CompilerVisibleProperty Include="NbspAnalyzerSeverity" />
+    <CompilerVisibleProperty Include="NbspAnalyzerIncludes" />
+    <CompilerVisibleProperty Include="NbspAnalyzerExcludes" />
+    <CompilerVisibleProperty Include="NbspAnalyzerAdditionalExcludes" />
+  </ItemGroup>
+  <Target Name="AddNbspAnalyzerAdditionalFiles"
+          BeforeTargets="GenerateMSBuildEditorConfigFileCore;CoreCompile">
+    <PropertyGroup>
+      <NbspAnalyzerExcludes Condition="'$(NbspAnalyzerExcludes)' != ''">$([System.String]::Copy('$(NbspAnalyzerExcludes)').Trim())</NbspAnalyzerExcludes>
+      <NbspAnalyzerAdditionalExcludes Condition="'$(NbspAnalyzerAdditionalExcludes)' != ''">$([System.String]::Copy('$(NbspAnalyzerAdditionalExcludes)').Trim())</NbspAnalyzerAdditionalExcludes>
+      <_TypographyNbspIsAllFiles Condition="'$(NbspAnalyzerIncludes)' == '**' OR '$(NbspAnalyzerIncludes)' == '**/*' OR '$(NbspAnalyzerIncludes)' == '**\*'">true</_TypographyNbspIsAllFiles>
+    </PropertyGroup>
+    <ItemGroup>
+      <_NbspExcludeGlob Include="$(NbspAnalyzerExcludes)" Condition="'$(NbspAnalyzerExcludes)' != ''" />
+      <_NbspExcludeGlob Include="$(NbspAnalyzerAdditionalExcludes)" Condition="'$(NbspAnalyzerAdditionalExcludes)' != ''" />
+      <_NbspExcludeGlob Include="$(_TypographyAlwaysFolderExcludes)" />
+      <_NbspAnalyzerAdditionalFile Include="$(MSBuildProjectDirectory)\**\*"
+                                   Exclude="@(_NbspExcludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')"
+                                   Condition="'$(_TypographyNbspIsAllFiles)' == 'true'" />
+      <_NbspAnalyzerIncludeGlob Include="$(NbspAnalyzerIncludes)" Condition="'$(NbspAnalyzerIncludes)' != '' AND '$(_TypographyNbspIsAllFiles)' != 'true'" />
+      <_NbspAnalyzerAdditionalFile Include="@(_NbspAnalyzerIncludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')"
+                                   Exclude="@(_NbspExcludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')" />
+      <AdditionalFiles Include="@(_NbspAnalyzerAdditionalFile)" />
+      <_NbspExcludeGlob Remove="@(_NbspExcludeGlob)" />
+      <_NbspAnalyzerIncludeGlob Remove="@(_NbspAnalyzerIncludeGlob)" />
+      <_NbspAnalyzerAdditionalFile Remove="@(_NbspAnalyzerAdditionalFile)" />
+    </ItemGroup>
+    <PropertyGroup>
+      <NbspAnalyzerIncludes Condition="'$(NbspAnalyzerIncludes)' != ''">$([System.String]::Copy('$(NbspAnalyzerIncludes)').Replace(';','|'))</NbspAnalyzerIncludes>
+      <NbspAnalyzerExcludes Condition="'$(NbspAnalyzerExcludes)' != ''">$([System.String]::Copy('$(NbspAnalyzerExcludes)').Replace(';','|'))</NbspAnalyzerExcludes>
+      <NbspAnalyzerAdditionalExcludes Condition="'$(NbspAnalyzerAdditionalExcludes)' != ''">$([System.String]::Copy('$(NbspAnalyzerAdditionalExcludes)').Replace(';','|'))</NbspAnalyzerAdditionalExcludes>
+    </PropertyGroup>
+  </Target>
+</Project>

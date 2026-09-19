@@ -93,7 +93,7 @@
     <!-- NuGet gallery blurb. CDATA is optional and keeps multiline text. -->
     <Description>
       <![CDATA[
-        Roslyn analyzer for C# typography: flags en/em dashes (CTYED001, U+2013 / U+2014), typographic quotation marks (CTYQM001), typographic apostrophes (CTYAP001, U+2019), horizontal ellipsis (CTYEL001, U+2026), and minus sign (CTYMN001, U+2212) in source and matching project files. Includes minus Excludes plus AdditionalExcludes; defaults are overwriteable MSBuild properties.
+        Roslyn analyzer for C# typography: flags en/em dashes (CTYED001, U+2013 / U+2014), typographic quotation marks (CTYQM001), typographic apostrophes (CTYAP001, U+2019), horizontal ellipsis (CTYEL001, U+2026), minus sign (CTYMN001, U+2212), and no-break spaces (CTYNB001, U+00A0 / U+202F) in source and matching project files. Includes minus Excludes plus AdditionalExcludes; defaults are overwriteable MSBuild properties.
 	    ]]>
     </Description>
     <PackageReadmeFile>Readme.md</PackageReadmeFile>

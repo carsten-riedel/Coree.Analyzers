@@ -16,6 +16,8 @@ namespace Coree.Analyzers.Typography.Tests
         private const string ApostropheSource = "class C { string s = \"x\u2019y\"; }";
         private const string EllipsisSource = "class C { string s = \"x\u2026y\"; }";
         private const string MinusSource = "class C { string s = \"x\u2212y\"; }";
+        private const string NbspSource = "class C { string s = \"x\u00A0y\"; }";
+        private const string NarrowNbspSource = "class C { string s = \"x\u202Fy\"; }";
 
         [TestMethod]
         public async Task EmDashInStringReportsDiagnostic()
@@ -113,6 +115,33 @@ namespace Coree.Analyzers.Typography.Tests
         }
 
         [TestMethod]
+        public async Task NbspInStringReportsDiagnostic()
+        {
+            var expected = DiagnosticResult
+                .CompilerWarning(NbspAnalyzer.DiagnosticId)
+                .WithSpan(1, 24, 1, 25);
+
+            await CSharpAnalyzerVerifier<NbspAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(NbspSource, expected);
+        }
+
+        [TestMethod]
+        public async Task NarrowNbspInStringReportsDiagnostic()
+        {
+            var expected = DiagnosticResult
+                .CompilerWarning(NbspAnalyzer.DiagnosticId)
+                .WithSpan(1, 24, 1, 25);
+
+            await CSharpAnalyzerVerifier<NbspAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(NarrowNbspSource, expected);
+        }
+
+        [TestMethod]
+        public async Task AsciiSpaceReportsNoNbspDiagnostic()
+        {
+            const string test = "class C { string s = \"x y\"; }";
+            await CSharpAnalyzerVerifier<NbspAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(test);
+        }
+
+        [TestMethod]
         public async Task EmDashSeverityErrorReportsError()
         {
             var expected = DiagnosticResult
@@ -191,6 +220,20 @@ namespace Coree.Analyzers.Typography.Tests
         }
 
         [TestMethod]
+        public async Task NbspSeverityErrorReportsError()
+        {
+            var expected = DiagnosticResult
+                .CompilerError(NbspAnalyzer.DiagnosticId)
+                .WithSpan(1, 24, 1, 25);
+
+            await VerifyWithSeverityAsync<NbspAnalyzer>(
+                NbspSource,
+                NbspAnalyzer.SeverityPropertyName,
+                "error",
+                expected);
+        }
+
+        [TestMethod]
         public async Task EmDashInMatchingAdditionalFileReportsDiagnostic()
         {
             var expected = DiagnosticResult
@@ -262,6 +305,21 @@ namespace Coree.Analyzers.Typography.Tests
                 "*.txt",
                 "sample.txt",
                 "x\u2212y",
+                expected);
+        }
+
+        [TestMethod]
+        public async Task NbspInMatchingAdditionalFileReportsDiagnostic()
+        {
+            var expected = DiagnosticResult
+                .CompilerWarning(NbspAnalyzer.DiagnosticId)
+                .WithSpan("sample.txt", 1, 2, 1, 3);
+
+            await VerifyWithAdditionalFileAsync<NbspAnalyzer>(
+                NbspAnalyzer.IncludesPropertyName,
+                "*.txt",
+                "sample.txt",
+                "x\u00A0y",
                 expected);
         }
 
@@ -505,6 +563,20 @@ namespace Coree.Analyzers.Typography.Tests
                 "docs/**",
                 "docs/notes.md",
                 "x\u2212y");
+        }
+
+        [TestMethod]
+        public async Task NbspAdditionalExcludesSkipMatchingFile()
+        {
+            await VerifyWithAdditionalFileAsync<NbspAnalyzer>(
+                NbspAnalyzer.IncludesPropertyName,
+                "**",
+                string.Empty,
+                string.Empty,
+                NbspAnalyzer.AdditionalExcludesPropertyName,
+                "docs/**",
+                "docs/notes.md",
+                "x\u00A0y");
         }
 
         [TestMethod]
