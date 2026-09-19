@@ -17,7 +17,7 @@
       "rollForward": false
     },
     "Eigenverft.Distributed.Drydock": {
-      "version": "0.1.20257.10053-dev",
+      "version": "1.0.20265.24989",
       "commands": [
         "drydock"
       ],
