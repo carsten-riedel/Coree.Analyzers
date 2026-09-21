@@ -268,7 +268,6 @@ $GitHubSourceUri = "https://nuget.pkg.github.com/$GitHubPackagesUser/index.json"
 $NuGetTestSourceUri = "https://apiint.nugettest.org/v3/index.json"
 $NuGetOrgSourceUri = "https://api.nuget.org/v3/index.json"
 Unregister-LocalNuGetDotNetPackageSource -SourceName "$GitHubSourceName"
-Invoke-ProcessTyped -Executable "dotnet" -Arguments @("nuget","add", "source", "--username", "$GitHubPackagesUser","--password","$GitHubToken","--store-password-in-clear-text","--name","$GitHubSourceName","$GitHubSourceUri") -CaptureOutput $false -CaptureOutputDump $false -HideValues @($GitHubToken)
 
 # Enable the .NET tools specified in the manifest file
 Enable-TempDotnetTools -ManifestFile "$DotNetToolsManifestPath" -NoReturn
@@ -632,6 +631,8 @@ if ($PushToLocalSource -eq $true)
 
 if ($PushToGitHubSource -eq $true)
 {
+    Invoke-ProcessTyped -Executable "dotnet" -Arguments @("nuget","add", "source", "--username", "$GitHubPackagesUser","--password","$GitHubToken","--store-password-in-clear-text","--name","$GitHubSourceName","$GitHubSourceUri") -CaptureOutput $false -CaptureOutputDump $false -HideValues @($GitHubToken)
+
     $NuGetPackageFileInfos = Find-FilesByPattern -Path "$PackRootPath" -Pattern "*.nupkg"
     foreach ($NuGetPackageFileInfo in $NuGetPackageFileInfos)
     {
