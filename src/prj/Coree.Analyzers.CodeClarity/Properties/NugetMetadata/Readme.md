@@ -10,7 +10,16 @@ A return expression should stay directly readable. This package flags one that e
 dotnet add package Coree.Analyzers.CodeClarity
 ```
 
-The nupkg is a development dependency: the analyzer under `analyzers/dotnet/cs`, plus `build/` and `buildTransitive/` props. There is no `lib/` group.
+Example in a project file. The version `0.1.2` is the one shown here:
+
+```xml
+<ItemGroup>
+  <PackageReference Include="Coree.Analyzers.CodeClarity" Version="0.1.2">
+    <PrivateAssets>all</PrivateAssets>
+    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+  </PackageReference>
+</ItemGroup>
+```
 
 ## Diagnostics
 
@@ -19,6 +28,26 @@ The nupkg is a development dependency: the analyzer under `analyzers/dotnet/cs`,
 | **CCCRC001** | A `return` expression whose calculation-step score exceeds `ReturnTypeComplexityAnalyzerMaximum` (default 1) |
 
 Arithmetic other than string concatenation, method calls other than `nameof`, and conditional operators each count as one step. Casts, signs, `await`, member access, and identifiers do not. Default severity is warning.
+
+At the default maximum of 1, `return a + b` stays quiet, and so does `return total`. `return a + b + c` reports CCCRC001. `total` is a local; that return is only the name.
+
+```csharp
+int OneStep(int a, int b)
+{
+    return a + b;
+}
+
+int TwoSteps(int a, int b, int c)
+{
+    return a + b + c;
+}
+
+int FromLocal(int a, int b, int c)
+{
+    int total = a + b + c;
+    return total;
+}
+```
 
 ## MSBuild properties
 

@@ -114,7 +114,18 @@
     <PackageOutputPath Condition=" '$(PackageOutputPath)' == '' ">$(MSBuildProjectDirectory)\bin\Pack</PackageOutputPath>
   </PropertyGroup>
 
+  <!-- Typography on this project is error. The package default is warning. -->
+  <PropertyGroup>
+    <EmDashAnalyzerSeverity>error</EmDashAnalyzerSeverity>
+    <SmartQuotesAnalyzerSeverity>error</SmartQuotesAnalyzerSeverity>
+    <ApostropheAnalyzerSeverity>error</ApostropheAnalyzerSeverity>
+    <EllipsisAnalyzerSeverity>error</EllipsisAnalyzerSeverity>
+    <MinusAnalyzerSeverity>error</MinusAnalyzerSeverity>
+    <NbspAnalyzerSeverity>error</NbspAnalyzerSeverity>
+  </PropertyGroup>
+
   <!-- Roslyn compile-time only. The IDE / `dotnet` host already has CodeAnalysis; do not pack it as a dependency. -->
+  <!-- Public Typography nupkg, same as any other consumer. PrivateAssets keeps it off this package. -->
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0">
       <PrivateAssets>all</PrivateAssets>
@@ -122,6 +133,10 @@
     </PackageReference>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0">
       <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Coree.Analyzers.Typography" Version="1.0.0.4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
 
