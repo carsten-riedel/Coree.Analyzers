@@ -1,0 +1,19 @@
+<Project>
+  <!--
+    NuGet rejects a PackageReference whose id equals this project's PackageId (NU1108).
+    Evaluation uses a fake id so restore can take the published package.
+    BeforePack puts the real id back, so the nupkg id is unchanged.
+    BeforeTargets="$(PackDependsOn)" is wrong: that list runs during Restore and undoes the fake id.
+  -->
+  <PropertyGroup>
+    <_ProjectDefinedPackageId>$(PackageId)</_ProjectDefinedPackageId>
+    <PackageId>*fake_packageid_for_project_$(MSBuildProjectName)*</PackageId>
+    <BeforePack>$(BeforePack);_UpdatePackageId</BeforePack>
+  </PropertyGroup>
+
+  <Target Name="_UpdatePackageId">
+    <PropertyGroup>
+      <PackageId>$(_ProjectDefinedPackageId)</PackageId>
+    </PropertyGroup>
+  </Target>
+</Project>

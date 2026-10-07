@@ -114,7 +114,24 @@
     <PackageOutputPath Condition=" '$(PackageOutputPath)' == '' ">$(MSBuildProjectDirectory)\bin\Pack</PackageOutputPath>
   </PropertyGroup>
 
+  <!-- Typography on this project is error. The package default is warning. -->
+  <PropertyGroup>
+    <EmDashAnalyzerSeverity>error</EmDashAnalyzerSeverity>
+    <SmartQuotesAnalyzerSeverity>error</SmartQuotesAnalyzerSeverity>
+    <ApostropheAnalyzerSeverity>error</ApostropheAnalyzerSeverity>
+    <EllipsisAnalyzerSeverity>error</EllipsisAnalyzerSeverity>
+    <MinusAnalyzerSeverity>error</MinusAnalyzerSeverity>
+    <NbspAnalyzerSeverity>error</NbspAnalyzerSeverity>
+  </PropertyGroup>
+
+  <!-- CodeClarity on this project is error, maximum 1. The package default severity is warning. -->
+  <PropertyGroup>
+    <ReturnTypeComplexityAnalyzerSeverity>error</ReturnTypeComplexityAnalyzerSeverity>
+    <ReturnTypeComplexityAnalyzerMaximum>1</ReturnTypeComplexityAnalyzerMaximum>
+  </PropertyGroup>
+
   <!-- Roslyn compile-time only. The IDE / `dotnet` host already has CodeAnalysis; do not pack it as a dependency. -->
+  <!-- Public nupkgs. PrivateAssets keeps them off this package. Typography shares this package id; SelfPackageId.targets lets that reference restore. CodeClarity is a normal reference. -->
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0">
       <PrivateAssets>all</PrivateAssets>
@@ -122,6 +139,14 @@
     </PackageReference>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0">
       <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Coree.Analyzers.Typography" Version="1.0.0.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Coree.Analyzers.CodeClarity" Version="0.1.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
 
@@ -140,5 +165,6 @@
   <!-- Source Link git state as properties (SDK 8+). Target hooks GenerateAssemblyInfo. -->
   <Import Project="Properties/Build/SourceControlState.targets" />
   <Import Project="Properties/Build/PackAsAnalyzer.targets" />
+  <Import Project="Properties/Build/SelfPackageId.targets" />
 
 </Project>

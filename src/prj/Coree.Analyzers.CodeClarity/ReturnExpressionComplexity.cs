@@ -72,7 +72,9 @@ namespace Coree.Analyzers.CodeClarity
 
         private static bool IsStringConcatenation(BinaryExpressionSyntax binary, SemanticModel model)
         {
-            return HasStringType(binary.Left, model) || HasStringType(binary.Right, model);
+            bool leftIsString = HasStringType(binary.Left, model);
+            bool rightIsString = HasStringType(binary.Right, model);
+            return leftIsString || rightIsString;
         }
 
         private static bool HasStringType(ExpressionSyntax expression, SemanticModel model)

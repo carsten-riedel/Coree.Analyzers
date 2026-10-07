@@ -24,7 +24,6 @@ namespace Coree.Analyzers.Typography
 
         internal const string AdditionalExcludesPropertyName = "ApostropheAnalyzerAdditionalExcludes";
 
-        // ’
         private const string ApostropheCharacters = "\u2019";
 
         private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(

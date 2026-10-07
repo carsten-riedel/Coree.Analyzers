@@ -24,7 +24,6 @@ namespace Coree.Analyzers.Typography
 
         internal const string AdditionalExcludesPropertyName = "EmDashAnalyzerAdditionalExcludes";
 
-        // – —
         private const string EmDashCharacters = "\u2013\u2014";
 
         private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(

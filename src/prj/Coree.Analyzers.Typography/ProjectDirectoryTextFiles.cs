@@ -16,10 +16,11 @@ namespace Coree.Analyzers.Typography
                 return false;
             }
 
-            return name.Equals("bin", StringComparison.OrdinalIgnoreCase)
-                || name.Equals("obj", StringComparison.OrdinalIgnoreCase)
-                || name.Equals(".git", StringComparison.OrdinalIgnoreCase)
-                || name.Equals(".vs", StringComparison.OrdinalIgnoreCase);
+            bool bin = name.Equals("bin", StringComparison.OrdinalIgnoreCase);
+            bool obj = name.Equals("obj", StringComparison.OrdinalIgnoreCase);
+            bool git = name.Equals(".git", StringComparison.OrdinalIgnoreCase);
+            bool vs = name.Equals(".vs", StringComparison.OrdinalIgnoreCase);
+            return bin || obj || git || vs;
         }
 
         internal static bool HasIgnoredDirectorySegment(string relativePath)
@@ -103,7 +104,8 @@ namespace Coree.Analyzers.Typography
                 return false;
             }
 
-            return compiledPaths.Contains(NormalizeFullPath(path));
+            string fullPath = NormalizeFullPath(path);
+            return compiledPaths.Contains(fullPath);
         }
     }
 }

@@ -24,7 +24,6 @@ namespace Coree.Analyzers.Typography
 
         internal const string AdditionalExcludesPropertyName = "EllipsisAnalyzerAdditionalExcludes";
 
-        // …
         private const string EllipsisCharacters = "\u2026";
 
         private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(

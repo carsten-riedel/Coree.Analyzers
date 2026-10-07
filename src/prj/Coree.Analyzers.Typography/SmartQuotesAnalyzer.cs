@@ -25,7 +25,6 @@ namespace Coree.Analyzers.Typography
 
         internal const string AdditionalExcludesPropertyName = "SmartQuotesAnalyzerAdditionalExcludes";
 
-        // “ ” „ ‟ « »
         private const string TypographicQuoteCharacters = "\u201C\u201D\u201E\u201F\u00AB\u00BB";
 
         private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(

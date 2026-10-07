@@ -50,7 +50,9 @@ namespace Coree.Analyzers.Typography
                 return left.Trim();
             }
 
-            return left.Trim() + ";" + right.Trim();
+            string leftTrimmed = left.Trim();
+            string rightTrimmed = right.Trim();
+            return leftTrimmed + ";" + rightTrimmed;
         }
 
         internal static bool AnyMatch(string relativePath, string patterns)
@@ -107,7 +109,8 @@ namespace Coree.Analyzers.Typography
                 return TrimDotSlash(normalizedPath);
             }
 
-            return normalizedPath.Substring(dir.Length + 1);
+            int relativeStart = dir.Length + 1;
+            return normalizedPath.Substring(relativeStart);
         }
 
         internal static bool IsMatch(string path, string pattern)
@@ -117,7 +120,9 @@ namespace Coree.Analyzers.Typography
                 return false;
             }
 
-            return Match(Normalize(path), 0, Normalize(pattern), 0);
+            string normalizedPath = Normalize(path);
+            string normalizedPattern = Normalize(pattern);
+            return Match(normalizedPath, 0, normalizedPattern, 0);
         }
 
         private static string Normalize(string value)
@@ -223,7 +228,9 @@ namespace Coree.Analyzers.Typography
                 return true;
             }
 
-            return char.ToUpperInvariant(a) == char.ToUpperInvariant(b);
+            char upperA = char.ToUpperInvariant(a);
+            char upperB = char.ToUpperInvariant(b);
+            return upperA == upperB;
         }
     }
 }

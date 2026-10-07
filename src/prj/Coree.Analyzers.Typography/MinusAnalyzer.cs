@@ -24,7 +24,6 @@ namespace Coree.Analyzers.Typography
 
         internal const string AdditionalExcludesPropertyName = "MinusAnalyzerAdditionalExcludes";
 
-        // −
         private const string MinusCharacters = "\u2212";
 
         private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(
