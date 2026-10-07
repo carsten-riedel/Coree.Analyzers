@@ -1,0 +1,14 @@
+<Solution>
+  <!-- Paths are relative to this file's final location.
+       PlaceSolution SlnFolder      → src/sln/Coree.Analyzers.CodeClarity/Coree.Analyzers.CodeClarity.slnx
+       PlaceSolution BesideCsproj  → src/prj/Coree.Analyzers.CodeClarity/Coree.Analyzers.CodeClarity.slnx
+       PlaceSolution RepoRoot       → repo root, so src/prj/ and src/sln/. -->
+  <Folder Name="/sln/Coree.Analyzers.CodeClarity/">
+    <File Path="Readme.md" />
+  </Folder>
+  <Folder Name="/prj/">
+    <Project Path="../../prj/Coree.Analyzers.CodeClarity.Tests/Coree.Analyzers.CodeClarity.Tests.csproj" />
+    <Project Path="../../prj/Coree.Analyzers.CodeClarity/Coree.Analyzers.CodeClarity.csproj" />
+    <Project Path="../../prj/Coree.Analyzers.CodeClarity.DebugHost/Coree.Analyzers.CodeClarity.DebugHost.csproj" />
+  </Folder>
+</Solution>

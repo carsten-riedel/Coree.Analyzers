@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Coree.Analyzers.CodeClarity": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "..\\Coree.Analyzers.CodeClarity.DebugHost\\Coree.Analyzers.CodeClarity.DebugHost.csproj"
+    }
+  }
+}
