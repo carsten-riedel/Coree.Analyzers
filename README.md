@@ -2,7 +2,7 @@
 
 <!-- Maintenance note: Keep Properties/NugetMetadata/Readme.md aligned with this README for shared prose, examples, headings, badges, and feature descriptions. Use absolute NuGet/GitHub URLs there where this README can use repository-relative links; otherwise keep shared content in sync. -->
 
-.NET multi-analyzer repository. Each package is independently packable. **Coree.Analyzers.Typography** is the first analyzer; it will not necessarily be the last.
+.NET multi-analyzer repository. Each package is independently packable. **Coree.Analyzers.Typography** and **Coree.Analyzers.CodeClarity** are the first two; they will not necessarily be the last.
 
 ## Coree.Analyzers.Typography
 
@@ -98,6 +98,37 @@ Replace the default exclude list to scan `.dat` / `.resources`, and fail the bui
 </PropertyGroup>
 ```
 
+
+## Coree.Analyzers.CodeClarity
+
+[![NuGet Version](https://img.shields.io/nuget/v/Coree.Analyzers.CodeClarity?label=NuGet&logo=nuget)](https://www.nuget.org/packages/Coree.Analyzers.CodeClarity) [![NuGet Downloads](https://img.shields.io/nuget/dt/Coree.Analyzers.CodeClarity?label=Downloads&logo=nuget)](https://www.nuget.org/packages/Coree.Analyzers.CodeClarity) [![Build Status](https://img.shields.io/github/actions/workflow/status/carsten-riedel/Coree.Analyzers/cicd.yml?branch=main&label=build)](https://github.com/carsten-riedel/Coree.Analyzers/actions/workflows/cicd.yml) [![Targets](https://img.shields.io/badge/targets-netstandard2.0-512BD4?logo=dotnet&logoColor=white)](https://www.nuget.org/packages/Coree.Analyzers.CodeClarity) [![License](https://img.shields.io/github/license/carsten-riedel/Coree.Analyzers?logo=mit)](LICENSE)
+
+A return expression should stay directly readable. This package flags one that exceeds the allowed number of calculation steps.
+
+```bash
+dotnet add package Coree.Analyzers.CodeClarity
+```
+
+The nupkg is a development dependency: the analyzer under `analyzers/dotnet/cs`, plus `build/` and `buildTransitive/` props. There is no `lib/` group.
+
+### Diagnostics
+
+| Id | What it flags |
+| --- | --- |
+| **CCCRC001** | A `return` expression whose calculation-step score exceeds `ReturnTypeComplexityAnalyzerMaximum` (default 1) |
+
+Arithmetic other than string concatenation, method calls other than `nameof`, and conditional operators each count as one step. Casts, signs, `await`, member access, and identifiers do not. Default severity is warning.
+
+### MSBuild properties
+
+Set these on the consuming compile target. The shipped props make them compiler-visible. Severity: `warning`, `error`, `message`, or `off`. An empty, negative, or non-numeric maximum keeps the default of 1.
+
+```xml
+<PropertyGroup>
+  <ReturnTypeComplexityAnalyzerSeverity>warning</ReturnTypeComplexityAnalyzerSeverity>
+  <ReturnTypeComplexityAnalyzerMaximum>1</ReturnTypeComplexityAnalyzerMaximum>
+</PropertyGroup>
+```
 
 Repository: [https://github.com/carsten-riedel/Coree.Analyzers](https://github.com/carsten-riedel/Coree.Analyzers)
 

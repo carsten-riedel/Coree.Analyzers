@@ -11,18 +11,27 @@ namespace Coree.Analyzers.CodeClarity.DebugHost
             // Visual Studio needs the .NET Compiler Platform SDK component.
             // F5 on this console only runs Main; it does not attach to the analyzer.
 
-            // Change EmDashAnalyzerSeverity / SmartQuotesAnalyzerSeverity on this csproj
-            // (warning, error, message, or off).
-            // Change EmDashAnalyzerIncludes / SmartQuotesAnalyzerIncludes
-            // and EmDashAnalyzerExcludes / SmartQuotesAnalyzerExcludes
-            // (semicolon-separated globs; empty includes skip additional files).
-            // ASCII hyphen and quotes do not report.
-            Console.WriteLine("1-2");
-            Console.WriteLine("\"hello\"");
+            // Change ReturnTypeComplexityAnalyzerSeverity (warning, error, message, or off)
+            // and ReturnTypeComplexityAnalyzerMaximum (allowed calculation steps; default 1).
+            // InlinedHeight reports CCCRC001. NamedHeight does not.
+            Console.WriteLine(InlinedHeight(1f, 2f));
+            Console.WriteLine(NamedHeight(1f, 2f));
+        }
 
-            // Em dash reports EMD001; typographic quotes report TSQ001.
-            Console.WriteLine("1—2");
-            Console.WriteLine("“hello”");
+        private static float InlinedHeight(float x, float z)
+        {
+            const float amplitude = 1f;
+            const float frequencyX = 0.1f;
+            const float frequencyZ = 0.1f;
+            return amplitude * MathF.Sin(x * frequencyX) * MathF.Cos(z * frequencyZ);
+        }
+
+        private static float NamedHeight(float x, float z)
+        {
+            float baseWave = MathF.Sin(x * 0.1f);
+            float heightVariation = MathF.Cos(z * 0.1f);
+            float groundHeight = 1f * baseWave * heightVariation;
+            return groundHeight;
         }
     }
 }

@@ -46,7 +46,7 @@ Coverlet measures only the analyzer assembly (`[Coree.Analyzers.CodeClarity]*`) 
 dotnet pack
 ```
 
-Creates one `.nupkg` in `src/prj/Coree.Analyzers.CodeClarity/bin/Pack/` with the analyzer under `analyzers/dotnet/cs` (not `lib/`) and `Coree.Analyzers.CodeClarity.props` under `build/` and `buildTransitive/` (`EmDashAnalyzerSeverity`, `SmartQuotesAnalyzerSeverity`, `EmDashAnalyzerIncludes`, `EmDashAnalyzerExcludes`, `SmartQuotesAnalyzerIncludes`, `SmartQuotesAnalyzerExcludes`). Test, DebugHost, and optional benchmark projects are not packed.
+Creates one `.nupkg` in `src/prj/Coree.Analyzers.CodeClarity/bin/Pack/` with the analyzer under `analyzers/dotnet/cs` (not `lib/`) and `Coree.Analyzers.CodeClarity.props` under `build/` and `buildTransitive/` (`ReturnTypeComplexityAnalyzerSeverity`, `ReturnTypeComplexityAnalyzerMaximum`). Test, DebugHost, and optional benchmark projects are not packed.
 
 Restore fails this analyzer package on high (`NU1903`) and critical (`NU1904`) vulnerable packages. Low and moderate stay warnings. `NugetReport` next to the tests lists that package's packages (txt/json) and is still info-only.
 
@@ -77,13 +77,13 @@ To break in the analyzer, install the **.NET Compiler Platform SDK** Visual Stud
 
 1. Set `Coree.Analyzers.CodeClarity` as the startup project (not `Coree.Analyzers.CodeClarity.DebugHost`).
 2. Select the `Coree.Analyzers.CodeClarity` launch profile (Roslyn Component).
-3. Set a breakpoint in `EmDashAnalyzer` or `SmartQuotesAnalyzer`.
+3. Set a breakpoint in `ReturnTypeComplexityAnalyzer`.
 4. Press F5. Visual Studio compiles `Coree.Analyzers.CodeClarity.DebugHost` and attaches to that compilation.
 
-`Coree.Analyzers.CodeClarity.DebugHost` is only the compile target. The DebugHost sample literals with an em dash report EMD001; typographic quotes in the sample report TSQ001. ASCII hyphen and quotes do not. `SampleTypography.txt` and this host csproj are additional files for the same IDs when the glob properties match. F5 / `dotnet run` on the console only runs `Main`; it does not attach to the analyzer.
+`Coree.Analyzers.CodeClarity.DebugHost` is only the compile target. `InlinedHeight` reports CCCRC001; `NamedHeight` does not. F5 / `dotnet run` on the console only runs `Main`; it does not attach to the analyzer.
 
-Severity is an MSBuild property on the compile target (`EmDashAnalyzerSeverity`, `SmartQuotesAnalyzerSeverity`): `warning` (default), `error`, `message`, or `off`. Additional-file globs are `EmDashAnalyzerIncludes` / `EmDashAnalyzerExcludes` and the SmartQuotes pair (semicolon-separated, project directory; demo includes `*.txt;*.csproj`; empty includes skip that scan; excludes subtract from that analyzer's includes). The analyzer nupkg ships `build/` and `buildTransitive/` props so PackageReference consumers get the same knobs. DebugHost imports that props file because it uses a project analyzer reference, not the nupkg.
+Severity is an MSBuild property on the compile target (`ReturnTypeComplexityAnalyzerSeverity`): `warning` (default), `error`, `message`, or `off`. `ReturnTypeComplexityAnalyzerMaximum` is the allowed number of calculation steps in a return expression; the default is 1. An empty or invalid maximum keeps that default. The analyzer nupkg ships `build/` and `buildTransitive/` props so PackageReference consumers get the same knobs. DebugHost imports that props file because it uses a project analyzer reference, not the nupkg.
 
-For stepping without F5, debug `FunctionalTests` from Test Explorer.
+For stepping without F5, debug `ReturnTypeComplexityAnalyzerTests` from Test Explorer.
 
 `DebugHost` is not packed. `dotnet pack` still produces only the analyzer nupkg.

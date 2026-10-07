@@ -37,7 +37,7 @@ namespace Coree.Analyzers.CodeClarity.Tests
                 "X000",
                 "Title",
                 "Message",
-                "Typography",
+                "Clarity",
                 DiagnosticSeverity.Warning,
                 isEnabledByDefault: true);
             Assert.AreSame(warning, AnalyzerSeverity.WithSeverity(warning, DiagnosticSeverity.Warning));
@@ -58,7 +58,7 @@ namespace Coree.Analyzers.CodeClarity.Tests
                 "X000",
                 "Title",
                 "Message",
-                "Typography",
+                "Clarity",
                 DiagnosticSeverity.Warning,
                 isEnabledByDefault: true);
             var error = AnalyzerSeverity.WithSeverity(warning, DiagnosticSeverity.Error);

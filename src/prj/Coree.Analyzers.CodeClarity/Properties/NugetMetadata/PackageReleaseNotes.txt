@@ -1,3 +1,6 @@
 0.1 (2026-10-07)
 
- - Project creation.
+ - Initial release.
+ - CCCRC001 flags a return expression whose calculation-step score exceeds ReturnTypeComplexityAnalyzerMaximum (default 1).
+ - String concatenation and nameof do not count. One arithmetic operator, one method call, or one conditional is allowed at the default.
+ - Default severity is warning; set warning, error, message, or off.
