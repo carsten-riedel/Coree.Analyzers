@@ -1,6 +1,6 @@
 # Coree.Analyzers
 
-<!-- Maintenance note: Keep Properties/NugetMetadata/Readme.md aligned with this README for shared prose, examples, headings, badges, and feature descriptions. Use absolute NuGet/GitHub URLs there where this README can use repository-relative links; otherwise keep shared content in sync. -->
+<!-- Maintenance note: This file lists every package. Each NuGet Readme.md tracks only its own section. Use absolute NuGet/GitHub URLs there where this README can use repository-relative links. -->
 
 .NET multi-analyzer repository. Each package is independently packable. **Coree.Analyzers.Typography** and **Coree.Analyzers.CodeClarity** are the first two; they will not necessarily be the last.
 
