@@ -1,0 +1,11 @@
+# Analyzers
+
+Coree.Analyzers is a repository of Roslyn analyzer packages that pack separately. Typography and CodeClarity are the first two. The repository text says they will not necessarily be the last.
+
+Both packages look at C# the compiler already accepts. Typography is about characters a word processor leaves behind. The package text says compilers do not care and reviewers do. It flags the en dash, the em dash, typographic quotation marks, the typographic apostrophe, the horizontal ellipsis, the minus sign, and the no-break space, in C# and in the extra project files a consumer ships. ASCII hyphens, quotes, apostrophes, periods, and spaces stay silent.
+
+CodeClarity is about readability of that same accepted C#. CCCRC001 flags a return expression whose calculation-step score is above the configured maximum. The default maximum is 1. The published description counts arithmetic other than string concatenation, method calls other than `nameof`, and conditional operators. How that last phrase lines up with `&&` and `||` is still open; see the domain clues. CCCPL001 is the parameter-list rule in the parameter list topic.
+
+A consumer chooses the severity. The default is warning.
+
+Evidence: README.md.
