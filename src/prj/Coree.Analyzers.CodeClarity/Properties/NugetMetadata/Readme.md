@@ -4,7 +4,7 @@
 
 [![NuGet Version](https://img.shields.io/nuget/v/Coree.Analyzers.CodeClarity?label=NuGet&logo=nuget)](https://www.nuget.org/packages/Coree.Analyzers.CodeClarity) [![NuGet Downloads](https://img.shields.io/nuget/dt/Coree.Analyzers.CodeClarity?label=Downloads&logo=nuget)](https://www.nuget.org/packages/Coree.Analyzers.CodeClarity) [![Build Status](https://img.shields.io/github/actions/workflow/status/carsten-riedel/Coree.Analyzers/cicd.yml?branch=main&label=build)](https://github.com/carsten-riedel/Coree.Analyzers/actions/workflows/cicd.yml) [![Targets](https://img.shields.io/badge/targets-netstandard2.0-512BD4?logo=dotnet&logoColor=white)](https://www.nuget.org/packages/Coree.Analyzers.CodeClarity) [![License](https://img.shields.io/github/license/carsten-riedel/Coree.Analyzers?logo=mit)](https://github.com/carsten-riedel/Coree.Analyzers/blob/main/LICENSE)
 
-A return expression should stay directly readable. This package flags one that exceeds the allowed number of calculation steps.
+A return expression should stay directly readable. This package flags one that exceeds the allowed number of calculation steps. A parameter list should also stay in one shape: every parameter on one line, or each parameter starting on its own line.
 
 ```bash
 dotnet add package Coree.Analyzers.CodeClarity
@@ -26,6 +26,7 @@ Example in a project file. The version `0.1.2` is the one shown here:
 | Id | What it flags |
 | --- | --- |
 | **CCCRC001** | A `return` expression whose calculation-step score exceeds `ReturnTypeComplexityAnalyzerMaximum` (default 1) |
+| **CCCPL001** | A parameter list that spans more than one line while one of those lines still starts more than one parameter |
 
 Arithmetic other than string concatenation, method calls other than `nameof`, and conditional operators each count as one step. Casts, signs, `await`, member access, and identifiers do not. Default severity is warning.
 
@@ -49,6 +50,22 @@ int FromLocal(int a, int b, int c)
 }
 ```
 
+CCCPL001 looks at methods, local functions, constructors, and primary constructors of classes, structs, and records. Calls, indexers, delegates, and lambdas stay out of it. The first sample reports CCCPL001. The other three do not: one line, one parameter per line, or every parameter together on the following line.
+
+```csharp
+public record TerrainProfile(float Amplitude, float FrequencyX, float FrequencyZ,
+    float DetailAmplitude, float DetailX, float DetailZ);
+
+public record TerrainProfile(float Amplitude, float FrequencyX, float FrequencyZ, float DetailAmplitude, float DetailX, float DetailZ);
+
+public void M(float a,
+    float b,
+    float c)
+
+public void M(
+    float a, float b, float c)
+```
+
 ## MSBuild properties
 
 Set these on the consuming compile target. The shipped props make them compiler-visible. Severity: `warning`, `error`, `message`, or `off`. An empty, negative, or non-numeric maximum keeps the default of 1.
@@ -57,6 +74,7 @@ Set these on the consuming compile target. The shipped props make them compiler-
 <PropertyGroup>
   <ReturnTypeComplexityAnalyzerSeverity>warning</ReturnTypeComplexityAnalyzerSeverity>
   <ReturnTypeComplexityAnalyzerMaximum>1</ReturnTypeComplexityAnalyzerMaximum>
+  <ParameterListLayoutAnalyzerSeverity>warning</ParameterListLayoutAnalyzerSeverity>
 </PropertyGroup>
 ```
 

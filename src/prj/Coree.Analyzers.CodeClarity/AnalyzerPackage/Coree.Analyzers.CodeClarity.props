@@ -3,14 +3,17 @@
     Consuming projects set ReturnTypeComplexityAnalyzerSeverity (warning, error, message, or off)
     and ReturnTypeComplexityAnalyzerMaximum (allowed calculation steps in a return expression).
     An empty or invalid maximum keeps the default of 1.
+    ParameterListLayoutAnalyzerSeverity uses the same severity values for CCCPL001.
     CompilerVisibleProperty is required or the compiler does not pass the values to the analyzer.
   -->
   <PropertyGroup>
     <ReturnTypeComplexityAnalyzerSeverity Condition="'$(ReturnTypeComplexityAnalyzerSeverity)' == ''">warning</ReturnTypeComplexityAnalyzerSeverity>
     <ReturnTypeComplexityAnalyzerMaximum Condition="'$(ReturnTypeComplexityAnalyzerMaximum)' == ''">1</ReturnTypeComplexityAnalyzerMaximum>
+    <ParameterListLayoutAnalyzerSeverity Condition="'$(ParameterListLayoutAnalyzerSeverity)' == ''">warning</ParameterListLayoutAnalyzerSeverity>
   </PropertyGroup>
   <ItemGroup>
     <CompilerVisibleProperty Include="ReturnTypeComplexityAnalyzerSeverity" />
     <CompilerVisibleProperty Include="ReturnTypeComplexityAnalyzerMaximum" />
+    <CompilerVisibleProperty Include="ParameterListLayoutAnalyzerSeverity" />
   </ItemGroup>
 </Project>

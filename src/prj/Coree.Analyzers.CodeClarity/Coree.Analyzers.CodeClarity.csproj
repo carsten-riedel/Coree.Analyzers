@@ -93,7 +93,7 @@
     <!-- NuGet gallery blurb. CDATA is optional and keeps multiline text. -->
     <Description>
       <![CDATA[
-        Roslyn analyzer for C# readability. CCCRC001 flags a return expression that exceeds ReturnTypeComplexityAnalyzerMaximum calculation steps (default 1). Arithmetic other than string concatenation, method calls other than nameof, and conditional operators each count as one step. Default severity is warning.
+        Roslyn analyzer for C# readability. CCCRC001 flags a return expression that exceeds ReturnTypeComplexityAnalyzerMaximum calculation steps (default 1). Arithmetic other than string concatenation, method calls other than nameof, and conditional operators each count as one step. CCCPL001 flags a parameter list that spans more than one line while one of those lines still starts more than one parameter. Default severity is warning.
 	    ]]>
     </Description>
     <PackageReadmeFile>Readme.md</PackageReadmeFile>
@@ -128,6 +128,7 @@
   <PropertyGroup>
     <ReturnTypeComplexityAnalyzerSeverity>error</ReturnTypeComplexityAnalyzerSeverity>
     <ReturnTypeComplexityAnalyzerMaximum>1</ReturnTypeComplexityAnalyzerMaximum>
+    <ParameterListLayoutAnalyzerSeverity>error</ParameterListLayoutAnalyzerSeverity>
   </PropertyGroup>
 
   <!-- Roslyn compile-time only. The IDE / `dotnet` host already has CodeAnalysis; do not pack it as a dependency. -->

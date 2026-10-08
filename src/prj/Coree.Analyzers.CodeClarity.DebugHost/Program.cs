@@ -14,8 +14,12 @@ namespace Coree.Analyzers.CodeClarity.DebugHost
             // Change ReturnTypeComplexityAnalyzerSeverity (warning, error, message, or off)
             // and ReturnTypeComplexityAnalyzerMaximum (allowed calculation steps; default 1).
             // InlinedHeight reports CCCRC001. NamedHeight does not.
+            // ParameterListLayoutAnalyzerSeverity uses the same severity values.
+            // MixedProfile reports CCCPL001. PackedProfile does not.
             Console.WriteLine(InlinedHeight(1f, 2f));
             Console.WriteLine(NamedHeight(1f, 2f));
+            Console.WriteLine(MixedProfile(1f, 2f, 3f, 4f, 5f, 6f));
+            Console.WriteLine(PackedProfile(1f, 2f, 3f, 4f, 5f, 6f));
         }
 
         private static float InlinedHeight(float x, float z)
@@ -32,6 +36,30 @@ namespace Coree.Analyzers.CodeClarity.DebugHost
             float heightVariation = MathF.Cos(z * 0.1f);
             float groundHeight = 1f * baseWave * heightVariation;
             return groundHeight;
+        }
+
+        private static float MixedProfile(float amplitude, float frequencyX, float frequencyZ,
+            float detailAmplitude, float detailX, float detailZ)
+        {
+            float width = amplitude;
+            width += frequencyX;
+            width += frequencyZ;
+            width += detailAmplitude;
+            width += detailX;
+            width += detailZ;
+            return width;
+        }
+
+        private static float PackedProfile(
+            float amplitude, float frequencyX, float frequencyZ, float detailAmplitude, float detailX, float detailZ)
+        {
+            float width = amplitude;
+            width += frequencyX;
+            width += frequencyZ;
+            width += detailAmplitude;
+            width += detailX;
+            width += detailZ;
+            return width;
         }
     }
 }

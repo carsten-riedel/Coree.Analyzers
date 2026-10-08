@@ -1,3 +1,9 @@
+0.1.5 (2026-10-08)
+
+ - CCCPL001 flags a parameter list that spans more than one line while one of those lines still starts more than one parameter.
+ - Methods, local functions, constructors, and primary constructors of classes, structs, and records are in scope.
+ - Default severity is warning. Set ParameterListLayoutAnalyzerSeverity to warning, error, message, or off.
+
 0.1 (2026-10-07)
 
  - Initial release.

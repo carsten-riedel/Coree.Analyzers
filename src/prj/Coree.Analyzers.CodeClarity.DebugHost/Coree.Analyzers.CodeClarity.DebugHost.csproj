@@ -29,6 +29,7 @@
   <PropertyGroup>
     <ReturnTypeComplexityAnalyzerSeverity>warning</ReturnTypeComplexityAnalyzerSeverity>
     <ReturnTypeComplexityAnalyzerMaximum>1</ReturnTypeComplexityAnalyzerMaximum>
+    <ParameterListLayoutAnalyzerSeverity>warning</ParameterListLayoutAnalyzerSeverity>
   </PropertyGroup>
 
   <!-- Load the in-repo analyzer at compile time. Do not reference it as a library. -->
