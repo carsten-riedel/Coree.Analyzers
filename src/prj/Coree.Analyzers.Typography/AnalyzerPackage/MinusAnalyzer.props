@@ -11,7 +11,8 @@
     <CompilerVisibleProperty Include="MinusAnalyzerAdditionalExcludes" />
   </ItemGroup>
   <Target Name="AddMinusAnalyzerAdditionalFiles"
-          BeforeTargets="GenerateMSBuildEditorConfigFileCore;CoreCompile">
+          BeforeTargets="GenerateMSBuildEditorConfigFileCore;CoreCompile"
+          DependsOnTargets="_TypographyCollectCompiledSources">
     <PropertyGroup>
       <MinusAnalyzerExcludes Condition="'$(MinusAnalyzerExcludes)' != ''">$([System.String]::Copy('$(MinusAnalyzerExcludes)').Trim())</MinusAnalyzerExcludes>
       <MinusAnalyzerAdditionalExcludes Condition="'$(MinusAnalyzerAdditionalExcludes)' != ''">$([System.String]::Copy('$(MinusAnalyzerAdditionalExcludes)').Trim())</MinusAnalyzerAdditionalExcludes>
@@ -21,12 +22,12 @@
       <_MinusExcludeGlob Include="$(MinusAnalyzerExcludes)" Condition="'$(MinusAnalyzerExcludes)' != ''" />
       <_MinusExcludeGlob Include="$(MinusAnalyzerAdditionalExcludes)" Condition="'$(MinusAnalyzerAdditionalExcludes)' != ''" />
       <_MinusExcludeGlob Include="$(_TypographyAlwaysFolderExcludes)" />
-      <_MinusAnalyzerAdditionalFile Include="$(MSBuildProjectDirectory)\**\*"
-                                    Exclude="@(_MinusExcludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')"
-                                    Condition="'$(_TypographyMinusIsAllFiles)' == 'true'" />
+      <_MinusAnalyzerAdditionalFile Include="$(_TypographyProjectDirectory)**\*"
+                                     Exclude="@(_MinusExcludeGlob->'$(_TypographyProjectDirectory)%(Identity)');@(_TypographyCompiledSource)"
+                                     Condition="'$(_TypographyMinusIsAllFiles)' == 'true'" />
       <_MinusAnalyzerIncludeGlob Include="$(MinusAnalyzerIncludes)" Condition="'$(MinusAnalyzerIncludes)' != '' AND '$(_TypographyMinusIsAllFiles)' != 'true'" />
-      <_MinusAnalyzerAdditionalFile Include="@(_MinusAnalyzerIncludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')"
-                                    Exclude="@(_MinusExcludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')" />
+      <_MinusAnalyzerAdditionalFile Include="@(_MinusAnalyzerIncludeGlob->'$(_TypographyProjectDirectory)%(Identity)')"
+                                     Exclude="@(_MinusExcludeGlob->'$(_TypographyProjectDirectory)%(Identity)');@(_TypographyCompiledSource)" />
       <AdditionalFiles Include="@(_MinusAnalyzerAdditionalFile)" />
       <_MinusExcludeGlob Remove="@(_MinusExcludeGlob)" />
       <_MinusAnalyzerIncludeGlob Remove="@(_MinusAnalyzerIncludeGlob)" />

@@ -5,6 +5,7 @@
     AdditionalExcludes is always added on top. Unset AdditionalExcludes adds nothing.
     bin, obj, .git, and .vs are always excluded (build output / Git / VS cache, not source).
     Matched extra files are read from disk as AdditionalFiles.
+    Files already in Compile stay on the C# syntax tree and are not registered again.
     Outer whitespace on Excludes and AdditionalExcludes is trimmed (spaces, tabs, CR, LF).
     Empty includes disable extra-file scanning. C# syntax trees stay in scope either way.
     CompilerVisibleProperty is required or the compiler does not pass the values to the analyzer.
@@ -14,7 +15,20 @@
   <PropertyGroup>
     <_TypographyDefaultExcludes>bin\**;obj\**;.git\**;.vs\**;**\*.dll;**\*.exe;**\*.pdb;**\*.png;**\*.jpg;**\*.jpeg;**\*.gif;**\*.bmp;**\*.ico;**\*.nupkg;**\*.snupkg;**\*.zip;**\*.7z;**\*.snk;**\*.woff;**\*.woff2;**\*.ttf;**\*.eot;**\*.otf;**\*.pdf;**\*.resources;**\*.cache;**\*.suo;**\*.user;**\*.bin;**\*.so;**\*.dylib;**\*.winmd;**\*.db;**\*.sqlite;**\*.sqlite3;**\*.dat;**\*.pfx;**\*.cer;**\*.p12;**\*.wasm</_TypographyDefaultExcludes>
     <_TypographyAlwaysFolderExcludes>bin\**;obj\**;.git\**;.vs\**</_TypographyAlwaysFolderExcludes>
+    <!-- Trailing slash, no "..". Compile %(FullPath) is already canonical; the globs must use the same form or Exclude misses. -->
+    <_TypographyProjectDirectory>$([MSBuild]::NormalizeDirectory($(MSBuildProjectDirectory)))</_TypographyProjectDirectory>
   </PropertyGroup>
+  <!--
+    Runs before each Add*AnalyzerAdditionalFiles target.
+    Those targets exclude this list so a compiled file is not also an AdditionalFile.
+    A .cs file that is not in Compile stays eligible.
+  -->
+  <Target Name="_TypographyCollectCompiledSources">
+    <ItemGroup>
+      <_TypographyCompiledSource Remove="@(_TypographyCompiledSource)" />
+      <_TypographyCompiledSource Include="@(Compile->'%(FullPath)')" Condition="'%(FullPath)' != ''" />
+    </ItemGroup>
+  </Target>
   <ItemGroup>
     <CompilerVisibleProperty Include="MSBuildProjectDirectory" />
   </ItemGroup>

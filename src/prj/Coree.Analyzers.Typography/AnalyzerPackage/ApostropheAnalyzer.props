@@ -11,7 +11,8 @@
     <CompilerVisibleProperty Include="ApostropheAnalyzerAdditionalExcludes" />
   </ItemGroup>
   <Target Name="AddApostropheAnalyzerAdditionalFiles"
-          BeforeTargets="GenerateMSBuildEditorConfigFileCore;CoreCompile">
+          BeforeTargets="GenerateMSBuildEditorConfigFileCore;CoreCompile"
+          DependsOnTargets="_TypographyCollectCompiledSources">
     <PropertyGroup>
       <ApostropheAnalyzerExcludes Condition="'$(ApostropheAnalyzerExcludes)' != ''">$([System.String]::Copy('$(ApostropheAnalyzerExcludes)').Trim())</ApostropheAnalyzerExcludes>
       <ApostropheAnalyzerAdditionalExcludes Condition="'$(ApostropheAnalyzerAdditionalExcludes)' != ''">$([System.String]::Copy('$(ApostropheAnalyzerAdditionalExcludes)').Trim())</ApostropheAnalyzerAdditionalExcludes>
@@ -21,12 +22,12 @@
       <_ApostropheExcludeGlob Include="$(ApostropheAnalyzerExcludes)" Condition="'$(ApostropheAnalyzerExcludes)' != ''" />
       <_ApostropheExcludeGlob Include="$(ApostropheAnalyzerAdditionalExcludes)" Condition="'$(ApostropheAnalyzerAdditionalExcludes)' != ''" />
       <_ApostropheExcludeGlob Include="$(_TypographyAlwaysFolderExcludes)" />
-      <_ApostropheAnalyzerAdditionalFile Include="$(MSBuildProjectDirectory)\**\*"
-                                         Exclude="@(_ApostropheExcludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')"
+      <_ApostropheAnalyzerAdditionalFile Include="$(_TypographyProjectDirectory)**\*"
+                                         Exclude="@(_ApostropheExcludeGlob->'$(_TypographyProjectDirectory)%(Identity)');@(_TypographyCompiledSource)"
                                          Condition="'$(_TypographyApostropheIsAllFiles)' == 'true'" />
       <_ApostropheAnalyzerIncludeGlob Include="$(ApostropheAnalyzerIncludes)" Condition="'$(ApostropheAnalyzerIncludes)' != '' AND '$(_TypographyApostropheIsAllFiles)' != 'true'" />
-      <_ApostropheAnalyzerAdditionalFile Include="@(_ApostropheAnalyzerIncludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')"
-                                         Exclude="@(_ApostropheExcludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')" />
+      <_ApostropheAnalyzerAdditionalFile Include="@(_ApostropheAnalyzerIncludeGlob->'$(_TypographyProjectDirectory)%(Identity)')"
+                                         Exclude="@(_ApostropheExcludeGlob->'$(_TypographyProjectDirectory)%(Identity)');@(_TypographyCompiledSource)" />
       <AdditionalFiles Include="@(_ApostropheAnalyzerAdditionalFile)" />
       <_ApostropheExcludeGlob Remove="@(_ApostropheExcludeGlob)" />
       <_ApostropheAnalyzerIncludeGlob Remove="@(_ApostropheAnalyzerIncludeGlob)" />

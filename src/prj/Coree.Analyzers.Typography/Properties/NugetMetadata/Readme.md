@@ -29,7 +29,7 @@ The nupkg is a development dependency: the analyzer under `analyzers/dotnet/cs`,
 | **CTYMN001** | Minus sign (U+2212) |
 | **CTYNB001** | No-break space (U+00A0) and narrow no-break space (U+202F) |
 
-C# syntax trees are always in scope. Matching files under the project directory are added as `AdditionalFiles` so Visual Studio can bind the same diagnostics `dotnet build` prints. Paths that are neither a syntax tree nor an additional file pin to the `.csproj` in Visual Studio.
+C# syntax trees are always in scope. Matching files under the project directory are added as `AdditionalFiles` so Visual Studio can bind the same diagnostics `dotnet build` prints. A file already in `Compile` stays on the syntax tree and is not registered again. A `.cs` file that is not compiled is still an additional file when the globs match. Paths that are neither a syntax tree nor an additional file pin to the `.csproj` in Visual Studio.
 
 ## MSBuild properties
 

@@ -11,7 +11,8 @@
     <CompilerVisibleProperty Include="EmDashAnalyzerAdditionalExcludes" />
   </ItemGroup>
   <Target Name="AddEmDashAnalyzerAdditionalFiles"
-          BeforeTargets="GenerateMSBuildEditorConfigFileCore;CoreCompile">
+          BeforeTargets="GenerateMSBuildEditorConfigFileCore;CoreCompile"
+          DependsOnTargets="_TypographyCollectCompiledSources">
     <PropertyGroup>
       <EmDashAnalyzerExcludes Condition="'$(EmDashAnalyzerExcludes)' != ''">$([System.String]::Copy('$(EmDashAnalyzerExcludes)').Trim())</EmDashAnalyzerExcludes>
       <EmDashAnalyzerAdditionalExcludes Condition="'$(EmDashAnalyzerAdditionalExcludes)' != ''">$([System.String]::Copy('$(EmDashAnalyzerAdditionalExcludes)').Trim())</EmDashAnalyzerAdditionalExcludes>
@@ -21,12 +22,12 @@
       <_EmDashExcludeGlob Include="$(EmDashAnalyzerExcludes)" Condition="'$(EmDashAnalyzerExcludes)' != ''" />
       <_EmDashExcludeGlob Include="$(EmDashAnalyzerAdditionalExcludes)" Condition="'$(EmDashAnalyzerAdditionalExcludes)' != ''" />
       <_EmDashExcludeGlob Include="$(_TypographyAlwaysFolderExcludes)" />
-      <_EmDashAnalyzerAdditionalFile Include="$(MSBuildProjectDirectory)\**\*"
-                                     Exclude="@(_EmDashExcludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')"
+      <_EmDashAnalyzerAdditionalFile Include="$(_TypographyProjectDirectory)**\*"
+                                     Exclude="@(_EmDashExcludeGlob->'$(_TypographyProjectDirectory)%(Identity)');@(_TypographyCompiledSource)"
                                      Condition="'$(_TypographyEmDashIsAllFiles)' == 'true'" />
       <_EmDashAnalyzerIncludeGlob Include="$(EmDashAnalyzerIncludes)" Condition="'$(EmDashAnalyzerIncludes)' != '' AND '$(_TypographyEmDashIsAllFiles)' != 'true'" />
-      <_EmDashAnalyzerAdditionalFile Include="@(_EmDashAnalyzerIncludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')"
-                                     Exclude="@(_EmDashExcludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')" />
+      <_EmDashAnalyzerAdditionalFile Include="@(_EmDashAnalyzerIncludeGlob->'$(_TypographyProjectDirectory)%(Identity)')"
+                                     Exclude="@(_EmDashExcludeGlob->'$(_TypographyProjectDirectory)%(Identity)');@(_TypographyCompiledSource)" />
       <AdditionalFiles Include="@(_EmDashAnalyzerAdditionalFile)" />
       <_EmDashExcludeGlob Remove="@(_EmDashExcludeGlob)" />
       <_EmDashAnalyzerIncludeGlob Remove="@(_EmDashAnalyzerIncludeGlob)" />

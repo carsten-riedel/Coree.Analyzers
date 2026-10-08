@@ -11,7 +11,8 @@
     <CompilerVisibleProperty Include="NbspAnalyzerAdditionalExcludes" />
   </ItemGroup>
   <Target Name="AddNbspAnalyzerAdditionalFiles"
-          BeforeTargets="GenerateMSBuildEditorConfigFileCore;CoreCompile">
+          BeforeTargets="GenerateMSBuildEditorConfigFileCore;CoreCompile"
+          DependsOnTargets="_TypographyCollectCompiledSources">
     <PropertyGroup>
       <NbspAnalyzerExcludes Condition="'$(NbspAnalyzerExcludes)' != ''">$([System.String]::Copy('$(NbspAnalyzerExcludes)').Trim())</NbspAnalyzerExcludes>
       <NbspAnalyzerAdditionalExcludes Condition="'$(NbspAnalyzerAdditionalExcludes)' != ''">$([System.String]::Copy('$(NbspAnalyzerAdditionalExcludes)').Trim())</NbspAnalyzerAdditionalExcludes>
@@ -21,12 +22,12 @@
       <_NbspExcludeGlob Include="$(NbspAnalyzerExcludes)" Condition="'$(NbspAnalyzerExcludes)' != ''" />
       <_NbspExcludeGlob Include="$(NbspAnalyzerAdditionalExcludes)" Condition="'$(NbspAnalyzerAdditionalExcludes)' != ''" />
       <_NbspExcludeGlob Include="$(_TypographyAlwaysFolderExcludes)" />
-      <_NbspAnalyzerAdditionalFile Include="$(MSBuildProjectDirectory)\**\*"
-                                   Exclude="@(_NbspExcludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')"
-                                   Condition="'$(_TypographyNbspIsAllFiles)' == 'true'" />
+      <_NbspAnalyzerAdditionalFile Include="$(_TypographyProjectDirectory)**\*"
+                                    Exclude="@(_NbspExcludeGlob->'$(_TypographyProjectDirectory)%(Identity)');@(_TypographyCompiledSource)"
+                                    Condition="'$(_TypographyNbspIsAllFiles)' == 'true'" />
       <_NbspAnalyzerIncludeGlob Include="$(NbspAnalyzerIncludes)" Condition="'$(NbspAnalyzerIncludes)' != '' AND '$(_TypographyNbspIsAllFiles)' != 'true'" />
-      <_NbspAnalyzerAdditionalFile Include="@(_NbspAnalyzerIncludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')"
-                                   Exclude="@(_NbspExcludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')" />
+      <_NbspAnalyzerAdditionalFile Include="@(_NbspAnalyzerIncludeGlob->'$(_TypographyProjectDirectory)%(Identity)')"
+                                    Exclude="@(_NbspExcludeGlob->'$(_TypographyProjectDirectory)%(Identity)');@(_TypographyCompiledSource)" />
       <AdditionalFiles Include="@(_NbspAnalyzerAdditionalFile)" />
       <_NbspExcludeGlob Remove="@(_NbspExcludeGlob)" />
       <_NbspAnalyzerIncludeGlob Remove="@(_NbspAnalyzerIncludeGlob)" />

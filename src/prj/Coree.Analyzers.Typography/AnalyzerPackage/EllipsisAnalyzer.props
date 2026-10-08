@@ -11,7 +11,8 @@
     <CompilerVisibleProperty Include="EllipsisAnalyzerAdditionalExcludes" />
   </ItemGroup>
   <Target Name="AddEllipsisAnalyzerAdditionalFiles"
-          BeforeTargets="GenerateMSBuildEditorConfigFileCore;CoreCompile">
+          BeforeTargets="GenerateMSBuildEditorConfigFileCore;CoreCompile"
+          DependsOnTargets="_TypographyCollectCompiledSources">
     <PropertyGroup>
       <EllipsisAnalyzerExcludes Condition="'$(EllipsisAnalyzerExcludes)' != ''">$([System.String]::Copy('$(EllipsisAnalyzerExcludes)').Trim())</EllipsisAnalyzerExcludes>
       <EllipsisAnalyzerAdditionalExcludes Condition="'$(EllipsisAnalyzerAdditionalExcludes)' != ''">$([System.String]::Copy('$(EllipsisAnalyzerAdditionalExcludes)').Trim())</EllipsisAnalyzerAdditionalExcludes>
@@ -21,12 +22,12 @@
       <_EllipsisExcludeGlob Include="$(EllipsisAnalyzerExcludes)" Condition="'$(EllipsisAnalyzerExcludes)' != ''" />
       <_EllipsisExcludeGlob Include="$(EllipsisAnalyzerAdditionalExcludes)" Condition="'$(EllipsisAnalyzerAdditionalExcludes)' != ''" />
       <_EllipsisExcludeGlob Include="$(_TypographyAlwaysFolderExcludes)" />
-      <_EllipsisAnalyzerAdditionalFile Include="$(MSBuildProjectDirectory)\**\*"
-                                       Exclude="@(_EllipsisExcludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')"
-                                       Condition="'$(_TypographyEllipsisIsAllFiles)' == 'true'" />
+      <_EllipsisAnalyzerAdditionalFile Include="$(_TypographyProjectDirectory)**\*"
+                                        Exclude="@(_EllipsisExcludeGlob->'$(_TypographyProjectDirectory)%(Identity)');@(_TypographyCompiledSource)"
+                                        Condition="'$(_TypographyEllipsisIsAllFiles)' == 'true'" />
       <_EllipsisAnalyzerIncludeGlob Include="$(EllipsisAnalyzerIncludes)" Condition="'$(EllipsisAnalyzerIncludes)' != '' AND '$(_TypographyEllipsisIsAllFiles)' != 'true'" />
-      <_EllipsisAnalyzerAdditionalFile Include="@(_EllipsisAnalyzerIncludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')"
-                                       Exclude="@(_EllipsisExcludeGlob->'$(MSBuildProjectDirectory)\%(Identity)')" />
+      <_EllipsisAnalyzerAdditionalFile Include="@(_EllipsisAnalyzerIncludeGlob->'$(_TypographyProjectDirectory)%(Identity)')"
+                                        Exclude="@(_EllipsisExcludeGlob->'$(_TypographyProjectDirectory)%(Identity)');@(_TypographyCompiledSource)" />
       <AdditionalFiles Include="@(_EllipsisAnalyzerAdditionalFile)" />
       <_EllipsisExcludeGlob Remove="@(_EllipsisExcludeGlob)" />
       <_EllipsisAnalyzerIncludeGlob Remove="@(_EllipsisAnalyzerIncludeGlob)" />
