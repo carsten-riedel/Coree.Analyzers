@@ -6,7 +6,7 @@ namespace Coree.Analyzers.CodeClarity
 {
     internal static class ParameterListLayout
     {
-        internal static bool IsMixed(ParameterListSyntax parameterList)
+        internal static bool IsDisallowed(ParameterListSyntax parameterList)
         {
             SeparatedSyntaxList<ParameterSyntax> parameters = parameterList.Parameters;
             if (parameters.Count < 2)
@@ -14,35 +14,57 @@ namespace Coree.Analyzers.CodeClarity
                 return false;
             }
 
-            int firstLine = StartLine(parameters[0]);
-            int currentLine = firstLine;
-            bool packedLine = false;
-            bool laterLine = false;
+            int openLine = Line(parameterList.OpenParenToken.GetLocation());
+            int closeLine = Line(parameterList.CloseParenToken.GetLocation());
+            int firstLine = Line(parameters[0].GetLocation());
+            bool oneLine = firstLine == openLine && firstLine == closeLine;
+            bool onOpenLine = firstLine == openLine;
+            bool sharesLine = false;
+            int previousLine = firstLine;
+
             for (int index = 1; index < parameters.Count; index++)
             {
-                int line = StartLine(parameters[index]);
-                if (line == currentLine)
+                int line = Line(parameters[index].GetLocation());
+                if (line != openLine)
                 {
-                    packedLine = true;
-                }
-                else
-                {
-                    currentLine = line;
+                    oneLine = false;
                 }
 
-                if (line != firstLine)
+                if (line != closeLine)
                 {
-                    laterLine = true;
+                    oneLine = false;
                 }
+
+                if (line == previousLine)
+                {
+                    sharesLine = true;
+                }
+
+                if (line == openLine)
+                {
+                    onOpenLine = true;
+                }
+
+                previousLine = line;
             }
 
-            return packedLine && laterLine;
+            if (oneLine)
+            {
+                return false;
+            }
+
+            // The list form puts the closing parenthesis on the line after the last parameter.
+            if (!onOpenLine && !sharesLine && closeLine == previousLine + 1)
+            {
+                return false;
+            }
+
+            return true;
         }
 
-        private static int StartLine(ParameterSyntax parameter)
+        private static int Line(Location location)
         {
-            FileLinePositionSpan span = parameter.GetLocation().GetLineSpan();
-            return span.StartLinePosition.Line;
+            return location.GetLineSpan().StartLinePosition.Line;
         }
     }
 }

@@ -4,16 +4,23 @@
     and ReturnTypeComplexityAnalyzerMaximum (allowed calculation steps in a return expression).
     An empty or invalid maximum keeps the default of 1.
     ParameterListLayoutAnalyzerSeverity uses the same severity values for CCCPL001.
+    ParameterListFitAnalyzerSeverity uses them for CCCPL002.
+    ParameterListFitAnalyzerMaximum is the one-line parameter length that still counts as fitting.
+    An empty or invalid maximum keeps the default of 120.
     CompilerVisibleProperty is required or the compiler does not pass the values to the analyzer.
   -->
   <PropertyGroup>
     <ReturnTypeComplexityAnalyzerSeverity Condition="'$(ReturnTypeComplexityAnalyzerSeverity)' == ''">warning</ReturnTypeComplexityAnalyzerSeverity>
     <ReturnTypeComplexityAnalyzerMaximum Condition="'$(ReturnTypeComplexityAnalyzerMaximum)' == ''">1</ReturnTypeComplexityAnalyzerMaximum>
     <ParameterListLayoutAnalyzerSeverity Condition="'$(ParameterListLayoutAnalyzerSeverity)' == ''">warning</ParameterListLayoutAnalyzerSeverity>
+    <ParameterListFitAnalyzerSeverity Condition="'$(ParameterListFitAnalyzerSeverity)' == ''">warning</ParameterListFitAnalyzerSeverity>
+    <ParameterListFitAnalyzerMaximum Condition="'$(ParameterListFitAnalyzerMaximum)' == ''">120</ParameterListFitAnalyzerMaximum>
   </PropertyGroup>
   <ItemGroup>
     <CompilerVisibleProperty Include="ReturnTypeComplexityAnalyzerSeverity" />
     <CompilerVisibleProperty Include="ReturnTypeComplexityAnalyzerMaximum" />
     <CompilerVisibleProperty Include="ParameterListLayoutAnalyzerSeverity" />
+    <CompilerVisibleProperty Include="ParameterListFitAnalyzerSeverity" />
+    <CompilerVisibleProperty Include="ParameterListFitAnalyzerMaximum" />
   </ItemGroup>
 </Project>

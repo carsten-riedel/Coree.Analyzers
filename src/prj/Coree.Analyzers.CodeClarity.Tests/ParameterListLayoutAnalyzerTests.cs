@@ -25,14 +25,9 @@ class Plain
 {
     void None() { }
     void One(int a) { }
+    void OneWrapped(
+        int a) { }
     void Flat(int a, int b, int c) { }
-    void Pair(int a,
-        int b) { }
-    void Head(int a,
-        int b,
-        int c) { }
-    void Next(
-        int a, int b, int c) { }
     void Expanded(
         int a,
         int b,
@@ -40,11 +35,14 @@ class Plain
     ) { }
     void Attributed(
         [Mark] int a,
-        int b) { }
+        int b
+    ) { }
 
-    public Plain(int a,
+    public Plain(
+        int a,
         int b,
-        int c)
+        int c
+    )
     {
     }
 
@@ -60,8 +58,7 @@ class Plain
     }
 }
 
-class PackedPrimary(
-    int a, int b, int c);
+class PackedPrimary(int a, int b, int c);
 
 record EmptyRecord
 {
@@ -75,7 +72,8 @@ public record TerrainProfileExpanded(
     float FrequencyZ,
     float DetailAmplitude,
     float DetailX,
-    float DetailZ);
+    float DetailZ
+);
 ";
             await CSharpAnalyzerVerifier<ParameterListLayoutAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(test);
         }
@@ -132,8 +130,51 @@ struct PrimaryStruct{|#7:(int a, int b,
 
 record struct PrimaryRecordStruct{|#8:(int a, int b,
     int c)|};
+
+class More
+{
+    public void Head{|#9:(int a,
+        int b,
+        int c)|}
+    {
+    }
+
+    public void Next{|#10:(
+        int a, int b, int c)|}
+    {
+    }
+
+    public void BrokenClose{|#11:(int a, int b, int c
+    )|}
+    {
+    }
+
+    public void BrokenBoth{|#12:(
+        int a, int b, int c
+    )|}
+    {
+    }
+
+    public void Gap{|#13:(
+        int a,
+        int b
+
+    )|}
+    {
+    }
+
+    public void Closed{|#15:(
+        int a,
+        int b,
+        int c)|}
+    {
+    }
+}
+
+class PackedFollowing{|#14:(
+    int a, int b, int c)|};
 ";
-            DiagnosticResult[] expected = new DiagnosticResult[9];
+            DiagnosticResult[] expected = new DiagnosticResult[16];
             for (int index = 0; index < expected.Length; index++)
             {
                 expected[index] = DiagnosticResult

@@ -16,10 +16,12 @@ namespace Coree.Analyzers.CodeClarity.DebugHost
             // InlinedHeight reports CCCRC001. NamedHeight does not.
             // ParameterListLayoutAnalyzerSeverity uses the same severity values.
             // MixedProfile reports CCCPL001. PackedProfile does not.
+            // ShortFit reports CCCPL002. Its parameters fit in the default 120 characters.
             Console.WriteLine(InlinedHeight(1f, 2f));
             Console.WriteLine(NamedHeight(1f, 2f));
             Console.WriteLine(MixedProfile(1f, 2f, 3f, 4f, 5f, 6f));
             Console.WriteLine(PackedProfile(1f, 2f, 3f, 4f, 5f, 6f));
+            Console.WriteLine(ShortFit(1f, 2f));
         }
 
         private static float InlinedHeight(float x, float z)
@@ -50,8 +52,7 @@ namespace Coree.Analyzers.CodeClarity.DebugHost
             return width;
         }
 
-        private static float PackedProfile(
-            float amplitude, float frequencyX, float frequencyZ, float detailAmplitude, float detailX, float detailZ)
+        private static float PackedProfile(float amplitude, float frequencyX, float frequencyZ, float detailAmplitude, float detailX, float detailZ)
         {
             float width = amplitude;
             width += frequencyX;
@@ -60,6 +61,14 @@ namespace Coree.Analyzers.CodeClarity.DebugHost
             width += detailX;
             width += detailZ;
             return width;
+        }
+
+        private static float ShortFit(
+            float amplitude,
+            float frequency
+        )
+        {
+            return amplitude + frequency;
         }
     }
 }

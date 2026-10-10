@@ -1,16 +1,17 @@
 # Parameter list layout
 
-CCCPL001 is the CodeClarity rule for a parameter list that breaks across lines in a mixed way.
+CCCPL001 allows two shapes for a parameter list on a method, local function, constructor, or primary constructor.
 
-The maintainer called that mixed break strange. The example was a record primary constructor: three parameters stay on the signature line, then the line breaks, then three more parameters follow. They called two shapes logical. Either the whole list stays on one line, or each parameter stands on its own line.
+The one-line shape keeps the opening parenthesis, every parameter, and the closing parenthesis on the same line.
 
-They then added two shapes that this analyzer must accept. Another analyzer might flag those later. They did not ask for that second analyzer.
+The list shape puts the opening parenthesis at the end of the signature line and starts each parameter on its own following line. The closing parenthesis stands on the line after the last parameter. A single parameter and an empty list stay quiet either way.
 
-- The first parameter stays on the signature line, and each later parameter starts on its own line.
-- The declaration name stays on its line, and every parameter starts on the single following line.
+On 2026-10-10 the maintainer withdrew shapes this rule had been accepting. A packed parameter line under the declaration name reports. So does a one-line list whose closing parenthesis drops to the next line, a list whose first parameter stays on the signature line, and a list whose closing parenthesis shares the last parameter line.
 
-The rule that matches those statements: when parameters start on more than one line, no line may start more than one of them. A list whose parameters all start on one line is allowed, including when that line sits under the declaration name. Indentation, and whether the closing parenthesis has its own line, are outside this rule.
+Calls, indexers, delegates, and lambdas stay out of the rule. The wider declaration set, beyond methods and record primary constructors, was reported with the implementation. Each of those kinds was not confirmed on its own.
 
-The maintainer said to start simply, with methods, and used the record as the example. The analyzer that was added also reports the same layout on local functions, constructors, and primary constructors of classes, structs, and records. Calls, indexers, delegates, and lambdas do not report. That wider set of declarations was reported with the implementation. Each of those kinds was not confirmed on its own.
+CCCPL002 is a separate analyzer. It reports a parameter list that is broken across lines when the parameters would still fit on one line. The length joins the parameters with `, ` after whitespace collapses. Parentheses are not counted. `ParameterListFitAnalyzerMaximum` defaults to 120. The two CCCPL001 shapes stay allowed; a short list form can report CCCPL002 while CCCPL001 stays quiet.
 
-Evidence: maintainer discussion on 2026-10-08; src/prj/Coree.Analyzers.CodeClarity/ParameterListLayoutAnalyzer.cs; README.md CodeClarity section.
+On 2026-10-10 the maintainer raised that default from 80 to 120. Published line-length guides were treated as possibly outdated for current widescreen monitors. The stated reason is that agents wrap too early, including short lists that still read on one line, such as `public void M(float amplitude, float frequencyX, float frequencyZ, float detailScale, int age)`. That parameter text is 79 characters. This analyzer counts parameters only, so a 120-character parameter list is a full `public void M(...)` line near 135 columns.
+
+Evidence: maintainer discussion on 2026-10-08 and 2026-10-10; src/prj/Coree.Analyzers.CodeClarity/ParameterListLayout.cs; src/prj/Coree.Analyzers.CodeClarity/ParameterListFit.cs; README.md CodeClarity section.
