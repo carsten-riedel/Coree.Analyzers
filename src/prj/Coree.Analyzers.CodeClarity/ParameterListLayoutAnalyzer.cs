@@ -14,7 +14,7 @@ namespace Coree.Analyzers.CodeClarity
     public sealed class ParameterListLayoutAnalyzer : DiagnosticAnalyzer
     {
         /// <summary>
-        /// Diagnostic identifier for a parameter list that is neither one line nor one parameter per line.
+        /// Diagnostic identifier for a parameter list whose parameters start on more than one line while one of those lines starts more than one parameter.
         /// </summary>
         public const string DiagnosticId = "CCCPL001";
 
