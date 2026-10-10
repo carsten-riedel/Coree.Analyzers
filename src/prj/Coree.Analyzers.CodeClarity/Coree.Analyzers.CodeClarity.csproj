@@ -93,7 +93,7 @@
     <!-- NuGet gallery blurb. CDATA is optional and keeps multiline text. -->
     <Description>
       <![CDATA[
-        Roslyn analyzer for C# readability. CCCRC001 flags a return expression that exceeds ReturnTypeComplexityAnalyzerMaximum calculation steps (default 1). Arithmetic other than string concatenation, method calls other than nameof, and conditional operators each count as one step. CCCPL001 flags a parameter list that is neither entirely on one line, parentheses included, nor one parameter per line with the closing parenthesis on the following line. CCCPL002 flags a broken parameter list whose parameters still fit in ParameterListFitAnalyzerMaximum characters (default 120). Default severity is warning.
+        Roslyn analyzer for C# readability. CCCRC001 flags a return expression that exceeds ReturnTypeComplexityAnalyzerMaximum calculation steps (default 1). Arithmetic other than string concatenation, method calls other than nameof, and conditional operators each count as one step. CCCPL001 flags a parameter list that is neither entirely on one line, parentheses included, nor one parameter per line with the closing parenthesis on the following line. CCCPL002 flags a broken parameter list whose parameters still fit in ParameterListFitAnalyzerMaximum characters (default 120). CCCNS001 flags a class, struct, record, interface, enum, or delegate declared outside a namespace. Default severity is warning.
 	    ]]>
     </Description>
     <PackageReadmeFile>Readme.md</PackageReadmeFile>
@@ -131,6 +131,7 @@
     <ParameterListLayoutAnalyzerSeverity>error</ParameterListLayoutAnalyzerSeverity>
     <ParameterListFitAnalyzerSeverity>error</ParameterListFitAnalyzerSeverity>
     <ParameterListFitAnalyzerMaximum>120</ParameterListFitAnalyzerMaximum>
+    <TypeNamespaceAnalyzerSeverity>error</TypeNamespaceAnalyzerSeverity>
   </PropertyGroup>
 
   <!-- Roslyn compile-time only. The IDE / `dotnet` host already has CodeAnalysis; do not pack it as a dependency. -->

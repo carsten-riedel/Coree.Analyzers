@@ -1,5 +1,9 @@
 using System;
 
+class LooseTerrain
+{
+}
+
 namespace Coree.Analyzers.CodeClarity.DebugHost
 {
     internal static class Program
@@ -17,6 +21,7 @@ namespace Coree.Analyzers.CodeClarity.DebugHost
             // ParameterListLayoutAnalyzerSeverity uses the same severity values.
             // MixedProfile reports CCCPL001. PackedProfile does not.
             // ShortFit reports CCCPL002. Its parameters fit in the default 120 characters.
+            // LooseTerrain reports CCCNS001. The types in this namespace do not.
             Console.WriteLine(InlinedHeight(1f, 2f));
             Console.WriteLine(NamedHeight(1f, 2f));
             Console.WriteLine(MixedProfile(1f, 2f, 3f, 4f, 5f, 6f));
