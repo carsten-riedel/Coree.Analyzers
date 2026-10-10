@@ -22,11 +22,13 @@ namespace Coree.Analyzers.CodeClarity.DebugHost
             // MixedProfile reports CCCPL001. PackedProfile does not.
             // ShortFit reports CCCPL002. Its parameters fit in the default 120 characters.
             // LooseTerrain reports CCCNS001. The types in this namespace do not.
+            // TightClear reports CCCMB001. TightWalk does not.
             Console.WriteLine(InlinedHeight(1f, 2f));
             Console.WriteLine(NamedHeight(1f, 2f));
             Console.WriteLine(MixedProfile(1f, 2f, 3f, 4f, 5f, 6f));
             Console.WriteLine(PackedProfile(1f, 2f, 3f, 4f, 5f, 6f));
             Console.WriteLine(ShortFit(1f, 2f));
+            Console.WriteLine(TightClear());
         }
 
         private static float InlinedHeight(float x, float z)
@@ -74,6 +76,15 @@ namespace Coree.Analyzers.CodeClarity.DebugHost
         )
         {
             return amplitude + frequency;
+        }
+
+        private static bool TightWalk()
+        {
+            return true;
+        }
+        private static bool TightClear()
+        {
+            return TightWalk();
         }
     }
 }

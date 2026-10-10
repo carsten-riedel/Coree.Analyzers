@@ -8,6 +8,7 @@
     ParameterListFitAnalyzerMaximum is the one-line parameter length that still counts as fitting.
     An empty or invalid maximum keeps the default of 120.
     TypeNamespaceAnalyzerSeverity uses the same severity values for CCCNS001.
+    MethodBlankLineAnalyzerSeverity uses them for CCCMB001.
     CompilerVisibleProperty is required or the compiler does not pass the values to the analyzer.
   -->
   <PropertyGroup>
@@ -17,6 +18,7 @@
     <ParameterListFitAnalyzerSeverity Condition="'$(ParameterListFitAnalyzerSeverity)' == ''">warning</ParameterListFitAnalyzerSeverity>
     <ParameterListFitAnalyzerMaximum Condition="'$(ParameterListFitAnalyzerMaximum)' == ''">120</ParameterListFitAnalyzerMaximum>
     <TypeNamespaceAnalyzerSeverity Condition="'$(TypeNamespaceAnalyzerSeverity)' == ''">warning</TypeNamespaceAnalyzerSeverity>
+    <MethodBlankLineAnalyzerSeverity Condition="'$(MethodBlankLineAnalyzerSeverity)' == ''">warning</MethodBlankLineAnalyzerSeverity>
   </PropertyGroup>
   <ItemGroup>
     <CompilerVisibleProperty Include="ReturnTypeComplexityAnalyzerSeverity" />
@@ -25,5 +27,6 @@
     <CompilerVisibleProperty Include="ParameterListFitAnalyzerSeverity" />
     <CompilerVisibleProperty Include="ParameterListFitAnalyzerMaximum" />
     <CompilerVisibleProperty Include="TypeNamespaceAnalyzerSeverity" />
+    <CompilerVisibleProperty Include="MethodBlankLineAnalyzerSeverity" />
   </ItemGroup>
 </Project>

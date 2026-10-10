@@ -33,6 +33,7 @@
     <ParameterListFitAnalyzerSeverity>warning</ParameterListFitAnalyzerSeverity>
     <ParameterListFitAnalyzerMaximum>120</ParameterListFitAnalyzerMaximum>
     <TypeNamespaceAnalyzerSeverity>warning</TypeNamespaceAnalyzerSeverity>
+    <MethodBlankLineAnalyzerSeverity>warning</MethodBlankLineAnalyzerSeverity>
   </PropertyGroup>
 
   <!-- Load the in-repo analyzer at compile time. Do not reference it as a library. -->
