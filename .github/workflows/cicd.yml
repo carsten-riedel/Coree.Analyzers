@@ -16,14 +16,12 @@ on:
     paths:
       - 'src/**'
     branches:
-      - 'master'
       - 'main'
       - 'hotfix'
       - 'release'
       - 'develop'
       - 'bugfix'
       - 'feature'
-      - 'master/**'
       - 'main/**'
       - 'hotfix/**'
       - 'release/**'
