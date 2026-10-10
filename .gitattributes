@@ -1,9 +1,12 @@
+# Normalize text files while preserving automatic binary detection.
 * text=auto
-*.sh text eol=lf
-*.ps1 text eol=crlf
-*.cs diff=csharp
-*.sln merge=binary
-*.slnx text
-*.png binary
-# DocShell.html is documentation bootstrap, not the product language.
-*.html linguist-detectable=false
+
+# Keep C# language detection explicit.
+*.cs linguist-language=C#
+
+# Shared automation and agent support do not represent application code.
+.github/** linguist-vendored
+workflows/** linguist-vendored
+AGENTS.md linguist-vendored
+AGENTS/** linguist-vendored
+.agents/** linguist-vendored
