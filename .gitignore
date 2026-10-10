@@ -18,8 +18,9 @@ TestResults/
 .DS_Store
 Thumbs.db
 
-# Sensitive file name patterns
-*[Ss][Ee][Cc][Rr][Ee][Tt]*
+# Sensitive PowerShell and JSON file name patterns
+*[Ss][Ee][Cc][Rr][Ee][Tt]*.[Pp][Ss]1
+*[Ss][Ee][Cc][Rr][Ee][Tt]*.[Jj][Ss][Oo][Nn]
 
 # Local agent instruction files
 AGENTS.md
