@@ -12,6 +12,8 @@ Word processors leave en/em dashes, curly quotes, typographic apostrophes, ellip
 
 This package catches those characters at compile time, in C# and in the extra project files you actually ship. ASCII hyphens, quotes, apostrophes, periods, and spaces stay silent. Default severity is warning; you decide whether that is noise, a gate, or off.
 
+In a C# document, the editor can replace the flagged character with that ASCII character. An en dash, em dash, or minus sign becomes a hyphen. A curly double quote or guillemet becomes a straight double quote. A single quotation mark or typographic apostrophe becomes an apostrophe. An ellipsis becomes three periods. A no-break space becomes a normal space. Inside a normal or interpolated string, a straight double quote is written as `\"`. Inside a verbatim string, it is written as `""`. Inside a character literal, an apostrophe is written as `\'`. A comment keeps the raw character. A raw string (`"""`) is left unchanged, and the warning still reports. The fix runs only when you apply it. One diagnostic can be fixed for the whole document, project, or solution. Extra files that are not C# documents still report and are not edited.
+
 ```bash
 dotnet add package Coree.Analyzers.Typography
 ```
