@@ -13,17 +13,19 @@ The same expression in an ordinary method does report. `return a + b + c` is two
 
 ## Change
 
-Score the expression of a `yield return` with the same rules already used for `return`. Arithmetic other than string concatenation, method calls other than `nameof`, the conditional operator `?:`, shift operators, and a user-defined `operator +` each still count as one step. The default maximum stays 1. A `yield return` with no expression stays quiet. `yield break` is not an expression and is not part of this check. Expression-bodied members stay as they are.
+`ReturnTypeComplexityAnalyzer` now scores the expression of a `yield return` with the same rules already used for `return`. Arithmetic other than string concatenation, method calls other than `nameof`, the conditional operator `?:`, shift operators, and a user-defined `operator +` each still count as one step. The default maximum stays 1. Roslyn 4.14 represents that statement as `YieldStatementSyntax`. A `yield return` with no expression stays quiet. `yield break` is not registered. Expression-bodied members are unchanged.
 
-Regressions cover the two-addition iterator above, a one-addition `yield return` that stays quiet, and `yield return nameof(...)` at maximum 0. The repository README, the NuGet readme, the analyzer description, and the unreleased package notes say that a `yield return` expression is included.
+Regressions cover the two-addition iterator above, a one-addition `yield return` that stays quiet, `yield return nameof(...)` at maximum 0, and `yield break`. The repository README, the NuGet readme, the package description, the analyzer description, and the unreleased package notes say that a `yield return` expression is included.
 
 ## After
 
-Not implemented yet.
+The iterator in Before now reports CCCRC001 at the default maximum of 1, on `a + b + c`. `yield return a + b` stays quiet at that default. `yield return nameof(C)` stays quiet at maximum 0. `yield break` stays quiet. An ordinary `return a + b + c` still reports, and an expression-bodied member such as `=> a + b + c` still does not. A developer who moved a dense calculation into an iterator no longer loses the warning. Whether that warning changes real projects was not measured.
 
 ## Evidence
 
-At `origin/main` `76107484db8079120328ea90626aeb60b18a31d1`, `ReturnTypeComplexityAnalyzer.Initialize` registers only `SyntaxKind.ReturnStatement`. `ReturnExpressionComplexity` already scores an expression and does not mention iterators. No file under `src/prj/Coree.Analyzers.CodeClarity` mentions `yield`. Whether developers simplify iterators after the warning appears was not measured.
+At `origin/main` `76107484db8079120328ea90626aeb60b18a31d1`, `ReturnTypeComplexityAnalyzer.Initialize` registered only `SyntaxKind.ReturnStatement`. Before the registration change, `TwoStepYieldReturnReports` failed: expected 1 diagnostic, actual 0. Command, from `src/sln/Coree.Analyzers.CodeClarity`: `dotnet test --filter FullyQualifiedName~TwoStepYieldReturnReports -p:CollectCoverage=false --verbosity minimal -m:1`.
+
+After the change, `dotnet build --no-restore -m:1` succeeded with 0 errors and the 6 existing DebugHost sample warnings. `dotnet test -m:1` passed 104 tests. Coverlet reported 100% line, branch, and method coverage of `Coree.Analyzers.CodeClarity`. `dotnet pack --no-restore -m:1` wrote `src/prj/Coree.Analyzers.CodeClarity/bin/Pack/Coree.Analyzers.CodeClarity.0.1.21-ga3c4736d64.nupkg` with the analyzer under `analyzers/dotnet/cs`, props under `build/` and `buildTransitive/`, the readme, and no `lib/` group. The nuspec text includes `yield return`. Implementation commit: `7b77f21f3e94af50d5d0c0d63ad42d7b2ac190b4`. Consumer benefit remains unmeasured.
 
 ## Understood assignment
 
@@ -78,11 +80,17 @@ The main risk is treating `yield break`, or a `yield return` that has no express
 
 ## Baseline and execution
 
-- Status: not implemented. Date: 2026-10-25.
+- Status: Done. Implementation verified on 2026-10-25. Not merged.
 - Integration target: `main`, refreshed `origin/main` at `76107484db8079120328ea90626aeb60b18a31d1`.
 - Feature branch: `feature/pevo/yield-return-261025`.
 - Worktree: `.worktrees/yield-return-261025`.
-- Early publication of this issue-only commit is pending. Pull request, merge, and worktree cleanup are not part of this checkpoint.
+- Issue-only baseline: `a3c4736d641cc0e6dbd4e81770595c31000b22c1`, published to `origin/feature/pevo/yield-return-261025` before product edits.
+- Implementation: `7b77f21f3e94af50d5d0c0d63ad42d7b2ac190b4`.
+- Publication of this closure commit, pull request, merge, and worktree cleanup are pending.
+
+## Final outcome
+
+CCCRC001 now applies the existing score to a `yield return` expression. The plan did not change. `yield break` and expression-bodied members stayed out, as bounded. Verification is the build, the 104 passing tests, 100% coverage, and the package inspection above. Real consumer uptake was not measured. Rollback is reverting `7b77f21f3e94af50d5d0c0d63ad42d7b2ac190b4` together with this closure.
 
 ## Incidental Discoveries (Out of Scope)
 
