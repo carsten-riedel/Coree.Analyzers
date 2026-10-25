@@ -132,6 +132,8 @@ Example in a project file. The version `0.1.2` is the one shown here:
 
 Arithmetic other than string concatenation, method calls other than `nameof`, and conditional operators each count as one step. Casts, signs, `await`, member access, and identifiers do not. Default severity is warning.
 
+Only the C# `nameof` operator is exempt. A user-defined method named `nameof` (including `@nameof`) counts as a method call. For example, `return @nameof(a + b);` has two steps and reports at the default maximum of 1.
+
 At the default maximum of 1, `return a + b` stays quiet, and so does `return total`. `return a + b + c` reports CCCRC001. `total` is a local; that return is only the name.
 
 ```csharp
