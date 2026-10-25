@@ -59,7 +59,8 @@ namespace Coree.Analyzers.CodeClarity
                 || kind == SyntaxKind.DivideExpression
                 || kind == SyntaxKind.ModuloExpression
                 || kind == SyntaxKind.LeftShiftExpression
-                || kind == SyntaxKind.RightShiftExpression;
+                || kind == SyntaxKind.RightShiftExpression
+                || kind == SyntaxKind.UnsignedRightShiftExpression;
             if (!arithmetic)
             {
                 return false;

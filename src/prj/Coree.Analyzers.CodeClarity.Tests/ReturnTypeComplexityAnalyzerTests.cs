@@ -209,6 +209,37 @@ class C
         }
 
         [TestMethod]
+        [DataRow("a >>> b", "0", true)]
+        [DataRow("a >>> b", "1", false)]
+        [DataRow("a >>> (b + c)", "1", true)]
+        [DataRow("(a >>> b) + c", "1", true)]
+        [DataRow("a >>> b >>> c", "1", true)]
+        [DataRow("F(a) >>> b", "1", true)]
+        [DataRow("a >>> (b + c)", "2", false)]
+        [DataRow("(a >>> b) + c", "2", false)]
+        [DataRow("a >>> b >>> c", "2", false)]
+        [DataRow("F(a) >>> b", "2", false)]
+        [DataRow("a >> b", "0", true)]
+        [DataRow("a >> b", "1", false)]
+        [DataRow("a & b | c", "0", false)]
+        public async Task UnsignedRightShiftUsesTheSameCalculationThreshold(string expression, string maximum, bool reports)
+        {
+            string returned = reports ? "{|#0:" + expression + "|}" : expression;
+            string source = "class C { int F(int x) { return x; } int M(int a, int b, int c) { return " + returned + "; } }";
+            DiagnosticResult[] expected = reports
+                ? new[] { DiagnosticResult.CompilerWarning(ReturnTypeComplexityAnalyzer.DiagnosticId).WithLocation(0) }
+                : System.Array.Empty<DiagnosticResult>();
+            await VerifyWithConfigAsync(source, null, maximum, expected);
+        }
+
+        [TestMethod]
+        public async Task DeferredUnsignedShiftsStayOutsideTheReturnCalculation()
+        {
+            const string source = "class C { System.Func<int> M(int a, int b, int c) { return () => a >>> b >>> c; } }";
+            await VerifyWithConfigAsync(source, null, "0");
+        }
+
+        [TestMethod]
         public async Task HigherMaximumAllowsTwoAdditions()
         {
             const string source = "class C { int M(int a, int b, int c) { return a + b + c; } }";

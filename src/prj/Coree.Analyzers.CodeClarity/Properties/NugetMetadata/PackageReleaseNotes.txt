@@ -3,6 +3,7 @@ Unreleased
  - Fix CCCMB001 false positives for blank lines in files with CR-only, Unicode, or mixed C# line endings. LF and CRLF behavior is preserved.
  - Fix CCCRC001 undercounting calls to user-defined methods named nameof or @nameof. The C# nameof operator remains exempt.
  - CCCRC001 counts a user-defined operator + even when one operand is a string. Built-in string concatenation still does not count.
+ - CCCRC001 counts unsigned right shifts (`>>>`) as one calculation step, consistently with `<<` and `>>`. A lone shift remains allowed at the default maximum.
  - CCCPL001 puts the closing parenthesis on the line after the last parameter ends. An attribute or a default may span lines. A closing parenthesis on that parameter's last line reports.
  - CCCPL001 reports two parameters that share a line even when the earlier parameter began on a previous line. A wrapped parameter that ends before the next parameter starts stays quiet.
  - CCCPL002 stays quiet when a parameter list contains a line comment, so it does not recommend a one-line spelling that would comment out the rest of the signature. A // inside a string can still report.

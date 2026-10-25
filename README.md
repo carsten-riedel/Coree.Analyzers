@@ -136,6 +136,8 @@ Arithmetic other than string concatenation, method calls other than `nameof`, an
 
 Only the C# `nameof` operator is exempt. A user-defined method named `nameof` (including `@nameof`) counts as a method call. For example, `return @nameof(a + b);` has two steps and reports at the default maximum of 1.
 
+Each shift operator (`<<`, `>>`, and `>>>`) also counts as one step. At the default maximum, `return value >>> count` stays quiet, while `return value >>> (count + extra)` reports CCCRC001.
+
 At the default maximum of 1, `return a + b` stays quiet, and so does `return total`. `return a + b + c` reports CCCRC001. `total` is a local; that return is only the name.
 
 ```csharp
