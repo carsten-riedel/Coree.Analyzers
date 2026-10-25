@@ -130,7 +130,7 @@ Example in a project file. The version `0.1.2` is the one shown here:
 | **CCCNS001** | A class, struct, record, interface, enum, or delegate declared outside a namespace |
 | **CCCMB001** | A method with a body that follows another method with a body in the same type without a blank line between them |
 
-Arithmetic other than string concatenation, method calls other than `nameof`, and conditional operators each count as one step. Casts, signs, `await`, member access, and identifiers do not. Default severity is warning.
+Arithmetic other than string concatenation, method calls other than `nameof`, and conditional operators each count as one step. A user-defined `operator +` counts even when one operand is a string. Casts, signs, `await`, member access, and identifiers do not. Default severity is warning.
 
 At the default maximum of 1, `return a + b` stays quiet, and so does `return total`. `return a + b + c` reports CCCRC001. `total` is a local; that return is only the name.
 

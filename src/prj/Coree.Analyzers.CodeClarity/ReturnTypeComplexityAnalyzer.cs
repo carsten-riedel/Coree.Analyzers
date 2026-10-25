@@ -31,7 +31,7 @@ namespace Coree.Analyzers.CodeClarity
             "Clarity",
             DiagnosticSeverity.Warning,
             isEnabledByDefault: true,
-            description: "Counts arithmetic operators (except string concatenation), method calls other than nameof, and conditional operators in a return expression. ReturnTypeComplexityAnalyzerMaximum is the allowed score; the default is 1.");
+            description: "Counts arithmetic operators (except string concatenation), method calls other than nameof, and conditional operators in a return expression. A user-defined operator + counts even when one operand is a string. ReturnTypeComplexityAnalyzerMaximum is the allowed score; the default is 1.");
 
         private static readonly DiagnosticDescriptor ErrorRule =
             AnalyzerSeverity.WithSeverity(Rule, DiagnosticSeverity.Error);

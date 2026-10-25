@@ -197,6 +197,77 @@ class C
             await VerifyWithSeverityAsync(source, "off");
         }
 
+        [TestMethod]
+        public async Task UserDefinedAdditionWithStringOperandCounts()
+        {
+            const string test = @"
+struct Meter
+{
+    public int Raw;
+    public static int operator +(string label, Meter value) => value.Raw;
+    public static int operator +(Meter value, string label) => value.Raw;
+}
+
+class C
+{
+    int Named(string label, Meter value) { return label + value; }
+    int FromValue(Meter value, string label) { return value + label; }
+    int Combined(string label, Meter value, int extra) { return {|#0:label + value + extra|}; }
+    string Concat(string left, string right) { return left + "" "" + right; }
+}";
+            var expected = DiagnosticResult
+                .CompilerWarning(ReturnTypeComplexityAnalyzer.DiagnosticId)
+                .WithLocation(0);
+            await CSharpAnalyzerVerifier<ReturnTypeComplexityAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(test, expected);
+        }
+
+        [TestMethod]
+        public async Task UserDefinedAdditionReportsAtZeroMaximum()
+        {
+            const string source = @"struct Meter
+{
+    public int Raw;
+    public static int operator +(string label, Meter value) => value.Raw;
+    public static int operator +(Meter value, string label) => value.Raw;
+}
+
+class C
+{
+    int Named(string label, Meter value) { return label + value; }
+    int FromValue(Meter value, string label) { return value + label; }
+}";
+            var named = DiagnosticResult
+                .CompilerWarning(ReturnTypeComplexityAnalyzer.DiagnosticId)
+                .WithSpan(10, 51, 10, 64);
+            var fromValue = DiagnosticResult
+                .CompilerWarning(ReturnTypeComplexityAnalyzer.DiagnosticId)
+                .WithSpan(11, 55, 11, 68);
+            await VerifyWithConfigAsync(source, null, "0", named, fromValue);
+        }
+
+        [TestMethod]
+        public async Task UserDefinedAdditionAllowsTwoStepsAtHigherMaximum()
+        {
+            const string source = @"struct Meter
+{
+    public int Raw;
+    public static int operator +(string label, Meter value) => value.Raw;
+}
+
+class C
+{
+    int Combined(string label, Meter value, int extra) { return label + value + extra; }
+}";
+            await VerifyWithConfigAsync(source, null, "2");
+        }
+
+        [TestMethod]
+        public async Task BuiltInStringConcatenationStaysQuietAtZeroMaximum()
+        {
+            const string source = "class C { string M(string a, string b, string c) { return a + \" \" + b + c; } }";
+            await VerifyWithConfigAsync(source, null, "0");
+        }
+
         private static async Task VerifyWithSeverityAsync(string source, string severity, params DiagnosticResult[] expected)
         {
             await VerifyWithConfigAsync(source, severity, null, expected);
