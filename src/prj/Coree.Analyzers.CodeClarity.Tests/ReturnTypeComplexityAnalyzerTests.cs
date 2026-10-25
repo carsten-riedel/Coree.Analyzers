@@ -365,6 +365,36 @@ class C
             await VerifyWithConfigAsync(source, null, "0");
         }
 
+        [TestMethod]
+        public async Task TwoStepYieldReturnReports()
+        {
+            const string source = "class C { System.Collections.Generic.IEnumerable<int> M(int a, int b, int c) { yield return {|#0:a + b + c|}; } }";
+            var expected = DiagnosticResult.CompilerWarning(ReturnTypeComplexityAnalyzer.DiagnosticId)
+                .WithLocation(0);
+            await CSharpAnalyzerVerifier<ReturnTypeComplexityAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(source, expected);
+        }
+
+        [TestMethod]
+        public async Task OneStepYieldReturnStaysQuiet()
+        {
+            const string source = "class C { System.Collections.Generic.IEnumerable<int> M(int a, int b) { yield return a + b; } }";
+            await CSharpAnalyzerVerifier<ReturnTypeComplexityAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(source);
+        }
+
+        [TestMethod]
+        public async Task YieldReturnNameofStaysQuietAtZeroMaximum()
+        {
+            const string source = "class C { System.Collections.Generic.IEnumerable<string> M() { yield return nameof(C); } }";
+            await VerifyWithConfigAsync(source, null, "0");
+        }
+
+        [TestMethod]
+        public async Task YieldBreakStaysQuiet()
+        {
+            const string source = "class C { System.Collections.Generic.IEnumerable<int> M() { yield break; } }";
+            await CSharpAnalyzerVerifier<ReturnTypeComplexityAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(source);
+        }
+
         private static async Task VerifyWithSeverityAsync(string source, string severity, params DiagnosticResult[] expected)
         {
             await VerifyWithConfigAsync(source, severity, null, expected);

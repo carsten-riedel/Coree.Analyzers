@@ -126,7 +126,7 @@ Example in a project file. The version `0.1.2` is the one shown here:
 
 | Id | What it flags |
 | --- | --- |
-| **CCCRC001** | A `return` expression whose calculation-step score exceeds `ReturnTypeComplexityAnalyzerMaximum` (default 1) |
+| **CCCRC001** | A `return` or `yield return` expression whose calculation-step score exceeds `ReturnTypeComplexityAnalyzerMaximum` (default 1) |
 | **CCCPL001** | A parameter list that is neither entirely on one line, parentheses included, nor one parameter per line with the closing parenthesis on the following line |
 | **CCCPL002** | A parameter list that is broken across lines even though the parameters fit in `ParameterListFitAnalyzerMaximum` characters (default 120) |
 | **CCCNS001** | A class, struct, record, interface, enum, or delegate declared outside a namespace |
@@ -138,7 +138,7 @@ Only the C# `nameof` operator is exempt. A user-defined method named `nameof` (i
 
 Each shift operator (`<<`, `>>`, and `>>>`) also counts as one step. At the default maximum, `return value >>> count` stays quiet, while `return value >>> (count + extra)` reports CCCRC001.
 
-At the default maximum of 1, `return a + b` stays quiet, and so does `return total`. `return a + b + c` reports CCCRC001. `total` is a local; that return is only the name.
+At the default maximum of 1, `return a + b` stays quiet, and so does `return total`. `return a + b + c` reports CCCRC001. `total` is a local; that return is only the name. A `yield return` expression uses that same score. `yield return a + b` stays quiet, and `yield return a + b + c` reports CCCRC001.
 
 ```csharp
 int OneStep(int a, int b)
