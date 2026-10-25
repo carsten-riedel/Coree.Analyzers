@@ -47,7 +47,7 @@ namespace Coree.Analyzers.CodeClarity
                     length += 2;
                 }
 
-                length += Normalize(parameters[index].ToString()).Length;
+                length += Normalize(parameters[index]).Length;
             }
 
             return length;
@@ -59,18 +59,33 @@ namespace Coree.Analyzers.CodeClarity
             return span.StartLinePosition.Line != span.EndLinePosition.Line;
         }
 
-        private static string Normalize(string text)
+        private static string Normalize(ParameterSyntax parameter)
         {
+            string text = parameter.ToString();
             var builder = new StringBuilder(text.Length);
             bool pendingSpace = false;
             bool any = false;
-            for (int index = 0; index < text.Length; index++)
+            int position = 0;
+            foreach (SyntaxToken token in parameter.DescendantTokens())
             {
-                char character = text[index];
-                if (char.IsWhiteSpace(character))
+                int tokenStart = token.SpanStart - parameter.SpanStart;
+                for (; position < tokenStart; position++)
                 {
-                    pendingSpace = any;
-                    continue;
+                    char character = text[position];
+                    if (char.IsWhiteSpace(character))
+                    {
+                        pendingSpace = any;
+                        continue;
+                    }
+
+                    if (pendingSpace)
+                    {
+                        builder.Append(' ');
+                        pendingSpace = false;
+                    }
+
+                    builder.Append(character);
+                    any = true;
                 }
 
                 if (pendingSpace)
@@ -79,8 +94,10 @@ namespace Coree.Analyzers.CodeClarity
                     pendingSpace = false;
                 }
 
-                builder.Append(character);
+                // Literal whitespace is part of the default value, not removable formatting.
+                builder.Append(token.Text);
                 any = true;
+                position = tokenStart + token.Span.Length;
             }
 
             return builder.ToString();

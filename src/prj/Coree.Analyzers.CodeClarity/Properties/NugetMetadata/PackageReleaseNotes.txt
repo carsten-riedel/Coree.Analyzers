@@ -7,6 +7,7 @@ Unreleased
  - CCCPL001 puts the closing parenthesis on the line after the last parameter ends. An attribute or a default may span lines. A closing parenthesis on that parameter's last line reports.
  - CCCPL001 reports two parameters that share a line even when the earlier parameter began on a previous line. A wrapped parameter that ends before the next parameter starts stays quiet.
  - CCCPL002 stays quiet when a parameter list contains a line comment, so it does not recommend a one-line spelling that would comment out the rest of the signature. A // inside a string can still report.
+ - CCCPL002 keeps whitespace inside literals when measuring a wrapped parameter list. Formatting whitespace outside tokens still collapses.
 
 0.1.5 (2026-10-08)
 

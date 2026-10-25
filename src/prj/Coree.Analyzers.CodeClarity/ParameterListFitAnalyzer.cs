@@ -8,7 +8,7 @@ namespace Coree.Analyzers.CodeClarity
 {
     /// <summary>
     /// Warns when a parameter list is broken across lines even though the parameters fit in the configured length.
-    /// The default limit is 120 characters. Indentation, tabs, and repeated spaces are not counted.
+    /// The default limit is 120 characters. Formatting whitespace collapses; literal text is preserved.
     /// A single-line comment keeps the list quiet, because that comment cannot stay on one line.
     /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
@@ -32,7 +32,7 @@ namespace Coree.Analyzers.CodeClarity
             "Clarity",
             DiagnosticSeverity.Warning,
             isEnabledByDefault: true,
-            description: "Joins parameters with a comma and a space after collapsing whitespace, then compares that length with ParameterListFitAnalyzerMaximum. Parentheses are not counted. A single-line comment is not treated as fitting on one line. The default limit is 120. An empty, negative, or non-numeric maximum keeps that default.");
+            description: "Joins parameters with a comma and a space after collapsing whitespace outside tokens, preserving literal text, then compares that length with ParameterListFitAnalyzerMaximum. Parentheses are not counted. A single-line comment is not treated as fitting on one line. The default limit is 120. An empty, negative, or non-numeric maximum keeps that default.");
 
         private static readonly DiagnosticDescriptor ErrorRule =
             AnalyzerSeverity.WithSeverity(Rule, DiagnosticSeverity.Error);

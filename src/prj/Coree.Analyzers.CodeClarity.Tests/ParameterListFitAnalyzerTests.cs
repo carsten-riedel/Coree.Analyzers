@@ -131,6 +131,51 @@ public record Profile{|#7:(
         }
 
         [TestMethod]
+        [DataRow("\"left    right\"")]
+        [DataRow("@\"left\t\t right\"")]
+        [DataRow("\"\"\"left    right\"\"\"")]
+        public async Task LiteralWhitespaceCountsAtTheConfiguredBoundary(string literal)
+        {
+            string parameter = "string value = " + literal;
+            string source = "class C { void M{|#0:(\n    " + parameter + "\n)|} { } }";
+            int length = parameter.Length;
+            await VerifyAsync(source, "warning", (length - 1).ToString());
+
+            var expected = DiagnosticResult
+                .CompilerWarning(ParameterListFitAnalyzer.DiagnosticId)
+                .WithLocation(0)
+                .WithArguments(length, length);
+            await VerifyAsync(source, "warning", length.ToString(), expected);
+
+            var above = DiagnosticResult
+                .CompilerWarning(ParameterListFitAnalyzer.DiagnosticId)
+                .WithLocation(0)
+                .WithArguments(length, length + 1);
+            await VerifyAsync(source, "warning", (length + 1).ToString(), above);
+        }
+
+        [TestMethod]
+        public async Task LongLiteralWhitespaceDoesNotFitTheDefaultMaximum()
+        {
+            string source = "class C { void M(\n    string value = \"left" + new string(' ', 120) + "right\"\n) { } }";
+            await CSharpAnalyzerVerifier<ParameterListFitAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(source);
+        }
+
+        [TestMethod]
+        public async Task CommentWhitespaceStillCollapsesWhileLiteralWhitespaceIsPreserved()
+        {
+            const string parameter = "string /* keep    default */ value = \"left    right\"";
+            const string normalized = "string /* keep default */ value = \"left    right\"";
+            string source = "class C { void M{|#0:(\n    " + parameter + "\n)|} { } }";
+            int length = normalized.Length;
+            var expected = DiagnosticResult
+                .CompilerWarning(ParameterListFitAnalyzer.DiagnosticId)
+                .WithLocation(0)
+                .WithArguments(length, length);
+            await VerifyAsync(source, "warning", length.ToString(), expected);
+        }
+
+        [TestMethod]
         public async Task HigherMaximumReportsTheLongBreak()
         {
             const string source = "class C { void M(\n    float amplitude,\n    float frequencyX,\n    float frequencyZ,\n    float detailScale,\n    int seed,\n    int octave,\n    float secondaryAmplitudeXYZ\n) { } }";
