@@ -14,17 +14,19 @@ The same escape exists for a non-void local function, a property, an indexer, a 
 
 ## Change
 
-Score the arrow expression when it is the member's returned value, using the same CCCRC001 rules already used for `return` and `yield return`. That covers a non-void method, a non-void local function, a property, an indexer, a get accessor, an operator, and a conversion operator. An `async` method whose return type is a non-generic `Task` or `ValueTask` stays quiet, because that arrow is not a returned value. Void members, constructors, setters, lambdas, and anonymous functions stay quiet. The default maximum stays 1. `=> a + b` stays quiet. `=> a + b + c` reports.
+CCCRC001 now scores an arrow expression when that expression is the member's returned value, using the same rules as `return` and `yield return`. That covers a non-void method, a non-void local function, a property, an indexer, a get accessor, an operator, and a conversion operator. An `async` method whose return type displays as non-generic `System.Threading.Tasks.Task` or `System.Threading.Tasks.ValueTask` stays quiet, because that arrow is not a returned value. Void members, constructors, setters, lambdas, and anonymous functions stay quiet. The default maximum stays 1. `=> a + b` stays quiet. `=> a + b + c` reports.
 
-The repository README, the CodeClarity NuGet readme, the package description, the analyzer description, the return-complexity note, and the unreleased package notes will say so.
+The repository README, the CodeClarity NuGet readme, the package description, the analyzer description, the return-complexity note, and the unreleased package notes say so.
 
 ## After
 
-Not implemented yet.
+`int Height(int a, int b, int c) => a + b + c` now reports CCCRC001 at the default maximum, on `a + b + c`. `int Height(int a, int b) => a + b` stays quiet. The same two-step expression reports for a non-void local function, a property, an indexer, a get accessor, an operator, a conversion operator, `async Task<int>`, and `async ValueTask<int>`. A void arrow, an `async Task`, an `async ValueTask`, a lambda, a constructor arrow, and a setter arrow stay quiet. `=> nameof(C)` stays quiet at maximum 0. A block `return a + b + c` and a `yield return a + b + c` still report. Writing the returned calculation with `=>` no longer removes the warning. Whether that warning changes real projects was not measured.
 
 ## Evidence
 
-At `origin/main` `085bac71d656d7740ec728cb13137750cd183fc9`, `ReturnTypeComplexityAnalyzer.Initialize` registers only `ReturnStatement` and `YieldReturnStatement`. `SingleCalculationStepIsSimple` expects `int Body(int a, int b, int c) => a + b + c` to produce no diagnostic. `docs/codeclarity/user/return-expression-complexity.md` says an expression-bodied member is not visited, and that moving a calculation there still removes the warning. Refreshed `origin` has only `main`. No open pull request or remote branch claims this scoring. Whether people rely on the silence was not measured.
+Before the change, at `origin/main` `085bac71d656d7740ec728cb13137750cd183fc9`, `ReturnTypeComplexityAnalyzer.Initialize` registered only `ReturnStatement` and `YieldReturnStatement`. `SingleCalculationStepIsSimple` expected `int Body(int a, int b, int c) => a + b + c` to produce no diagnostic. The return-complexity note said an expression-bodied member was not visited. Refreshed `origin` had only `main`. No open pull request or remote branch claimed this scoring.
+
+After the change, from `src/sln/Coree.Analyzers.CodeClarity`: `dotnet build --no-restore -m:1` succeeded with 0 errors. The DebugHost warnings are the existing sample diagnostics, including CCCRC001 on the block-bodied `InlinedHeight`. `dotnet test --no-build` passed 111 tests. Coverlet reported 100% line, branch, and method coverage of `Coree.Analyzers.CodeClarity`. `ExpressionBodiedReturnedValuesReport` and `ExpressionBodiedNonValuesAndSingleStepsStayQuiet` cover the cases in After. `dotnet pack` then succeeded and wrote `src/prj/Coree.Analyzers.CodeClarity/bin/Pack/Coree.Analyzers.CodeClarity.1.0.2-g0e00105b9d.nupkg`. That version is the local Git height of the implementation commit, not a published release. Real consumer uptake was not measured.
 
 ## Understood assignment and provenance
 
@@ -78,7 +80,19 @@ Rollback is reverting this branch. No configuration migration is required.
 - Integration target: `main`. Refreshed base: `origin/main` at `085bac71d656d7740ec728cb13137750cd183fc9`.
 - Feature branch: `feature/pevo/expression-return-261025`.
 - Worktree: `.worktrees/expression-return-261025`, ignored by `.git/info/exclude`.
-- Issue path: `Issues/open/expression-return-261025.md`. This file is the issue-only baseline. Early publication of this branch is the next step and is not done yet. Closure publication, pull request, merge, and worktree cleanup are not done.
+- Issue path at baseline: `Issues/open/expression-return-261025.md`.
+- Issue-only baseline commit: `1b3e8a592160a7cba6d15c8fa0e7f80bb3d41d6b`, published to `origin/feature/pevo/expression-return-261025` before product edits.
+- Implementation commit: `0e00105b9db4a7e0152f6057fcc02fcd01bddfbf`.
+
+## Final outcome
+
+Status: Done. The implementation is verified and is not merged.
+
+`ReturnTypeComplexityAnalyzer` scores a returned arrow with the existing `ReturnExpressionComplexity` rules. The plan's member set was implemented as registered syntax kinds rather than one shared switch. `async Task<int>` and `async ValueTask<int>` report, which is the generic case already implied by scoring returned values. No acceptance criterion was dropped.
+
+Verification is the build, the 111 passing tests, 100% coverage, and the pack result in Evidence. Consumer benefit was not measured outside those tests. Rollback is reverting `0e00105b9db4a7e0152f6057fcc02fcd01bddfbf` together with this closure.
+
+Publication of this Done closure, pull-request creation, merge, and worktree cleanup are not done yet. The remote branch currently points at the issue-only baseline.
 
 ## Incidental Discoveries (Out of Scope)
 
