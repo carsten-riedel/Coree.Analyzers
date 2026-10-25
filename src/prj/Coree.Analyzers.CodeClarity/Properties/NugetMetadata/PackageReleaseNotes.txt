@@ -1,3 +1,7 @@
+Unreleased
+
+ - CCCPL002 stays quiet when a parameter list contains a line comment, so it does not recommend a one-line spelling that would comment out the rest of the signature. A // inside a string can still report.
+
 0.1.5 (2026-10-08)
 
  - CCCPL001 flags a parameter list that spans more than one line while one of those lines still starts more than one parameter.

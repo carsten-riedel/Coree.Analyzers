@@ -172,7 +172,7 @@ public void M(
 )
 ```
 
-CCCPL002 is separate from that shape rule. The last sample stays within CCCPL001 and still reports CCCPL002, because the parameters would fit on one line. The length is the parameters joined by `, ` after tabs, line breaks, and repeated spaces collapse. Parentheses are not counted. `float a, float b, float c` is 25 characters, so it reports at the default of 120. The one-line record does not. A longer list that uses the same legal break stays quiet.
+CCCPL002 is separate from that shape rule. The last sample stays within CCCPL001 and still reports CCCPL002, because the parameters would fit on one line. The length is the parameters joined by `, ` after tabs, line breaks, and repeated spaces collapse. Parentheses are not counted. A list that contains a `//` comment stays quiet, because that comment cannot be kept on the one line the diagnostic recommends. A `//` inside a string is not a comment and can still report. `float a, float b, float c` is 25 characters, so it reports at the default of 120. The one-line record does not. A longer list that uses the same legal break stays quiet.
 
 CCCNS001 reports a class, struct, record, interface, enum, or delegate that is not inside a namespace. Nested types are not reported on their own. The first sample reports CCCNS001. The block namespace and the file-scoped namespace do not.
 

@@ -160,6 +160,42 @@ public record Profile{|#7:(
         }
 
         [TestMethod]
+        public async Task LineCommentInsideParameterStaysQuiet()
+        {
+            const string source = "class C { void M(\n    int // amplitude\n    a,\n    int b\n) { } }";
+            await VerifyAsync(source, "warning", null);
+        }
+
+        [TestMethod]
+        public async Task LineCommentBetweenParametersStaysQuiet()
+        {
+            const string source = "class C { void M(\n    int a, // amplitude\n    int b\n) { } }";
+            await VerifyAsync(source, "warning", null);
+        }
+
+        [TestMethod]
+        public async Task SlashSlashInsideStringStillReports()
+        {
+            const string source = "class C { void M(\n    string scheme,\n    string url = \"http://example\"\n) { } }";
+            var expected = DiagnosticResult
+                .CompilerWarning(ParameterListFitAnalyzer.DiagnosticId)
+                .WithSpan(1, 17, 4, 2)
+                .WithMessage("This parameter list is broken across lines, but the parameters fit in 44 characters (limit 120). Write it on one line, as in M(a, b, c).");
+            await VerifyAsync(source, "warning", null, expected);
+        }
+
+        [TestMethod]
+        public async Task BlockCommentStillReports()
+        {
+            const string source = "class C { void M(\n    int /* amplitude */ a,\n    int b\n) { } }";
+            var expected = DiagnosticResult
+                .CompilerWarning(ParameterListFitAnalyzer.DiagnosticId)
+                .WithSpan(1, 17, 4, 2)
+                .WithMessage("This parameter list is broken across lines, but the parameters fit in 28 characters (limit 120). Write it on one line, as in M(a, b, c).");
+            await VerifyAsync(source, "warning", null, expected);
+        }
+
+        [TestMethod]
         public async Task SeverityErrorReportsError()
         {
             const string source = "class C { void M(\n    int a,\n    int b\n) { } }";
