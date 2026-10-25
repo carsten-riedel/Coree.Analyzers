@@ -26,10 +26,11 @@ namespace Coree.Analyzers.CodeClarity
 
         internal static bool HasBlankLine(string gap)
         {
-            string[] lines = gap.Split('\n');
-            for (int index = 1; index < lines.Length - 1; index++)
+            // Use compiler line boundaries for CR-only and Unicode endings, keeping CRLF as one break.
+            TextLineCollection lines = SourceText.From(gap).Lines;
+            for (int index = 1; index < lines.Count - 1; index++)
             {
-                if (string.IsNullOrWhiteSpace(lines[index]))
+                if (string.IsNullOrWhiteSpace(lines[index].ToString()))
                 {
                     return true;
                 }
