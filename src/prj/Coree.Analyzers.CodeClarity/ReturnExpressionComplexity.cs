@@ -75,6 +75,13 @@ namespace Coree.Analyzers.CodeClarity
 
         private static bool IsStringConcatenation(BinaryExpressionSyntax binary, SemanticModel model)
         {
+            // A string operand is not enough: a user-defined operator + is an arithmetic step, not concatenation.
+            if (model.GetSymbolInfo(binary).Symbol is IMethodSymbol method
+                && method.MethodKind == MethodKind.UserDefinedOperator)
+            {
+                return false;
+            }
+
             bool leftIsString = HasStringType(binary.Left, model);
             bool rightIsString = HasStringType(binary.Right, model);
             return leftIsString || rightIsString;

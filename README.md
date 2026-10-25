@@ -130,7 +130,7 @@ Example in a project file. The version `0.1.2` is the one shown here:
 | **CCCNS001** | A class, struct, record, interface, enum, or delegate declared outside a namespace |
 | **CCCMB001** | A method with a body that follows another method with a body in the same type without a blank line between them |
 
-Arithmetic other than string concatenation, method calls other than `nameof`, and conditional operators each count as one step. Casts, signs, `await`, member access, and identifiers do not. Default severity is warning.
+Arithmetic other than string concatenation, method calls other than `nameof`, and conditional operators each count as one step. A user-defined `operator +` counts even when one operand is a string. Casts, signs, `await`, member access, and identifiers do not. Default severity is warning.
 
 Only the C# `nameof` operator is exempt. A user-defined method named `nameof` (including `@nameof`) counts as a method call. For example, `return @nameof(a + b);` has two steps and reports at the default maximum of 1.
 
