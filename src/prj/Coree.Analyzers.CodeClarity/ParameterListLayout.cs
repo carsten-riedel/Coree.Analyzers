@@ -53,8 +53,11 @@ namespace Coree.Analyzers.CodeClarity
                 return false;
             }
 
-            // The list form puts the closing parenthesis on the line after the last parameter.
-            if (!onOpenLine && !sharesLine && closeLine == previousLine + 1)
+            // Follow the last line of the last parameter, not its first line.
+            // A start-line check warns when that parameter legally spans lines, and it
+            // misses a closing parenthesis that sits on the parameter's last line.
+            int lastEndLine = EndLine(parameters[parameters.Count - 1].GetLocation());
+            if (!onOpenLine && !sharesLine && closeLine == lastEndLine + 1)
             {
                 return false;
             }
@@ -65,6 +68,11 @@ namespace Coree.Analyzers.CodeClarity
         private static int Line(Location location)
         {
             return location.GetLineSpan().StartLinePosition.Line;
+        }
+
+        private static int EndLine(Location location)
+        {
+            return location.GetLineSpan().EndLinePosition.Line;
         }
     }
 }

@@ -38,6 +38,24 @@ class Plain
         int b
     ) { }
 
+    void LastAttribute(
+        int a,
+        [Mark]
+        int b
+    ) { }
+
+    void LastDefault(
+        int a,
+        string b = @""one
+two""
+    ) { }
+
+    void EarlierSpan(
+        [Mark]
+        int a,
+        int b
+    ) { }
+
     public Plain(
         int a,
         int b,
@@ -73,6 +91,12 @@ public record TerrainProfileExpanded(
     float DetailAmplitude,
     float DetailX,
     float DetailZ
+);
+
+public record LastAttributeRecord(
+    int a,
+    [Mark]
+    int b
 );
 ";
             await CSharpAnalyzerVerifier<ParameterListLayoutAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(test);
@@ -169,12 +193,35 @@ class More
         int c)|}
     {
     }
+
+    public void LastAttributeClosed{|#16:(
+        int a,
+        [Mark]
+        int b)|}
+    {
+    }
+
+    public void LastDefaultClosed{|#17:(
+        int a,
+        string b = @""one
+two"")|}
+    {
+    }
+
+    public void BlankAfterSpan{|#18:(
+        int a,
+        [Mark]
+        int b
+
+    )|}
+    {
+    }
 }
 
 class PackedFollowing{|#14:(
     int a, int b, int c)|};
 ";
-            DiagnosticResult[] expected = new DiagnosticResult[16];
+            DiagnosticResult[] expected = new DiagnosticResult[19];
             for (int index = 0; index < expected.Length; index++)
             {
                 expected[index] = DiagnosticResult
