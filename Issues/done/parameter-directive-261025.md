@@ -15,15 +15,17 @@ C# requires `#if`, `#endif`, `#region`, and the other directives to stand on the
 
 ## Change
 
-CCCPL002 stays quiet when the parameter list contains preprocessor directive trivia. The length calculation is unchanged, so a short broken list with no directive still reports. A `#if` inside a string is not a directive and can still report. Repository README, NuGet README, analyzer description, and package notes state this exception.
+CCCPL002 now stays quiet when the parameter list contains preprocessor directive trivia (`SyntaxTrivia.IsDirective`). The length calculation is unchanged. A short broken list with no directive still reports. A `#if` sequence inside a string is not trivia and still reports. Repository README, NuGet README, analyzer description, domain note, and Unreleased package notes state this exception. Line-comment quieting and block-comment reporting on this baseline were left as they were.
 
 ## After
 
-Not implemented yet.
+The list with `#if true` around `int debugFlag` no longer reports CCCPL002. The list with `#region flags` around `int b` no longer reports it either. A short broken list whose string default contains `"#if true"` still reports CCCPL002. `BlockCommentStillReports` still reports. Whether people actually keep those directives was not measured.
 
 ## Evidence
 
-At `origin/main` `76107484db8079120328ea90626aeb60b18a31d1`, `ParameterListFit.ContainsLineComment` walks `DescendantTrivia` and returns true only for `SingleLineCommentTrivia`. Directive trivia uses other syntax kinds (`IfDirectiveTrivia`, `EndIfDirectiveTrivia`, `RegionDirectiveTrivia`, and the rest of `SyntaxTrivia.IsDirective`). `BlockCommentStillReports` still expects a diagnostic for `/* */` on this baseline. `LineCommentInsideParameterStaysQuiet` and `LineCommentBetweenParametersStaysQuiet` cover `//` only. C# preprocessor directives must occupy a full line, so they cannot survive the one-line spelling CCCPL002 recommends. Consumer benefit is not measured.
+At `origin/main` `76107484db8079120328ea90626aeb60b18a31d1`, `ParameterListFit.ContainsLineComment` walked `DescendantTrivia` and returned true only for `SingleLineCommentTrivia`. Before the guard, `PreprocessorIfAroundParameterStaysQuiet` and `PreprocessorRegionAroundParameterStaysQuiet` each returned one CCCPL002 warning (27 and 19 characters, limit 120). Command, from `src/sln/Coree.Analyzers.CodeClarity`: `dotnet test --filter FullyQualifiedName~PreprocessorIfAroundParameterStaysQuiet|FullyQualifiedName~PreprocessorRegionAroundParameterStaysQuiet -p:CollectCoverage=false --verbosity minimal -m:1`. Result: Failed 2, Passed 0.
+
+After the guard, from that same directory: `dotnet build -m:1` succeeded with 0 errors. `dotnet test --no-build` passed 103 tests with 100% line, branch, and method coverage. `dotnet pack --no-restore -m:1` produced `Coree.Analyzers.CodeClarity.0.1.21-gc3176ba206.nupkg` under `src/prj/Coree.Analyzers.CodeClarity/bin/Pack/`: analyzer under `analyzers/dotnet/cs`, props under `build/` and `buildTransitive/`, no `lib/` group. The packed README and nuspec notes mention the preprocessor exception. The first string sample used an optional parameter before a required one (`CS1737`) and was replaced by required `int b` followed by `string option = "#if true"`. Consumer benefit is not measured.
 
 ## Understood assignment and provenance
 
@@ -78,12 +80,22 @@ Consumers are C# developers who see CCCPL002. Lists that already warn without di
 
 ## Selected improvement and baseline
 
-- Status: Open. Implementation not started.
+- Status: Done. Implementation verified against the acceptance criteria. Not merged.
 - Date: 2026-10-25.
 - Integration target: `main`; refreshed `origin/main` at `76107484db8079120328ea90626aeb60b18a31d1`.
 - Feature branch: `feature/pevo/parameter-directive-261025`.
 - Temporary worktree: `.worktrees/parameter-directive-261025`, ignored through `.git/info/exclude`.
-- Early issue-only checkpoint publication: pending until this file is committed and the branch is pushed.
+- Issue-only baseline: `c3176ba206ceeceac1658810c1d336264cac7a07`, published to `origin` before product edits.
+- Implementation: `eb506cb058e81ec9215099921a49164fc810c983`.
+- Publication of this closure commit, pull-request creation, merge, and worktree cleanup: pending until after this commit is pushed.
+
+## Final outcome
+
+The planned trivia guard was implemented without a scope change. Block comments still report on this baseline. Line-comment quiet cases stay quiet. No diagnostic id, severity, or maximum changed.
+
+The HashIf string sample was invalid C# at first (`CS1737`) and was corrected before the passing suite run. That did not change the selected outcome.
+
+Rollback remains reverting the guard, tests, and accompanying notes together. Lists that contain directive trivia stop receiving CCCPL002 at the consumer's configured severity. That is the correction, not a separate migration.
 
 ## Incidental Discoveries (Out of Scope)
 
