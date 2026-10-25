@@ -15,12 +15,14 @@
           DependsOnTargets="_TypographyCollectCompiledSources">
     <PropertyGroup>
       <EllipsisAnalyzerExcludes Condition="'$(EllipsisAnalyzerExcludes)' != ''">$([System.String]::Copy('$(EllipsisAnalyzerExcludes)').Trim())</EllipsisAnalyzerExcludes>
+      <!-- Trim stores ';' as %3B. An empty Excludes value is the documented default. Split before using the list as globs. -->
+      <EllipsisAnalyzerExcludes Condition="'$(EllipsisAnalyzerExcludes)' == ''">$([System.String]::Copy('$(_TypographyDefaultExcludes)').Trim())</EllipsisAnalyzerExcludes>
       <EllipsisAnalyzerAdditionalExcludes Condition="'$(EllipsisAnalyzerAdditionalExcludes)' != ''">$([System.String]::Copy('$(EllipsisAnalyzerAdditionalExcludes)').Trim())</EllipsisAnalyzerAdditionalExcludes>
       <_TypographyEllipsisIsAllFiles Condition="'$(EllipsisAnalyzerIncludes)' == '**' OR '$(EllipsisAnalyzerIncludes)' == '**/*' OR '$(EllipsisAnalyzerIncludes)' == '**\*'">true</_TypographyEllipsisIsAllFiles>
     </PropertyGroup>
     <ItemGroup>
-      <_EllipsisExcludeGlob Include="$(EllipsisAnalyzerExcludes)" Condition="'$(EllipsisAnalyzerExcludes)' != ''" />
-      <_EllipsisExcludeGlob Include="$(EllipsisAnalyzerAdditionalExcludes)" Condition="'$(EllipsisAnalyzerAdditionalExcludes)' != ''" />
+      <_EllipsisExcludeGlob Include="$([System.String]::Copy('$(EllipsisAnalyzerExcludes)').Split('%3B'))" Condition="'$(EllipsisAnalyzerExcludes)' != ''" />
+      <_EllipsisExcludeGlob Include="$([System.String]::Copy('$(EllipsisAnalyzerAdditionalExcludes)').Split('%3B'))" Condition="'$(EllipsisAnalyzerAdditionalExcludes)' != ''" />
       <_EllipsisExcludeGlob Include="$(_TypographyAlwaysFolderExcludes)" />
       <_EllipsisAnalyzerAdditionalFile Include="$(_TypographyProjectDirectory)**\*"
                                         Exclude="@(_EllipsisExcludeGlob->'$(_TypographyProjectDirectory)%(Identity)');@(_TypographyCompiledSource)"

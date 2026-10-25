@@ -1,3 +1,7 @@
+Unreleased
+
+ - Fix Typography Excludes so each pattern is its own glob. The default extension list, including an empty Excludes value, no longer registers those files as additional files.
+
 1.0.2 (2026-10-08)
 
  - A file already in Compile stays on the C# syntax tree and is not registered again as an AdditionalFile.

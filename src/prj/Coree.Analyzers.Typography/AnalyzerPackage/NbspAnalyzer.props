@@ -15,12 +15,14 @@
           DependsOnTargets="_TypographyCollectCompiledSources">
     <PropertyGroup>
       <NbspAnalyzerExcludes Condition="'$(NbspAnalyzerExcludes)' != ''">$([System.String]::Copy('$(NbspAnalyzerExcludes)').Trim())</NbspAnalyzerExcludes>
+      <!-- Trim stores ';' as %3B. An empty Excludes value is the documented default. Split before using the list as globs. -->
+      <NbspAnalyzerExcludes Condition="'$(NbspAnalyzerExcludes)' == ''">$([System.String]::Copy('$(_TypographyDefaultExcludes)').Trim())</NbspAnalyzerExcludes>
       <NbspAnalyzerAdditionalExcludes Condition="'$(NbspAnalyzerAdditionalExcludes)' != ''">$([System.String]::Copy('$(NbspAnalyzerAdditionalExcludes)').Trim())</NbspAnalyzerAdditionalExcludes>
       <_TypographyNbspIsAllFiles Condition="'$(NbspAnalyzerIncludes)' == '**' OR '$(NbspAnalyzerIncludes)' == '**/*' OR '$(NbspAnalyzerIncludes)' == '**\*'">true</_TypographyNbspIsAllFiles>
     </PropertyGroup>
     <ItemGroup>
-      <_NbspExcludeGlob Include="$(NbspAnalyzerExcludes)" Condition="'$(NbspAnalyzerExcludes)' != ''" />
-      <_NbspExcludeGlob Include="$(NbspAnalyzerAdditionalExcludes)" Condition="'$(NbspAnalyzerAdditionalExcludes)' != ''" />
+      <_NbspExcludeGlob Include="$([System.String]::Copy('$(NbspAnalyzerExcludes)').Split('%3B'))" Condition="'$(NbspAnalyzerExcludes)' != ''" />
+      <_NbspExcludeGlob Include="$([System.String]::Copy('$(NbspAnalyzerAdditionalExcludes)').Split('%3B'))" Condition="'$(NbspAnalyzerAdditionalExcludes)' != ''" />
       <_NbspExcludeGlob Include="$(_TypographyAlwaysFolderExcludes)" />
       <_NbspAnalyzerAdditionalFile Include="$(_TypographyProjectDirectory)**\*"
                                     Exclude="@(_NbspExcludeGlob->'$(_TypographyProjectDirectory)%(Identity)');@(_TypographyCompiledSource)"

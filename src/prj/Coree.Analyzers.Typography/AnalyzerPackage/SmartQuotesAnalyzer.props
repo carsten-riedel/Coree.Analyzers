@@ -15,12 +15,14 @@
           DependsOnTargets="_TypographyCollectCompiledSources">
     <PropertyGroup>
       <SmartQuotesAnalyzerExcludes Condition="'$(SmartQuotesAnalyzerExcludes)' != ''">$([System.String]::Copy('$(SmartQuotesAnalyzerExcludes)').Trim())</SmartQuotesAnalyzerExcludes>
+      <!-- Trim stores ';' as %3B. An empty Excludes value is the documented default. Split before using the list as globs. -->
+      <SmartQuotesAnalyzerExcludes Condition="'$(SmartQuotesAnalyzerExcludes)' == ''">$([System.String]::Copy('$(_TypographyDefaultExcludes)').Trim())</SmartQuotesAnalyzerExcludes>
       <SmartQuotesAnalyzerAdditionalExcludes Condition="'$(SmartQuotesAnalyzerAdditionalExcludes)' != ''">$([System.String]::Copy('$(SmartQuotesAnalyzerAdditionalExcludes)').Trim())</SmartQuotesAnalyzerAdditionalExcludes>
       <_TypographySmartQuotesIsAllFiles Condition="'$(SmartQuotesAnalyzerIncludes)' == '**' OR '$(SmartQuotesAnalyzerIncludes)' == '**/*' OR '$(SmartQuotesAnalyzerIncludes)' == '**\*'">true</_TypographySmartQuotesIsAllFiles>
     </PropertyGroup>
     <ItemGroup>
-      <_SmartQuotesExcludeGlob Include="$(SmartQuotesAnalyzerExcludes)" Condition="'$(SmartQuotesAnalyzerExcludes)' != ''" />
-      <_SmartQuotesExcludeGlob Include="$(SmartQuotesAnalyzerAdditionalExcludes)" Condition="'$(SmartQuotesAnalyzerAdditionalExcludes)' != ''" />
+      <_SmartQuotesExcludeGlob Include="$([System.String]::Copy('$(SmartQuotesAnalyzerExcludes)').Split('%3B'))" Condition="'$(SmartQuotesAnalyzerExcludes)' != ''" />
+      <_SmartQuotesExcludeGlob Include="$([System.String]::Copy('$(SmartQuotesAnalyzerAdditionalExcludes)').Split('%3B'))" Condition="'$(SmartQuotesAnalyzerAdditionalExcludes)' != ''" />
       <_SmartQuotesExcludeGlob Include="$(_TypographyAlwaysFolderExcludes)" />
       <_SmartQuotesAnalyzerAdditionalFile Include="$(_TypographyProjectDirectory)**\*"
                                           Exclude="@(_SmartQuotesExcludeGlob->'$(_TypographyProjectDirectory)%(Identity)');@(_TypographyCompiledSource)"

@@ -15,12 +15,14 @@
           DependsOnTargets="_TypographyCollectCompiledSources">
     <PropertyGroup>
       <MinusAnalyzerExcludes Condition="'$(MinusAnalyzerExcludes)' != ''">$([System.String]::Copy('$(MinusAnalyzerExcludes)').Trim())</MinusAnalyzerExcludes>
+      <!-- Trim stores ';' as %3B. An empty Excludes value is the documented default. Split before using the list as globs. -->
+      <MinusAnalyzerExcludes Condition="'$(MinusAnalyzerExcludes)' == ''">$([System.String]::Copy('$(_TypographyDefaultExcludes)').Trim())</MinusAnalyzerExcludes>
       <MinusAnalyzerAdditionalExcludes Condition="'$(MinusAnalyzerAdditionalExcludes)' != ''">$([System.String]::Copy('$(MinusAnalyzerAdditionalExcludes)').Trim())</MinusAnalyzerAdditionalExcludes>
       <_TypographyMinusIsAllFiles Condition="'$(MinusAnalyzerIncludes)' == '**' OR '$(MinusAnalyzerIncludes)' == '**/*' OR '$(MinusAnalyzerIncludes)' == '**\*'">true</_TypographyMinusIsAllFiles>
     </PropertyGroup>
     <ItemGroup>
-      <_MinusExcludeGlob Include="$(MinusAnalyzerExcludes)" Condition="'$(MinusAnalyzerExcludes)' != ''" />
-      <_MinusExcludeGlob Include="$(MinusAnalyzerAdditionalExcludes)" Condition="'$(MinusAnalyzerAdditionalExcludes)' != ''" />
+      <_MinusExcludeGlob Include="$([System.String]::Copy('$(MinusAnalyzerExcludes)').Split('%3B'))" Condition="'$(MinusAnalyzerExcludes)' != ''" />
+      <_MinusExcludeGlob Include="$([System.String]::Copy('$(MinusAnalyzerAdditionalExcludes)').Split('%3B'))" Condition="'$(MinusAnalyzerAdditionalExcludes)' != ''" />
       <_MinusExcludeGlob Include="$(_TypographyAlwaysFolderExcludes)" />
       <_MinusAnalyzerAdditionalFile Include="$(_TypographyProjectDirectory)**\*"
                                      Exclude="@(_MinusExcludeGlob->'$(_TypographyProjectDirectory)%(Identity)');@(_TypographyCompiledSource)"
