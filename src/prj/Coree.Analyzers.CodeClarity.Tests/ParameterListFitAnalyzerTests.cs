@@ -219,6 +219,30 @@ public record Profile{|#7:(
         }
 
         [TestMethod]
+        public async Task PreprocessorIfAroundParameterStaysQuiet()
+        {
+            const string source = "class C { void M(\n    int a,\n#if true\n    int debugFlag,\n#endif\n    int b\n) { } }";
+            await VerifyAsync(source, "warning", null);
+        }
+
+        [TestMethod]
+        public async Task PreprocessorRegionAroundParameterStaysQuiet()
+        {
+            const string source = "class C { void M(\n    int a,\n#region flags\n    int b,\n#endregion\n    int c\n) { } }";
+            await VerifyAsync(source, "warning", null);
+        }
+
+        [TestMethod]
+        public async Task HashIfInsideStringStillReports()
+        {
+            const string source = "class C { void M(\n    int b,\n    string option = \"#if true\"\n) { } }";
+            var expected = DiagnosticResult
+                .CompilerWarning(ParameterListFitAnalyzer.DiagnosticId)
+                .WithSpan(1, 17, 4, 2);
+            await VerifyAsync(source, "warning", null, expected);
+        }
+
+        [TestMethod]
         public async Task SlashSlashInsideStringStillReports()
         {
             const string source = "class C { void M(\n    string scheme,\n    string url = \"http://example\"\n) { } }";

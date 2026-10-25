@@ -15,8 +15,8 @@ namespace Coree.Analyzers.CodeClarity
                 return false;
             }
 
-            // A line comment cannot be kept in the one-line spelling this diagnostic recommends.
-            if (ContainsLineComment(parameterList))
+            // A line comment or preprocessor directive cannot be kept in the one-line spelling this diagnostic recommends.
+            if (ContainsLineComment(parameterList) || ContainsPreprocessorDirective(parameterList))
             {
                 return false;
             }
@@ -29,6 +29,19 @@ namespace Coree.Analyzers.CodeClarity
             foreach (SyntaxTrivia trivia in parameterList.DescendantTrivia())
             {
                 if (trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool ContainsPreprocessorDirective(ParameterListSyntax parameterList)
+        {
+            foreach (SyntaxTrivia trivia in parameterList.DescendantTrivia())
+            {
+                if (trivia.IsDirective)
                 {
                     return true;
                 }
