@@ -4,20 +4,20 @@ CodeClarity's CCCMB001 reports a missing blank line between two methods even whe
 
 ## Change
 
-Planned: use Roslyn's source-text line boundaries to recognize blank lines consistently with the compiler. Add contrasting analyzer tests for separated methods, adjacent methods, whitespace-only lines, comments, and mixed line endings. Keep the existing rule and configuration intact.
+Changed `MethodBlankLine.HasBlankLine` to use Roslyn's source-text line boundaries while examining only complete interior lines. Added contrasting analyzer tests for separated methods, adjacent methods, whitespace-only lines, comments, and mixed line endings. The existing rule and configuration remain intact; consumer README descriptions and Unreleased package notes explain the corrected behavior.
 
 ## After
 
-Not implemented yet.
+The same methods separated by an empty or whitespace-only line now stay quiet in CR-only and Unicode-terminated C# source. LF, CRLF, and mixed endings also recognize blank lines. A single CRLF pair, method indentation, and comment-only gaps still report on the later method. Consumers can satisfy CCCMB001 without changing their source-file line endings.
 
 ## Evidence
 
-At base `ab21473c4e2051b8b0cc2abcbe38ddb35e7f7c8d`, [MethodBlankLine.cs](../../src/prj/Coree.Analyzers.CodeClarity/MethodBlankLine.cs) uses `gap.Split('\n')`; its existing carriage-return test actually supplies CRLF. [C# line terminators](https://learn.microsoft.com/dotnet/csharp/language-reference/language-specification/lexical-structure#632-line-terminators) include CR, LF, CRLF, NEL, line separator, and paragraph separator. The existing [domain contract](../../docs/agent-domain-understanding/context/method-blank-line.md) defines an empty or whitespace-only line without limiting line endings. Runtime reproduction and post-change verification are pending. Consumer benefit has not been measured.
+At base `ab21473c4e2051b8b0cc2abcbe38ddb35e7f7c8d`, [MethodBlankLine.cs](../../src/prj/Coree.Analyzers.CodeClarity/MethodBlankLine.cs) uses `gap.Split('\n')`; its existing carriage-return test actually supplies CRLF. [C# line terminators](https://learn.microsoft.com/dotnet/csharp/language-reference/language-specification/lexical-structure#632-line-terminators) include CR, LF, CRLF, NEL, line separator, and paragraph separator. The existing [domain contract](../../docs/agent-domain-understanding/context/method-blank-line.md) defines an empty or whitespace-only line without limiting line endings. With the final valid regression fixtures, the original implementation failed nine of 24 method-spacing tests; the repaired implementation passes the complete 61-test CodeClarity suite with 100% line, branch, and method coverage. Build and pack also succeed. Consumer benefit has not been measured.
 
 ## Assignment and status
 
 - User invoked `execute-product-evolution` without a profile or a specific feature request, authorizing one autonomous bounded improvement, issue recording, commits, branch publication, and temporary workspace cleanup. No PR or integration is requested.
-- Status: Open. Date: 2026-10-25.
+- Status: Done (implementation verified; not merged). Date: 2026-10-25.
 - All three phase strategies were selected as Default (Conservative) before reading policy references; there were no refinements or policy changes.
 
 ## Discover — Default.md + Contract.md
@@ -59,7 +59,7 @@ Choose A for its clear existing contract, minimal consumer disruption, and decis
 - Integration target: `main`; refreshed base: `origin/main` at `ab21473c4e2051b8b0cc2abcbe38ddb35e7f7c8d`.
 - Feature branch: `feature/pevo/method-newlines-261025`.
 - Temporary linked worktree: `.worktrees/method-newlines-261025`, ignored through the local shared Git exclude file.
-- Early issue-only branch publication: pending; required before product edits.
+- Early issue-only branch publication: verified at `99c80b26717ff79cbad9d1e7eaaa9041f94fe19a` before product edits.
 - Consumers: CodeClarity users in IDE and command-line builds, especially imported or generated source with uncommon line terminators. Generated-code exclusion remains unchanged.
 - Main risk: accidentally counting indentation or a CRLF pair as a blank line. Contrast tests must distinguish complete interior lines from partial first/last lines.
 - Rollback: revert the implementation and documentation commits; no data migration or public API change.
@@ -67,4 +67,20 @@ Choose A for its clear existing contract, minimal consumer disruption, and decis
 
 ## Execution record
 
-Original decision recorded before product changes. Implementation, verification, final publication, cleanup and integration are pending.
+Original decision recorded and published before product changes in `99c80b2`. Implementation is committed in `2fb3c16`; the separate documentation checkpoint is `fe0e206`. No change to the original outcome, policies, or outer scope was required.
+
+## Verification and final outcome
+
+All commands ran from `src/sln/Coree.Analyzers.CodeClarity/` in the isolated worktree:
+
+- Baseline: `dotnet test --no-restore --filter FullyQualifiedName~MethodBlankLineAnalyzerTests -p:CollectCoverage=false --verbosity quiet -m:1` with the final valid new fixtures and original implementation: 9 failed, 15 passed. Failures were the four non-LF terminators for blank/whitespace-only lines and the mixed-ending scenario; the six adjacent/comment-only controls passed.
+- Repaired full suite: `dotnet test --no-restore --verbosity quiet -m:1`: 61 passed, zero failed/skipped; 100% line, branch, and method coverage with the configured threshold enabled. The preceding initial test invocation performed restore successfully.
+- `dotnet build --no-restore -m:1 --verbosity quiet`: succeeded, zero errors; six expected sample-analyzer warnings from DebugHost. The DebugHost source and runbook explain these deliberately nonconforming samples.
+- `dotnet pack --no-restore -m:1 --verbosity quiet`: succeeded. ZIP inspection confirmed the analyzer DLL/XML under `analyzers/dotnet/cs`, props under `build/` and `buildTransitive/`, no `lib/` group, updated packaged README, and corrected release notes in the nuspec.
+- `git diff origin/main --check`: clean. Review confirms changes are confined to the blank-line helper, its tests, corresponding consumer documentation/release notes, and this issue. Public IDs, descriptors, severity properties, generated-code policy, other analyzers, and dependencies are unchanged.
+- Context challenge: every supported terminator has a positive blank-line case, whitespace-only case, and contrasting missing/comment-only case. Mixed endings are covered; CRLF remains one break. Existing tests protect same-line methods, comments/docs/attributes, member/body exclusions, nesting, severity, message, and diagnostic locations. No unresolved in-scope blind spot was found.
+- Runbook and existing domain knowledge were reviewed. No build/operation guidance changed and no unrelated knowledge was promoted. Local work-history files are omitted under the temporary-checkout exception.
+
+Acceptance criteria 1-5 are satisfied. This verifies diagnostic behavior and package compatibility; real consumer usage and benefit remain unmeasured. Typography was not changed and its independent test suite was not run.
+
+Final-head publication and temporary worktree/local branch cleanup are pending at this dedicated closure commit and will be verified in the handoff. The early remote feature branch exists. PR creation and integration remain separate human decisions. Rollback remains a normal revert of the implementation/documentation commits, without migration.
