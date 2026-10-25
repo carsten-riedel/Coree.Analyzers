@@ -143,6 +143,72 @@ class C
         }
 
         [TestMethod]
+        [DataRow("@nameof(a + b)")]
+        [DataRow("nameof(a + b)")]
+        [DataRow("this.nameof(a + b)")]
+        [DataRow("@nameof(@nameof(a))")]
+        [DataRow("nameof(nameof(a))")]
+        public async Task NameofMethodCallsWithAnotherStepReport(string expression)
+        {
+            string source = "class C { int @nameof(int x) { return x; } "
+                + "int M(int a, int b) { return {|#0:" + expression + "|}; } }";
+            var expected = DiagnosticResult.CompilerWarning(ReturnTypeComplexityAnalyzer.DiagnosticId)
+                .WithLocation(0);
+            await CSharpAnalyzerVerifier<ReturnTypeComplexityAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(source, expected);
+        }
+
+        [TestMethod]
+        [DataRow("@nameof(a)")]
+        [DataRow("nameof(a)")]
+        [DataRow("this.nameof(a)")]
+        public async Task SingleNameofMethodCallHonorsMaximum(string expression)
+        {
+            const string prefix = "class C { int @nameof(int x) { return x; } int M(int a) { return ";
+            string source = prefix + expression + "; } }";
+            await VerifyWithConfigAsync(source, null, "1");
+
+            string markedSource = prefix + "{|#0:" + expression + "|}; } }";
+            var expected = DiagnosticResult.CompilerWarning(ReturnTypeComplexityAnalyzer.DiagnosticId)
+                .WithLocation(0);
+            await VerifyWithConfigAsync(markedSource, null, "0", expected);
+        }
+
+        [TestMethod]
+        public async Task GenuineNameofHasNoCostAtZeroMaximum()
+        {
+            const string source = @"
+class Callable
+{
+    public int @nameof(int value) { return value; }
+}
+class C
+{
+    string TypeName() { return nameof(Callable); }
+    string MemberName() { return nameof(Callable.@nameof); }
+}";
+            await VerifyWithConfigAsync(source, null, "0");
+        }
+
+        [TestMethod]
+        public async Task UnresolvedNameofExpressionsDoNotCrash()
+        {
+            const string source = @"
+class C
+{
+    string Name() { return nameof(Missing); }
+    int Call(int a, int b) { return {|#0:@nameof(a + b)|}; }
+}";
+            var test = new CSharpAnalyzerTest<ReturnTypeComplexityAnalyzer, DefaultVerifier>
+            {
+                TestCode = source,
+                CompilerDiagnostics = CompilerDiagnostics.None,
+            };
+            test.ExpectedDiagnostics.Add(DiagnosticResult.CompilerWarning(ReturnTypeComplexityAnalyzer.DiagnosticId)
+                .WithLocation(0));
+            await test.RunAsync();
+        }
+
+        [TestMethod]
         public async Task HigherMaximumAllowsTwoAdditions()
         {
             const string source = "class C { int M(int a, int b, int c) { return a + b + c; } }";

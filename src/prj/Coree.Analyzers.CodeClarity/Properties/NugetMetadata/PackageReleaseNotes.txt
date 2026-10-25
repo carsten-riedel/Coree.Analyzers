@@ -1,6 +1,7 @@
 Unreleased
 
  - Fix CCCMB001 false positives for blank lines in files with CR-only, Unicode, or mixed C# line endings. LF and CRLF behavior is preserved.
+ - Fix CCCRC001 undercounting calls to user-defined methods named nameof or @nameof. The C# nameof operator remains exempt.
 
 0.1.5 (2026-10-08)
 
