@@ -23,11 +23,13 @@ The nupkg is a development dependency: the analyzer under `analyzers/dotnet/cs`,
 | Id | What it flags |
 | --- | --- |
 | **CTYED001** | En dash (U+2013) and em dash (U+2014) |
-| **CTYQM001** | Typographic quotation marks (curly quotes and guillemets) |
+| **CTYQM001** | Curly double quotes, guillemets, and single quotation marks U+2018, U+201A, and U+201B |
 | **CTYAP001** | Typographic apostrophe / closing single quotation mark (U+2019) |
 | **CTYEL001** | Horizontal ellipsis (U+2026) |
 | **CTYMN001** | Minus sign (U+2212) |
 | **CTYNB001** | No-break space (U+00A0) and narrow no-break space (U+202F) |
+
+CTYQM001 reports the opening single quotation mark (U+2018), the single low-9 quotation mark (U+201A), and the single high-reversed-9 quotation mark (U+201B), along with the curly double quotes and guillemets. The closing single quotation mark (U+2019) stays on CTYAP001 only, so that character is not reported twice.
 
 C# syntax trees are always in scope. Matching files under the project directory are added as `AdditionalFiles` so Visual Studio can bind the same diagnostics `dotnet build` prints. A file already in `Compile` stays on the syntax tree and is not registered again. A `.cs` file that is not compiled is still an additional file when the globs match. Paths that are neither a syntax tree nor an additional file pin to the `.csproj` in Visual Studio.
 

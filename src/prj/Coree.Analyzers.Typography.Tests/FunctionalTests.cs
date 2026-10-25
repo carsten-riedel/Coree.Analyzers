@@ -64,6 +64,50 @@ namespace Coree.Analyzers.Typography.Tests
         }
 
         [TestMethod]
+        public async Task LeftSingleQuotationMarkReportsSmartQuote()
+        {
+            const string test = "class C { string s = \"x\u2018y\"; }";
+            var expected = DiagnosticResult
+                .CompilerWarning(SmartQuotesAnalyzer.DiagnosticId)
+                .WithSpan(1, 24, 1, 25);
+            await CSharpAnalyzerVerifier<SmartQuotesAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(test, expected);
+        }
+
+        [TestMethod]
+        public async Task SingleLow9QuotationMarkReportsSmartQuote()
+        {
+            const string test = "class C { string s = \"x\u201Ay\"; }";
+            var expected = DiagnosticResult
+                .CompilerWarning(SmartQuotesAnalyzer.DiagnosticId)
+                .WithSpan(1, 24, 1, 25);
+            await CSharpAnalyzerVerifier<SmartQuotesAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(test, expected);
+        }
+
+        [TestMethod]
+        public async Task SingleHighReversed9QuotationMarkReportsSmartQuote()
+        {
+            const string test = "class C { string s = \"x\u201By\"; }";
+            var expected = DiagnosticResult
+                .CompilerWarning(SmartQuotesAnalyzer.DiagnosticId)
+                .WithSpan(1, 24, 1, 25);
+            await CSharpAnalyzerVerifier<SmartQuotesAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(test, expected);
+        }
+
+        [TestMethod]
+        public async Task ClosingSingleQuotationMarkIsNotASmartQuote()
+        {
+            const string test = "class C { string s = \"x\u2019y\"; }";
+            await CSharpAnalyzerVerifier<SmartQuotesAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(test);
+        }
+
+        [TestMethod]
+        public async Task SingleQuotationMarksAreNotApostrophes()
+        {
+            const string test = "class C { string s = \"x\u2018y\u201Ay\u201By\"; }";
+            await CSharpAnalyzerVerifier<ApostropheAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(test);
+        }
+
+        [TestMethod]
         public async Task TypographicApostropheInStringReportsDiagnostic()
         {
             var expected = DiagnosticResult
