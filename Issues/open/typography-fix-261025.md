@@ -115,6 +115,8 @@ Revised rule for CTYQM001 and CTYAP001 only:
 
 Acceptance criteria 2 and 3 are read with this rule. Add: a raw string that contains U+201C still reports CTYQM001 and is not offered a fix. The other criteria are unchanged.
 
+Fix-all uses that same replacement for every C# document in the scope the IDE requests: the document, the project, or the solution. The first write-up named only the document. A project or solution fix-all is the same edit, applied to each document the developer included. Raw strings in those documents are still skipped.
+
 ## Incidental Discoveries (Out of Scope)
 
 - `ProjectDirectoryTextFiles.ContainsNul` returns false when U+0000 appears after the first 512 characters. `ContainsNulReadsOnlyTheFirst512Characters` locks that limit. Whether a later NUL should skip the rest of an additional file was not established.
