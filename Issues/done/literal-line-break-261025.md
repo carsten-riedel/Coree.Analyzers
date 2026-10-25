@@ -6,24 +6,26 @@ A default can be a verbatim or raw string that itself contains a line break. The
 
 ```csharp
 void M(
+    int limit,
     string query = @"select
-        id",
-    int limit)
+        id")
 ```
 
 The recommended one-line spelling cannot keep that string. A line break inside a block comment is different: the comment can sit on one line, and that list still reports. An escaped `\n` in a regular string is still one source line and can still report.
 
 ## Change
 
-CCCPL002 will stay quiet when a parameter token contains a C# line break: CR, LF, next line (U+0085), line separator (U+2028), or paragraph separator (U+2029). Those characters are inside the literal, so the one-line spelling cannot preserve them. Formatting whitespace will still collapse. A block comment will still be allowed on one line, and a short wrapped list without a literal line break will still report. The repository README, the NuGet readme, the parameter-list user page, the diagnostic description, and the package notes will say so.
+CCCPL002 stays quiet when a parameter token's source text contains a C# line break: CR, LF, next line (U+0085), line separator (U+2028), or paragraph separator (U+2029). The check uses the source spelling, so an escaped `\n` in a regular string is still one line. Formatting whitespace still collapses. A block comment can still sit on one line, and a short wrapped list without a literal line break still reports. The repository README, the NuGet readme, the parameter-list user page, the diagnostic description, and the package notes say so.
 
 ## After
 
-Not implemented yet.
+The list in Before no longer reports CCCPL002. The line break in `@"select` / `id"` stays in the string, and the diagnostic does not ask for a one-line spelling that would remove it. A short wrapped list such as `float a, float b, float c` still reports. `string value = "select\nid"` still reports, because that `\n` is two source characters, not a line break. A multiline block comment still reports, because that comment can be written on one line. Whether fewer projects now fail a warning-as-error build was not measured.
 
 ## Evidence
 
-`ParameterListFit.Normalize` appends each token's own text, so a newline inside a verbatim or raw string stays in the joined length. `UsesBreakButFits` then returns true when that length is within the maximum and the list has no line comment or directive. `LiteralWhitespaceCountsAtTheConfiguredBoundary` covers spaces and tabs inside single-line literals, including a single-line raw string. No test covers a literal that spans lines. Observed on `main` at `085bac71d656d7740ec728cb13137750cd183fc9`.
+Before the change, `ParameterListFit.Normalize` appended each token's own text and `UsesBreakButFits` still returned true when that length was within the maximum. Observed on `main` at `085bac71d656d7740ec728cb13137750cd183fc9`.
+
+After the change, from `src/sln/Coree.Analyzers.CodeClarity`: `dotnet test -m:1` passed 118 tests, with Coverlet reporting 100% line, branch, and method coverage of `Coree.Analyzers.CodeClarity`. `dotnet build --no-restore -m:1` succeeded with 0 errors and the 6 existing DebugHost sample warnings. `dotnet pack --no-restore -m:1` wrote `src/prj/Coree.Analyzers.CodeClarity/bin/Pack/Coree.Analyzers.CodeClarity.1.0.1-g6a1405d804.nupkg`. The packed readme and nuspec notes include the literal line-break exception. `LiteralLineBreakStaysQuiet` covers verbatim, raw, and interpolated forms and the five line-break characters. `EscapedNewlineInsideRegularStringStillReports` still warns. `MultilineBlockCommentStillReports` still warns. Implementation commit: `c12b3bf812b8ecd57cfb0b6aea85c147688162f1`. Consumer benefit remains unmeasured.
 
 ## Understood assignment and provenance
 
@@ -78,7 +80,17 @@ Acceptance:
 - The consumer texts named above describe the literal line-break exception.
 - `dotnet test` for CodeClarity passes with 100% line, branch, and method coverage of the analyzer assembly.
 
-Rollback is reverting this branch. Integration target is `main`. Local branch: `feature/pevo/literal-line-break-261025`. Worktree: `.worktrees/literal-line-break`. Base: `origin/main` at `085bac71d656d7740ec728cb13137750cd183fc9`. The early push of this issue commit is still to be done. Final publication, review, and cleanup are not done.
+Rollback is reverting this branch. Integration target is `main`. Local branch: `feature/pevo/literal-line-break-261025`. Worktree: `.worktrees/literal-line-break`. Base: `origin/main` at `085bac71d656d7740ec728cb13137750cd183fc9`. Issue baseline `6a1405d8049435dc000b1e4d3a7f3d7e65b5d229` is on `origin/feature/pevo/literal-line-break-261025`. Implementation is `c12b3bf812b8ecd57cfb0b6aea85c147688162f1`. Publication of this closure commit, review, and cleanup are not done yet.
+
+## Final outcome
+
+Status: Done. The implementation is verified and ready for review. It is not merged.
+
+The sample in Before now puts `int limit` before the string default. The first test draft used the other order and failed with CS1737; that order is invalid C# and was not a product change. The quiet result does not depend on which parameter holds the string.
+
+`dotnet test -m:1` passed 118 tests with 100% line, branch, and method coverage. Build had 0 errors. Pack included the updated readme and release notes. CCCPL001 was not modified. Rollback is reverting `c12b3bf812b8ecd57cfb0b6aea85c147688162f1` together with this closure.
+
+The move to `Issues/done/` is commit `7a73a2508bc25104351e23283cfde6fcfa223e24`. That commit did not include this updated wording, so the verified outcome is recorded in the following issue commit. Publication of that commit, review, and cleanup are pending. The follow-up commit SHA is not written here.
 
 ## Incidental Discoveries (Out of Scope)
 
