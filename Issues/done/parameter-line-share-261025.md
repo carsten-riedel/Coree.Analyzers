@@ -1,27 +1,27 @@
 ## Before
 
-CCCPL001 is quiet for this parameter list. The second parameter sits on the same line as the end of the first, and `)` is on the following line:
+CCCPL001 is quiet for this parameter list. The second parameter sits on the same line as the end of the first, and `)` is on the following line. The second parameter has a default so the signature compiles:
 
 ```csharp
 public void M(
     string value = @"one
-two", int other
+two", int other = 1
 )
 ```
 
-The same packed shape already warns when both parameters start on that line, as in `int b, int c`. Here the first parameter began on an earlier line, so the check never sees the shared line. A consumer can keep a layout the two-shape rule rejects by wrapping the earlier parameter.
+The same silence happens when a multiline attribute ends on the line that also starts the next parameter. The packed shape already warns when both parameters start on that line, as in `int b, int c`. Here the first parameter began on an earlier line, so the check never sees the shared line. A consumer can keep a layout the two-shape rule rejects by wrapping the earlier parameter.
 
 ## Change
 
-Treat two parameters as sharing a line when their source spans overlap, not only when they start on the same line. Leave the other checks as they are: one line including both parentheses, a parameter starting on the opening parenthesis line, and the closing parenthesis measured from the last parameter's start line. Add regressions for a verbatim default and a multiline attribute that run into the next parameter, plus the same verbatim default when the next parameter starts on a later line. Say this in the CodeClarity explanations and package notes.
+`ParameterListLayout` now treats a later parameter as sharing a line when it begins on or above the earlier parameter's last line. The other checks are unchanged: one line including both parentheses, a parameter starting on the opening parenthesis line, and the closing parenthesis measured from the last parameter's start line. Regressions cover a verbatim default and a multiline attribute that run into the next parameter, and the same shapes when the next parameter starts on a later line. The CodeClarity explanations and package notes say this.
 
 ## After
 
-Not implemented yet.
+The verbatim list above reports CCCPL001, and so does the attribute list whose next parameter sits on the attribute's last line. The same verbatim default and attribute stay quiet when the next parameter starts on a later line. A consumer can no longer hide a shared line by beginning the earlier parameter higher up. Lists that already passed with one parameter per line still pass. Whether that warning changes real projects was not measured.
 
 ## Evidence
 
-At `origin/main` `ab21473c4e2051b8b0cc2abcbe38ddb35e7f7c8d`, `ParameterListLayout.IsDisallowed` stores only `GetLineSpan().StartLinePosition.Line`. `sharesLine` is set when that start line equals the previous parameter's start line. The list form is then allowed when no parameter starts on the opening line, no two parameters start on the same line, and `)` is on the last start line plus one. `MixedLayoutsReport` already warns for `int b, int c` on one line. Nothing in the suite puts the next parameter on the last line of a parameter that started higher. The 2026-10-10 change "Restrict parameter lists to two shapes" states the intended form as one parameter per following line. Consumer benefit is not measured.
+At `origin/main` `ab21473c4e2051b8b0cc2abcbe38ddb35e7f7c8d`, `ParameterListLayout.IsDisallowed` stored only each parameter's start line. Before the repair, `ContinuedParameterSharingALineReports` expected 2 CCCPL001 diagnostics and got none; `MultilineParameterOnItsOwnLinesStaysQuiet` passed. After the repair, from `src/sln/Coree.Analyzers.CodeClarity` in the worktree: `dotnet build --no-restore -m:1` succeeded with 0 errors and the 6 expected DebugHost sample warnings; `dotnet test --no-build` passed 45 tests with 100% line, branch, and method coverage; `dotnet pack --no-restore -m:1` produced a package with the analyzer under `analyzers/dotnet/cs`, props under `build/` and `buildTransitive/`, the updated readme, the shared-line release note, and no `lib/` group. Consumer benefit is not measured.
 
 ## Understood assignment
 
@@ -73,13 +73,28 @@ The main risk is a span whose exclusive end sits at column 0 of the next line an
 
 ## Baseline and execution
 
-- Status: Open.
+- Status: Done (implementation verified; not merged). Date: 2026-10-25.
 - Integration target: `origin/main` at `ab21473c4e2051b8b0cc2abcbe38ddb35e7f7c8d`, refreshed on 2026-10-25.
 - Feature branch: `feature/pevo/parameter-line-share-261025`.
 - Temporary ignored worktree: `.worktrees/parameter-line-share-261025`.
-- This issue is the only content of the first commit. Publish that commit and verify the remote ref before any product edit.
-- Run from `src/sln/Coree.Analyzers.CodeClarity`: documented restore, serialized build, full test, and pack. A filtered red run may disable coverage because a filtered run cannot meet the whole-assembly threshold.
-- Verification, final publication, and cleanup are pending.
+- Issue-only baseline `3376a8b0a26418ac25af04924ce9ef6731edd0ca` was published and the remote ref matched before product edits.
+- Implementation is `0dd97b752ad9bdb7fe80cc8e86e8e19b0f016a73`. Documentation is `8f47db96e1c9e69bfb2a7b57d78aa6fb7b359eed`. No change to the selected outcome or outer scope was required.
+- The closing parenthesis is still measured from the last parameter's start line. Tested one-parameter-per-line lists stayed quiet with the span's end line, so no column-0 adjustment was added.
+
+## Verification and final outcome
+
+Acceptance criteria 1-5 are satisfied. Commands ran from `src/sln/Coree.Analyzers.CodeClarity` in the isolated worktree.
+
+- Red, before the layout change, with coverage collection disabled: `ContinuedParameterSharingALineReports` failed (expected 2, actual 0). `MultilineParameterOnItsOwnLinesStaysQuiet` passed.
+- Green: `dotnet test --filter FullyQualifiedName~ParameterListLayoutAnalyzerTests -p:CollectCoverage=false -m:1` passed 7 tests.
+- `dotnet build --no-restore -m:1`: succeeded, 0 errors, 6 expected DebugHost warnings (CCCMB001, CCCNS001, CCCPL001, two CCCPL002, CCCRC001).
+- `dotnet test --no-build`: 45 passed, 0 failed, 100% line, branch, and method coverage.
+- `dotnet pack --no-restore -m:1`: succeeded. The package contains the analyzer DLL and XML under `analyzers/dotnet/cs`, props under `build/` and `buildTransitive/`, the updated readme, the shared-line note in the nuspec, and no `lib/` group.
+- `git diff --check` was clean before the implementation commits. The diff is the layout helper, its regressions, the two CodeClarity readmes, and the package notes.
+- Public IDs, severities, CCCPL002, and the other analyzers are unchanged. Typography was not run.
+- Real consumer usage remains unmeasured. A span that ends at column 0 of the next line was not observed in the passing one-parameter-per-line fixtures.
+
+Final-head publication and temporary worktree/local branch cleanup are pending at this closure commit. The early remote feature branch exists. PR creation and integration remain separate human decisions. Rollback remains a normal revert of the implementation and documentation commits.
 
 ## Incidental Discoveries (Out of Scope)
 
