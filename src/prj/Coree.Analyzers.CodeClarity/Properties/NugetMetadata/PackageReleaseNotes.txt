@@ -1,5 +1,6 @@
-Unreleased
+2026-10-25
 
+ - Package versions use the build number (1.0.N).
  - CCCRC001 scores a yield return expression the same way it scores a return expression. yield return a + b + c reports at the default maximum. yield return a + b stays quiet.
  - Fix CCCMB001 false positives for blank lines in files with CR-only, Unicode, or mixed C# line endings. LF and CRLF behavior is preserved.
  - Fix CCCRC001 undercounting calls to user-defined methods named nameof or @nameof. The C# nameof operator remains exempt.
