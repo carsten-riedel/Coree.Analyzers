@@ -6,17 +6,25 @@ Setting `EmDashAnalyzerExcludes` to an empty value after the props import does t
 
 ## Change
 
-Apply each trimmed exclude pattern as its own glob when the additional files are chosen, for every Typography analyzer. Do that for both `Excludes` and `AdditionalExcludes`. When `Excludes` is empty after trimming, fill in the documented default list first. Leave a non-empty list as a replacement, and leave an empty `AdditionalExcludes` as nothing added. Keep the always-on directory exclusions. Cover an omitted list, an empty list written after the props import, a one-pattern replacement, and a two-pattern additional exclude. Record the correction in the package notes.
+Each Typography analyzer target splits its trimmed `Excludes` and `AdditionalExcludes` lists on the stored `%3B` separator before those lists are used as globs. When `Excludes` is empty after trimming, including a value assigned after the props import, the target fills in the documented default list first. A non-empty list still replaces that default. An empty `AdditionalExcludes` still adds nothing. The always-on `bin`, `obj`, `.git`, and `.vs` exclusions are unchanged. The registration tests cover an omitted list, an empty list written after the import, a `**\*.md` replacement, and `AdditionalExcludes` of `**\*.md;**\*.json`. The package notes record the correction.
 
 ## After
 
-Not implemented yet.
+With the props imported and `EmDashAnalyzerExcludes` left unset, `icon.png`, a nested `pic.png`, and `payload.dat` are not additional files. `Sample.txt` is still registered once for each analyzer. `bin\skip.txt` stays out.
+
+Setting every analyzer's `Excludes` to an empty value after the props import restores that same default list. Those binaries stay out, `Sample.txt` is still registered six times, and the compiler-visible exclude property contains `*.png` and `*.dat`, with `|` between patterns.
+
+A replacement `EmDashAnalyzerExcludes` of `**\*.md` still keeps markdown out and lets `icon.png` and `payload.dat` back in for EmDash only. `EmDashAnalyzerAdditionalExcludes` of `**\*.md;**\*.json` keeps both markdown and json out for EmDash only; the other analyzers still register them, and the omitted default list still keeps `icon.png` out. A custom list is not merged back with the defaults.
+
+Whether a consuming project sees fewer diagnostics on those binary files was not measured.
 
 ## Evidence
 
-At `origin/main` `ab21473c4e2051b8b0cc2abcbe38ddb35e7f7c8d`, each analyzer target trims its exclude properties with `[System.String]::Copy(...).Trim()`. After that assignment the separators are stored as `%3B`. `Include="$(EmDashAnalyzerExcludes)"` therefore keeps the whole default list as one item, so `**\*.png` and `**\*.dll` never match. `$(_TypographyAlwaysFolderExcludes)` is not trimmed that way, and `bin\**` still expands to `bin\skip.txt`.
+Before the props change, `AdditionalFileRegistrationTests` against the original targets failed three times. Omitted excludes, empty excludes after the import, and a replacement list each registered `icon.png` six times, once per analyzer. Command, from `src/sln/Coree.Analyzers.Typography`: `dotnet test --filter FullyQualifiedName~AdditionalFileRegistrationTests -p:CollectCoverage=false --verbosity minimal -m:1`. Result: Failed 3, Passed 0.
 
-A temporary SDK project that imported `Coree.Analyzers.Typography.props` showed this directly. Omitted excludes: the property contained `**\*.png`, and the EmDash additional files still included `icon.png`, `sub\pic.png`, and `root.dll`. Empty excludes after the import: the property was empty and `icon.png` was included. Replacement `**\*.md`: `readme.md` was absent and the png and dll files were present. `note.txt` stayed present in each case. The registration tests assert that the property text contains `*.dat` and that `bin`, `obj`, `.git`, and `.vs` are absent. They do not assert that `icon.png` or `payload.dat` are absent, and the fixture creates both. Consumer benefit is not measured.
+After the split, that filter passed. The documented checks then passed on the same tree: `dotnet restore`, `dotnet build --no-restore -m:1` (0 errors; the DebugHost warnings are the sample characters), `dotnet test --no-build` (69 passed, line/branch/method coverage 100%), and `dotnet pack` (nupkg under `src/prj/Coree.Analyzers.Typography/bin/Pack/`). A later `dotnet test` after the two-pattern fixture was added also passed: 69 passed, coverage 100%.
+
+The omitted case asserts `icon.png`, `pic.png`, and `payload.dat` count 0 and `Sample.txt` count 6. The empty-after-import case asserts those counts and that the property contains `*.png` and `*.dat`. The replacement `**\*.md` case asserts `icon.png` and `payload.dat` count 1 and `Readme.md` count 5. `AdditionalExcludes` `**\*.md;**\*.json` asserts `Readme.md` and `app.json` count 5, `Sample.txt` count 6, and `icon.png` count 0. The compiler-visible exclude text contains `|` and does not contain `%3B`. `bin\skip.txt` stays at 0. Consumer benefit remains unmeasured. A pattern that intentionally contains the characters `%3B` would still be split.
 
 ## Understood assignment
 
@@ -68,13 +76,18 @@ Consumers are projects that use the Typography package and its extra-file scan. 
 
 ## Baseline and execution
 
-- Status: Open.
+- Status: Done. Implementation verified against the acceptance criteria. Not merged.
 - Integration target: `origin/main` at `ab21473c4e2051b8b0cc2abcbe38ddb35e7f7c8d`, refreshed on 2026-10-25.
 - Feature branch: `feature/pevo/exclude-globs-261025`.
 - Temporary ignored worktree: `.worktrees/exclude-globs-261025`.
-- This issue is the only content of the first commit. Publish that commit and verify the remote ref before any product edit.
-- Run from `src/sln/Coree.Analyzers.Typography`: documented restore, serialized build, full test, and pack. A filtered red run may disable coverage because a filtered run cannot meet the whole-assembly threshold.
-- Verification, final publication, and cleanup are pending.
+- This issue is the only content of the first commit. That commit was published and the remote ref was verified before the product edit.
+- Implementation checkpoint: `ad88d1f7156a623a5c944af3a5d16dd66c7f6235`.
+- Run from `src/sln/Coree.Analyzers.Typography`: documented restore, serialized build, full test, and pack. A filtered red run disabled coverage because a filtered run cannot meet the whole-assembly threshold.
+- Publication of this closure commit, a pull request, merge, and worktree cleanup are pending.
+
+## Final outcome
+
+The six analyzer targets split trimmed exclude lists into separate globs and restore the documented default when `Excludes` is empty. That is the selected change. Verification is the red registration run, then the green registration tests and the full Typography suite at 100% line, branch, and method coverage, plus build and pack. Expected consumer benefit is not measured. The residual risk is a pattern that already contains the literal characters `%3B`. Rollback is reverting the props, the registration tests, and the package notes together. Publication of this closure commit, a pull request, merge, and worktree cleanup are still pending in this commit.
 
 ## Incidental Discoveries (Out of Scope)
 
