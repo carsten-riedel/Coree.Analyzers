@@ -90,7 +90,6 @@ class C
     int Choice(bool ready, int a, int b) { return ready ? a : b; }
     System.Func<int> Deferred(int a, int b, int c) { return () => a * b + c; }
     void None() { return; }
-    int Body(int a, int b, int c) => a + b + c;
 }";
             await CSharpAnalyzerVerifier<ReturnTypeComplexityAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(test);
         }
@@ -393,6 +392,86 @@ class C
         {
             const string source = "class C { System.Collections.Generic.IEnumerable<int> M() { yield break; } }";
             await CSharpAnalyzerVerifier<ReturnTypeComplexityAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(source);
+        }
+
+        [TestMethod]
+        public async Task ExpressionBodiedReturnedValuesReport()
+        {
+            const string source = @"
+class Meter
+{
+    public int Raw;
+    int Method(int a, int b, int c) => {|#0:a + b + c|};
+    int Local(int a, int b, int c)
+    {
+        int Inner(int x, int y, int z) => {|#1:x + y + z|};
+        return Inner(a, b, c);
+    }
+    int Property => {|#2:Raw + Raw + 1|};
+    int this[int a, int b] => {|#3:a + b + Raw|};
+    int Read { get => {|#4:Raw + Raw + 1|}; }
+    public static int operator +(Meter left, Meter right) => {|#5:left.Raw + right.Raw + 1|};
+    public static explicit operator int(Meter value) => {|#6:value.Raw + value.Raw + 1|};
+    async System.Threading.Tasks.Task<int> Sum(int a, int b, int c) => {|#7:a + b + c|};
+    async System.Threading.Tasks.ValueTask<int> SumValue(int a, int b, int c) => {|#8:a + b + c|};
+}";
+            DiagnosticResult[] expected = new DiagnosticResult[9];
+            for (int index = 0; index < expected.Length; index++)
+            {
+                expected[index] = DiagnosticResult
+                    .CompilerWarning(ReturnTypeComplexityAnalyzer.DiagnosticId)
+                    .WithLocation(index);
+            }
+
+            await CSharpAnalyzerVerifier<ReturnTypeComplexityAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(source, expected);
+        }
+
+        [TestMethod]
+        public async Task ExpressionBodiedNonValuesAndSingleStepsStayQuiet()
+        {
+            const string source = @"
+class Meter
+{
+    public int Raw;
+    int Method(int a, int b) => a + b;
+    int Local(int a, int b)
+    {
+        int Inner(int x, int y) => x + y;
+        int Block(int x, int y) { return x + y; }
+        return Inner(a, b);
+    }
+    int Property => Raw + 1;
+    int BlockProperty { get { return Raw + 1; } }
+    int this[int a] => a + Raw;
+    int this[int a, int b] { get { return a + b; } }
+    int Read { get => Raw + 1; }
+    int BlockRead { get { return Raw; } set { Raw = value + value + value; } }
+    public static int operator +(Meter left, Meter right) => left.Raw + right.Raw;
+    public static int operator -(Meter left, Meter right) { return left.Raw + right.Raw; }
+    public static explicit operator int(Meter value) => value.Raw + 1;
+    public static explicit operator long(Meter value) { return value.Raw + 1; }
+    void Log(int a, int b, int c) => Write(a + b + c);
+    async System.Threading.Tasks.Task Delay(int a, int b, int c) => System.Threading.Tasks.Task.Delay(a + b + c);
+    async System.Threading.Tasks.ValueTask Clear(int a, int b, int c) => new System.Threading.Tasks.ValueTask(System.Threading.Tasks.Task.Delay(a + b + c));
+    async System.Threading.Tasks.Task<int> One(int a, int b) => a + b;
+    System.Func<int> Deferred(int a, int b, int c) => () => a + b + c;
+    Meter(int a, int b, int c) => Raw = a + b + c;
+    void Write(int value) { }
+}";
+            await CSharpAnalyzerVerifier<ReturnTypeComplexityAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(source);
+        }
+
+        [TestMethod]
+        public async Task ExpressionBodiedNameofStaysQuietAtZeroMaximum()
+        {
+            const string source = "class C { string Name() => nameof(C); }";
+            await VerifyWithConfigAsync(source, null, "0");
+        }
+
+        [TestMethod]
+        public void MissingMethodSymbolDoesNotCountAsReturnedValue()
+        {
+            Assert.IsFalse(ReturnTypeComplexityAnalyzer.ReturnsValue(null));
         }
 
         private static async Task VerifyWithSeverityAsync(string source, string severity, params DiagnosticResult[] expected)
