@@ -4,15 +4,15 @@ A source file contains a word-processor opening single quote, U+2018, as in ‘q
 
 ## Change
 
-Planned: report U+2018, U+201A, and U+201B as CTYQM001 quotation marks, together with the curly double quotes and guillemets that rule already reports. Leave U+2019 on CTYAP001 alone, so a closing single quote is not reported twice. Keep ASCII quotation marks and apostrophes silent. Cover those cases with analyzer regressions, and name the split in the Typography descriptions and package release notes.
+CTYQM001 now reports U+2018, U+201A, and U+201B together with the curly double quotes and guillemets it already reported. U+2019 stays on CTYAP001 alone, so a closing single quote is not reported twice. ASCII quotation marks and apostrophes stay silent. Analyzer regressions cover the three new marks, the U+2019 exclusion, and the apostrophe exclusion. The repository README, the Typography NuGet readme, and the package release notes name that split.
 
 ## After
 
-Not implemented yet.
+A source file that contains ‘quoted’ (U+2018 followed later by U+2019) now gets CTYQM001 on the opening mark and CTYAP001 on the closing mark. U+201A and U+201B get CTYQM001 as well. The opening quote is no longer skipped. ASCII quotes and apostrophes still produce neither diagnostic. Whether people actually replace those characters was not measured.
 
 ## Evidence
 
-At `origin/main` `ab21473c4e2051b8b0cc2abcbe38ddb35e7f7c8d`, `SmartQuotesAnalyzer` looks only for U+201C, U+201D, U+201E, U+201F, U+00AB, and U+00BB. `ApostropheAnalyzer` looks only for U+2019. The scanner reports a character only when it is in that set. Existing functional tests cover U+201C and U+2019, not U+2018, U+201A, or U+201B. The published CTYQM001 text says curly quotes and guillemets. The runtime result and any consumer effect are not measured yet.
+At `origin/main` `ab21473c4e2051b8b0cc2abcbe38ddb35e7f7c8d`, `SmartQuotesAnalyzer` looked only for U+201C, U+201D, U+201E, U+201F, U+00AB, and U+00BB. `ApostropheAnalyzer` looked only for U+2019. Before that set changed, a focused run of the new tests (`dotnet test --filter FullyQualifiedName~QuotationMark -p:CollectCoverage=false` from `src/sln/Coree.Analyzers.Typography`) returned no diagnostic for U+2018, U+201A, and U+201B (3 failed) and passed the two exclusions (U+2019 is not CTYQM001; the three marks are not CTYAP001). After the change, `dotnet restore`, `dotnet build --no-restore -m:1`, `dotnet test --no-build`, and `dotnet pack` from that same directory all exited 0. The full test run passed 72 tests. Coverlet reported 100% line, branch, and method coverage of `Coree.Analyzers.Typography`. The DebugHost build still reports its existing curly quotes as CTYQM001 and U+2019 as CTYAP001. Real consumer uptake is unmeasured.
 
 ## Understood assignment
 
@@ -51,15 +51,23 @@ Consumers are people compiling C# and extra project files with Typography. Diagn
 
 ## Baseline
 
-Status: Open.
+Status: Done. Implementation is verified and ready for review. It is not merged.
 Integration target: `origin/main` at `ab21473c4e2051b8b0cc2abcbe38ddb35e7f7c8d`, fetched 2026-10-25.
 Feature branch: `feature/pevo/single-quotes-261025`.
 Worktree: `.worktrees/single-quotes-261025`.
-This file is the only content of the first commit. That commit is published and the remote ref checked before any product edit.
+Issue-only baseline: `5fc154b4c89a6d6525f0d9a4e1a69f1660f1e178`, published to `origin` and checked before product edits.
+Implementation: `5e9ea0e855731ab47b10c048d5808997495759f0`.
+Publication of this closure commit, pull-request creation, merge, and worktree cleanup are still pending.
+
+## Final outcome
+
+The planned character-set change was implemented without a scope change. U+2039 and U+203A stayed excluded. No diagnostic id, severity, or include/exclude behavior changed. The diagnostic sentence now says “ASCII quote or apostrophe” instead of “ASCII double quote or apostrophe”, because the rule now includes single quotation marks as well as double quotes.
+
+Rollback remains reverting the character set, tests, and accompanying notes together. Files that already contain U+2018, U+201A, or U+201B will start warning at the consumer’s configured severity. That is the correction, not a separate migration.
 
 ## Incidental discoveries (out of scope)
 
 - CCCPL001's start-line check, described as B, is unresolved. Another branch, `feature/pevo/parameter-list-end-261025`, has since recorded that question; this run does not take it.
 - A Typography `Includes` value left empty in `Directory.Build.props` can be replaced by the package props default `**`, because those props import later and treat empty as unset. The same empty value in the project body, after the import, is not replaced. Whether anyone depends on the early empty value was not established.
-- `SmartQuotesAnalyzer`'s type comment still says it is a sample and tells the reader to replace the type.
+- `SmartQuotesAnalyzer`'s type comment originally said it was a sample and told the reader to replace the type. That sentence was rewritten with the character-set explanation, because the comment was the type's own description.
 - CodeClarity's package release notes, described as D, still omit diagnostics the README already documents.
