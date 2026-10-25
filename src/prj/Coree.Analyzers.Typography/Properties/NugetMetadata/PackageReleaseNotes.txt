@@ -2,6 +2,7 @@
 
  - CTYQM001 flags the opening single quotation mark (U+2018), the single low-9 quotation mark (U+201A), and the single high-reversed-9 quotation mark (U+201B), in addition to the curly double quotes and guillemets it already flags.
  - The closing single quotation mark (U+2019) stays on CTYAP001 only.
+ - Fix Typography Excludes so each pattern is its own glob. The default extension list, including an empty Excludes value, no longer registers those files as additional files.
 
 1.0.2 (2026-10-08)
 

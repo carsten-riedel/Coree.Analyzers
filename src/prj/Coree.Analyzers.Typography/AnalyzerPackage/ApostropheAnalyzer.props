@@ -15,12 +15,14 @@
           DependsOnTargets="_TypographyCollectCompiledSources">
     <PropertyGroup>
       <ApostropheAnalyzerExcludes Condition="'$(ApostropheAnalyzerExcludes)' != ''">$([System.String]::Copy('$(ApostropheAnalyzerExcludes)').Trim())</ApostropheAnalyzerExcludes>
+      <!-- Trim stores ';' as %3B. An empty Excludes value is the documented default. Split before using the list as globs. -->
+      <ApostropheAnalyzerExcludes Condition="'$(ApostropheAnalyzerExcludes)' == ''">$([System.String]::Copy('$(_TypographyDefaultExcludes)').Trim())</ApostropheAnalyzerExcludes>
       <ApostropheAnalyzerAdditionalExcludes Condition="'$(ApostropheAnalyzerAdditionalExcludes)' != ''">$([System.String]::Copy('$(ApostropheAnalyzerAdditionalExcludes)').Trim())</ApostropheAnalyzerAdditionalExcludes>
       <_TypographyApostropheIsAllFiles Condition="'$(ApostropheAnalyzerIncludes)' == '**' OR '$(ApostropheAnalyzerIncludes)' == '**/*' OR '$(ApostropheAnalyzerIncludes)' == '**\*'">true</_TypographyApostropheIsAllFiles>
     </PropertyGroup>
     <ItemGroup>
-      <_ApostropheExcludeGlob Include="$(ApostropheAnalyzerExcludes)" Condition="'$(ApostropheAnalyzerExcludes)' != ''" />
-      <_ApostropheExcludeGlob Include="$(ApostropheAnalyzerAdditionalExcludes)" Condition="'$(ApostropheAnalyzerAdditionalExcludes)' != ''" />
+      <_ApostropheExcludeGlob Include="$([System.String]::Copy('$(ApostropheAnalyzerExcludes)').Split('%3B'))" Condition="'$(ApostropheAnalyzerExcludes)' != ''" />
+      <_ApostropheExcludeGlob Include="$([System.String]::Copy('$(ApostropheAnalyzerAdditionalExcludes)').Split('%3B'))" Condition="'$(ApostropheAnalyzerAdditionalExcludes)' != ''" />
       <_ApostropheExcludeGlob Include="$(_TypographyAlwaysFolderExcludes)" />
       <_ApostropheAnalyzerAdditionalFile Include="$(_TypographyProjectDirectory)**\*"
                                          Exclude="@(_ApostropheExcludeGlob->'$(_TypographyProjectDirectory)%(Identity)');@(_TypographyCompiledSource)"

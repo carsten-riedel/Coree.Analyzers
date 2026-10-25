@@ -15,12 +15,14 @@
           DependsOnTargets="_TypographyCollectCompiledSources">
     <PropertyGroup>
       <EmDashAnalyzerExcludes Condition="'$(EmDashAnalyzerExcludes)' != ''">$([System.String]::Copy('$(EmDashAnalyzerExcludes)').Trim())</EmDashAnalyzerExcludes>
+      <!-- Trim stores ';' as %3B. An empty Excludes value is the documented default. Split before using the list as globs. -->
+      <EmDashAnalyzerExcludes Condition="'$(EmDashAnalyzerExcludes)' == ''">$([System.String]::Copy('$(_TypographyDefaultExcludes)').Trim())</EmDashAnalyzerExcludes>
       <EmDashAnalyzerAdditionalExcludes Condition="'$(EmDashAnalyzerAdditionalExcludes)' != ''">$([System.String]::Copy('$(EmDashAnalyzerAdditionalExcludes)').Trim())</EmDashAnalyzerAdditionalExcludes>
       <_TypographyEmDashIsAllFiles Condition="'$(EmDashAnalyzerIncludes)' == '**' OR '$(EmDashAnalyzerIncludes)' == '**/*' OR '$(EmDashAnalyzerIncludes)' == '**\*'">true</_TypographyEmDashIsAllFiles>
     </PropertyGroup>
     <ItemGroup>
-      <_EmDashExcludeGlob Include="$(EmDashAnalyzerExcludes)" Condition="'$(EmDashAnalyzerExcludes)' != ''" />
-      <_EmDashExcludeGlob Include="$(EmDashAnalyzerAdditionalExcludes)" Condition="'$(EmDashAnalyzerAdditionalExcludes)' != ''" />
+      <_EmDashExcludeGlob Include="$([System.String]::Copy('$(EmDashAnalyzerExcludes)').Split('%3B'))" Condition="'$(EmDashAnalyzerExcludes)' != ''" />
+      <_EmDashExcludeGlob Include="$([System.String]::Copy('$(EmDashAnalyzerAdditionalExcludes)').Split('%3B'))" Condition="'$(EmDashAnalyzerAdditionalExcludes)' != ''" />
       <_EmDashExcludeGlob Include="$(_TypographyAlwaysFolderExcludes)" />
       <_EmDashAnalyzerAdditionalFile Include="$(_TypographyProjectDirectory)**\*"
                                      Exclude="@(_EmDashExcludeGlob->'$(_TypographyProjectDirectory)%(Identity)');@(_TypographyCompiledSource)"

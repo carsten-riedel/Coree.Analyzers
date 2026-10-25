@@ -50,10 +50,16 @@ namespace Coree.Analyzers.Typography.Tests
                 Assert.AreEqual(6, Count(standard, "AdditionalFiles", "app.json"));
                 Assert.AreEqual(6, Count(standard, "AdditionalFiles", "note.txt"));
                 Assert.AreEqual(6, Count(standard, "AdditionalFiles", "Fixture.csproj"));
+                Assert.AreEqual(0, Count(standard, "AdditionalFiles", "icon.png"));
+                Assert.AreEqual(0, Count(standard, "AdditionalFiles", "pic.png"));
+                Assert.AreEqual(0, Count(standard, "AdditionalFiles", "payload.dat"));
                 Assert.AreEqual(0, Count(standard, "AdditionalFiles", "skip.txt"));
                 Assert.AreEqual(0, Count(standard, "AdditionalFiles", "HEAD"));
                 Assert.AreEqual(0, Count(standard, "AdditionalFiles", "cache.txt"));
-                Assert.IsTrue(Property(standard, "EmDashAnalyzerExcludes").IndexOf("*.dat", StringComparison.Ordinal) >= 0);
+                var standardExcludes = Property(standard, "EmDashAnalyzerExcludes");
+                Assert.IsTrue(standardExcludes.IndexOf("*.dat", StringComparison.Ordinal) >= 0, standardExcludes);
+                Assert.IsTrue(standardExcludes.IndexOf("|", StringComparison.Ordinal) >= 0, standardExcludes);
+                Assert.IsTrue(standardExcludes.IndexOf("%3B", StringComparison.Ordinal) < 0, standardExcludes);
                 Assert.AreEqual("warning", Property(standard, "EmDashAnalyzerSeverity"));
                 Assert.AreEqual("warning", Property(standard, "MinusAnalyzerSeverity"));
                 Assert.AreEqual("warning", Property(standard, "NbspAnalyzerSeverity"));
@@ -83,6 +89,8 @@ namespace Coree.Analyzers.Typography.Tests
                 AssertNoCompileOverlap(filtered);
                 Assert.AreEqual(5, Count(filtered, "AdditionalFiles", "Readme.md"));
                 Assert.AreEqual(5, Count(filtered, "AdditionalFiles", "note.txt"));
+                Assert.AreEqual(1, Count(filtered, "AdditionalFiles", "icon.png"));
+                Assert.AreEqual(1, Count(filtered, "AdditionalFiles", "payload.dat"));
                 Assert.AreEqual(6, Count(filtered, "AdditionalFiles", "Sample.txt"));
                 Assert.AreEqual(0, Count(filtered, "AdditionalFiles", "skip.txt"));
                 Assert.AreEqual("message", Property(filtered, "SmartQuotesAnalyzerSeverity"));
@@ -112,7 +120,111 @@ namespace Coree.Analyzers.Typography.Tests
             }
         }
 
-        private static void WriteFixture(string fixture, string project, string props)
+        [TestMethod]
+        public void EmptyExcludesKeepsDefaultExtensionFilters()
+        {
+            var props = AnalyzerPropsPath();
+            var root = Path.Combine(Path.GetTempPath(), "typography-empty-excludes-" + Guid.NewGuid().ToString("N"));
+            var fixture = Path.Combine(root, "fixture");
+            var project = Path.Combine(fixture, "Fixture.csproj");
+            try
+            {
+                WriteFixture(fixture, project, props, @"  <PropertyGroup>
+    <EmDashAnalyzerExcludes></EmDashAnalyzerExcludes>
+    <SmartQuotesAnalyzerExcludes></SmartQuotesAnalyzerExcludes>
+    <ApostropheAnalyzerExcludes></ApostropheAnalyzerExcludes>
+    <EllipsisAnalyzerExcludes></EllipsisAnalyzerExcludes>
+    <MinusAnalyzerExcludes></MinusAnalyzerExcludes>
+    <NbspAnalyzerExcludes></NbspAnalyzerExcludes>
+  </PropertyGroup>
+");
+                Restore(project);
+                var empty = Evaluate(project);
+                AssertNoCompileOverlap(empty);
+                Assert.AreEqual(0, Count(empty, "AdditionalFiles", "icon.png"));
+                Assert.AreEqual(0, Count(empty, "AdditionalFiles", "pic.png"));
+                Assert.AreEqual(0, Count(empty, "AdditionalFiles", "payload.dat"));
+                Assert.AreEqual(0, Count(empty, "AdditionalFiles", "skip.txt"));
+                Assert.AreEqual(6, Count(empty, "AdditionalFiles", "Sample.txt"));
+                Assert.IsTrue(Property(empty, "EmDashAnalyzerExcludes").IndexOf("*.png", StringComparison.Ordinal) >= 0);
+                Assert.IsTrue(Property(empty, "EmDashAnalyzerExcludes").IndexOf("*.dat", StringComparison.Ordinal) >= 0);
+            }
+            finally
+            {
+                if (Directory.Exists(root))
+                {
+                    Directory.Delete(root, recursive: true);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void ReplacementAndAdditionalExcludesStaySeparatePatterns()
+        {
+            var props = AnalyzerPropsPath();
+            var root = Path.Combine(Path.GetTempPath(), "typography-split-excludes-" + Guid.NewGuid().ToString("N"));
+            var fixture = Path.Combine(root, "fixture");
+            var project = Path.Combine(fixture, "Fixture.csproj");
+            try
+            {
+                WriteFixture(fixture, project, props, @"  <PropertyGroup>
+    <EmDashAnalyzerExcludes>**\*.md</EmDashAnalyzerExcludes>
+    <EmDashAnalyzerAdditionalExcludes>**\*.json;**\*.txt</EmDashAnalyzerAdditionalExcludes>
+  </PropertyGroup>
+");
+                Restore(project);
+                var split = Evaluate(project);
+                AssertNoCompileOverlap(split);
+                Assert.AreEqual(1, Count(split, "AdditionalFiles", "icon.png"));
+                Assert.AreEqual(1, Count(split, "AdditionalFiles", "pic.png"));
+                Assert.AreEqual(1, Count(split, "AdditionalFiles", "payload.dat"));
+                Assert.AreEqual(5, Count(split, "AdditionalFiles", "Readme.md"));
+                Assert.AreEqual(5, Count(split, "AdditionalFiles", "app.json"));
+                Assert.AreEqual(5, Count(split, "AdditionalFiles", "Sample.txt"));
+                Assert.AreEqual(5, Count(split, "AdditionalFiles", "note.txt"));
+                Assert.AreEqual(0, Count(split, "AdditionalFiles", "skip.txt"));
+                var additional = Property(split, "EmDashAnalyzerAdditionalExcludes");
+                Assert.IsTrue(additional.IndexOf("*.json", StringComparison.Ordinal) >= 0, additional);
+                Assert.IsTrue(additional.IndexOf("*.txt", StringComparison.Ordinal) >= 0, additional);
+                Assert.IsTrue(additional.IndexOf("|", StringComparison.Ordinal) >= 0, additional);
+                Assert.IsTrue(additional.IndexOf("%3B", StringComparison.Ordinal) < 0, additional);
+
+                var pairFixture = Path.Combine(root, "pair");
+                var pairProject = Path.Combine(pairFixture, "Fixture.csproj");
+                WriteFixture(pairFixture, pairProject, props, @"  <PropertyGroup>
+    <EmDashAnalyzerAdditionalExcludes>**\*.md;**\*.json</EmDashAnalyzerAdditionalExcludes>
+  </PropertyGroup>
+");
+                Restore(pairProject);
+                var pair = Evaluate(pairProject);
+                AssertNoCompileOverlap(pair);
+                Assert.AreEqual(0, Count(pair, "AdditionalFiles", "icon.png"));
+                Assert.AreEqual(0, Count(pair, "AdditionalFiles", "payload.dat"));
+                Assert.AreEqual(5, Count(pair, "AdditionalFiles", "Readme.md"));
+                Assert.AreEqual(5, Count(pair, "AdditionalFiles", "app.json"));
+                Assert.AreEqual(6, Count(pair, "AdditionalFiles", "Sample.txt"));
+                Assert.AreEqual(0, Count(pair, "AdditionalFiles", "skip.txt"));
+            }
+            finally
+            {
+                if (Directory.Exists(root))
+                {
+                    Directory.Delete(root, recursive: true);
+                }
+            }
+        }
+
+        private static string AnalyzerPropsPath()
+        {
+            return Path.GetFullPath(Path.Combine(
+                AppContext.BaseDirectory,
+                "..", "..", "..", "..",
+                "Coree.Analyzers.Typography",
+                "AnalyzerPackage",
+                "Coree.Analyzers.Typography.props"));
+        }
+
+        private static void WriteFixture(string fixture, string project, string props, string? postImport = null)
         {
             Directory.CreateDirectory(Path.Combine(fixture, "nested"));
             Directory.CreateDirectory(Path.Combine(fixture, "bin"));
@@ -139,6 +251,7 @@ namespace Coree.Analyzers.Typography.Tests
             File.WriteAllText(Path.Combine(fixture, "nested", "note.txt"), "note\n");
             File.WriteAllText(Path.Combine(fixture, "payload.dat"), "dat\n");
             File.WriteAllText(Path.Combine(fixture, "icon.png"), "png\n");
+            File.WriteAllText(Path.Combine(fixture, "nested", "pic.png"), "png\n");
             File.WriteAllText(Path.Combine(fixture, "bin", "skip.txt"), "bin\n");
             File.WriteAllText(Path.Combine(fixture, "obj", "skip.txt"), "obj\n");
             File.WriteAllText(Path.Combine(fixture, ".git", "HEAD"), "ref\n");
@@ -153,7 +266,7 @@ namespace Coree.Analyzers.Typography.Tests
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <Import Project=""" + import + @""" />
-  <ItemGroup>
+" + (postImport ?? string.Empty) + @"  <ItemGroup>
     <Compile Remove=""Loose.cs"" />
     <Compile Include=""nested\..\nested\Alias.cs"" />
     <Compile Include=""..\outside\Linked.cs"" Link=""Linked.cs"" />
@@ -187,7 +300,7 @@ namespace Coree.Analyzers.Typography.Tests
                 project,
                 "-target:" + Targets,
                 "-getItem:Compile,AdditionalFiles",
-                "-getProperty:EmDashAnalyzerSeverity,EmDashAnalyzerExcludes,SmartQuotesAnalyzerSeverity,ApostropheAnalyzerSeverity,EllipsisAnalyzerSeverity,MinusAnalyzerSeverity,NbspAnalyzerSeverity",
+                "-getProperty:EmDashAnalyzerSeverity,EmDashAnalyzerExcludes,EmDashAnalyzerAdditionalExcludes,SmartQuotesAnalyzerSeverity,ApostropheAnalyzerSeverity,EllipsisAnalyzerSeverity,MinusAnalyzerSeverity,NbspAnalyzerSeverity",
                 "-nologo",
                 "-verbosity:quiet",
             };

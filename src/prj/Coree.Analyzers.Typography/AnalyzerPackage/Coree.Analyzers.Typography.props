@@ -1,12 +1,13 @@
 <Project>
   <!--
     Public surface: Includes minus (Excludes + AdditionalExcludes).
-    Unset Excludes get the default list. Setting Excludes replaces that list (MSBuild does not merge).
-    AdditionalExcludes is always added on top. Unset AdditionalExcludes adds nothing.
+    Unset or empty Excludes get the default list. Setting Excludes replaces that list (MSBuild does not merge).
+    AdditionalExcludes is always added on top. Unset or empty AdditionalExcludes adds nothing.
     bin, obj, .git, and .vs are always excluded (build output / Git / VS cache, not source).
     Matched extra files are read from disk as AdditionalFiles.
     Files already in Compile stay on the C# syntax tree and are not registered again.
     Outer whitespace on Excludes and AdditionalExcludes is trimmed (spaces, tabs, CR, LF).
+    Trim stores ';' as %3B, so each analyzer target splits that list before using it as globs.
     Empty includes disable extra-file scanning. C# syntax trees stay in scope either way.
     CompilerVisibleProperty is required or the compiler does not pass the values to the analyzer.
     EditorConfig treats ';' as a comment, so a target rewrites the compiler-visible copies with '|'.
