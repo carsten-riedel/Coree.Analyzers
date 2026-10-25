@@ -19,4 +19,15 @@ CCCPL002 stays quiet when the list contains a `//` comment. Putting that list on
 
 A block comment does not get that exception. `int /* amplitude */ a` is valid on one line, and a wrapped list that contains it still reports CCCPL002 when the parameters fit.
 
+A literal that contains a line break does. This stays quiet:
+
+```csharp
+void M(
+    int limit,
+    string query = @"select
+        id")
+```
+
+The line break is part of the string, so the one-line spelling would change it. The same is true of a raw string and of an interpolated verbatim or raw string. CR, LF, CRLF, next line (U+0085), line separator (U+2028), and paragraph separator (U+2029) are the breaks that count. An escaped `\n` in a regular string is still one source line. `string value = "select\nid"` can still report when the list is wrapped and the parameters fit.
+
 CCCPL001 is a separate shape rule. A list can satisfy that shape and still report CCCPL002. A directive or a `//` comment does not turn CCCPL001 off.
