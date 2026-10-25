@@ -191,6 +191,8 @@ class Terrain { }
 
 CCCMB001 reports the later of two methods with a body that are consecutive members of the same type and have no blank line between them. A whitespace-only line counts. A comment or documentation line does not. The first sample reports CCCMB001. The second does not. Constructors, fields, properties, operators, indexers, local functions, and methods without a body stay quiet.
 
+Blank lines are recognized with all C# line endings: LF, CRLF, CR, next line (U+0085), line separator (U+2028), and paragraph separator (U+2029), including mixed endings within a file.
+
 ```csharp
 public bool Walkable()
 {

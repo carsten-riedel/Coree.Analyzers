@@ -225,9 +225,58 @@ class OnlyOne
         }
 
         [TestMethod]
-        public async Task CarriageReturnBlankLineStaysQuiet()
+        [DataRow("\n")]
+        [DataRow("\r\n")]
+        [DataRow("\r")]
+        [DataRow("\u0085")]
+        [DataRow("\u2028")]
+        [DataRow("\u2029")]
+        public async Task BlankLineStaysQuiet(string lineEnding)
         {
-            const string source = "class C {\r\n    void A() { }\r\n\r\n    void B() { }\r\n}";
+            string source = "class C {" + lineEnding
+                + "    void A() { }" + lineEnding + lineEnding
+                + "    void B() { }" + lineEnding + "}";
+            await CSharpAnalyzerVerifier<MethodBlankLineAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(source);
+        }
+
+        [TestMethod]
+        [DataRow("\n")]
+        [DataRow("\r\n")]
+        [DataRow("\r")]
+        [DataRow("\u0085")]
+        [DataRow("\u2028")]
+        [DataRow("\u2029")]
+        public async Task WhitespaceOnlyLineStaysQuiet(string lineEnding)
+        {
+            string source = "class C {" + lineEnding
+                + "    void A() { }" + lineEnding + " \t " + lineEnding
+                + "    void B() { }" + lineEnding + "}";
+            await CSharpAnalyzerVerifier<MethodBlankLineAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(source);
+        }
+
+        [TestMethod]
+        [DataRow("\n")]
+        [DataRow("\r\n")]
+        [DataRow("\r")]
+        [DataRow("\u0085")]
+        [DataRow("\u2028")]
+        [DataRow("\u2029")]
+        public async Task MissingAndCommentOnlyLinesReport(string lineEnding)
+        {
+            string source = "class C {" + lineEnding
+                + "    void A() { }" + lineEnding
+                + "    void {|#0:B|}() { }" + lineEnding
+                + "    // note" + lineEnding
+                + "    void {|#1:D|}() { }" + lineEnding + "}";
+            var expected = DiagnosticResult.CompilerWarning(MethodBlankLineAnalyzer.DiagnosticId);
+            await CSharpAnalyzerVerifier<MethodBlankLineAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(
+                source, expected.WithLocation(0), expected.WithLocation(1));
+        }
+
+        [TestMethod]
+        public async Task MixedLineEndingsRecognizeBlankLines()
+        {
+            const string source = "class C {\n    void A() { }\r\n \t\u2028    void B() { }\u0085\r    void D() { }\n}";
             await CSharpAnalyzerVerifier<MethodBlankLineAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(source);
         }
 
