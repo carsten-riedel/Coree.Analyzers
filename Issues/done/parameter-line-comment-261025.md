@@ -21,15 +21,17 @@ The one-line form the message shows, `M(a, b, c)`, does not keep that comment.
 
 ## Change
 
-Leave CCCPL002 quiet when the parameter list contains a single-line comment. Keep reporting a short broken list whose only `//` is inside a string literal. Do not change how other whitespace is measured, the length limit, or CCCPL001. Say this in the consumer explanations and the package notes.
+CCCPL002 stays quiet when the parameter list contains a single-line comment. The length calculation is unchanged, so a short broken list with no line comment still reports. A `//` inside a string is not a comment and still reports. A block comment can still report. The repository README, NuGet README, analyzer description, and package notes say this.
 
 ## After
 
-Not implemented yet.
+The list with `// amplitude` inside the first parameter no longer reports CCCPL002. The list with `// amplitude` between the parameters no longer reports it either. A short broken list whose string default contains `http://example` still reports CCCPL002 and says the parameters fit in 44 characters, limit 120. A block comment inside a parameter still reports and says 28 characters. Lists that were already short and had no comment still report.
 
 ## Evidence
 
-At `origin/main` `ab21473c4e2051b8b0cc2abcbe38ddb35e7f7c8d`, `ParameterListFit.Normalize` walks every character and turns each whitespace run into one space. A `//` comment inside a parameter is not whitespace, so it stays in the measured line. A `//` comment between parameters sits outside each parameter's span, so the length ignores it. `ShortBreaksReport` already expects CCCPL002 for a short list with no comment. Nothing in that suite places a line comment in the list. The runtime result against the original check will be recorded below. Consumer benefit is not measured.
+At `origin/main` `ab21473c4e2051b8b0cc2abcbe38ddb35e7f7c8d`, `ParameterListFit.Normalize` walks every character and turns each whitespace run into one space. A `//` comment inside a parameter is not whitespace, so it stays in the measured line. A `//` comment between parameters sits outside each parameter's span, so the length ignores it. `ShortBreaksReport` already expects CCCPL002 for a short list with no comment. Nothing in that suite placed a line comment in the list.
+
+Before the fix, `ParameterListFitAnalyzerTests` with coverage collection disabled reported two comment failures and one invalid sample. The interior comment produced CCCPL002 at 25 characters, span `(1,17)-(5,2)`. The comment between parameters produced CCCPL002 at 12 characters, span `(1,17)-(4,2)`, which is `int a, int b` with the comment omitted. The first string sample also produced CCCPL002 at 36 characters, but it was invalid C#: the optional `string url` preceded required `int b` (`CS1737`). That sample was replaced by required `string scheme` followed by the optional URL. Nine other tests in that filtered run passed. After the fix, the same filtered class passed 13 tests. The full suite, package inspection, and commands are recorded below. Consumer benefit is not measured.
 
 ## Understood assignment
 
@@ -83,13 +85,27 @@ The main risk is missing a comment that the compiler attaches outside the parame
 
 ## Baseline and execution
 
-- Status: Open.
+- Status: Done. Implementation verified on 2026-10-25. Not merged. Publication of this closure commit, pull request, and worktree cleanup are pending.
 - Integration target: `origin/main` at `ab21473c4e2051b8b0cc2abcbe38ddb35e7f7c8d`, refreshed on 2026-10-25.
 - Feature branch: `feature/pevo/parameter-line-comment-261025`.
 - Temporary ignored worktree: `.worktrees/parameter-line-comment-261025`.
-- This issue is the only content of the first commit. Publish that commit and verify the remote ref before any product edit. The branch was created from `origin/main`; the first push must name this feature ref and must not update `main`.
-- Run from `src/sln/Coree.Analyzers.CodeClarity`: documented restore, serialized build, full test, and pack. A filtered red run may disable coverage because a filtered run cannot meet the whole-assembly threshold.
-- Verification, final publication, and cleanup are pending.
+- The issue-only baseline commit is `29c3fe5a3f7c0bbcad2b084e5ee321a3b1ef33a2`. It was published to `origin/feature/pevo/parameter-line-comment-261025` before product edits. `origin/main` stayed at `ab21473c4e2051b8b0cc2abcbe38ddb35e7f7c8d`.
+- The implementation commit is `70ce095b03943b485f904748049751add50ba1d5`.
+- This closure commit's publication, pull request, and worktree cleanup are not done yet.
+
+## Verification and final outcome
+
+Commands ran from `src/sln/Coree.Analyzers.CodeClarity` in this worktree.
+
+- Red run, before the fix: `dotnet test --filter FullyQualifiedName~ParameterListFitAnalyzerTests -p:CollectCoverage=false --verbosity minimal -m:1`. The two line-comment cases failed as described in Evidence. The first URL sample was invalid C# and was replaced. Nine existing tests passed.
+- After the fix, the same filtered command passed 13 tests, including the URL list at 44 characters and a block comment at 28 characters.
+- `dotnet restore` was up to date.
+- `dotnet build --no-restore -m:1` succeeded with 0 errors. The six warnings are the existing DebugHost samples: CCCMB001, CCCNS001, CCCRC001, two CCCPL002, and CCCPL001.
+- `dotnet test --no-build --verbosity minimal` passed 47 tests, failed 0, skipped 0. Coverage of `Coree.Analyzers.CodeClarity` was 100% line, 100% branch, and 100% method.
+- `dotnet pack --no-restore -m:1` after the implementation commit produced `Coree.Analyzers.CodeClarity.0.1.10-g70ce095b03.nupkg`. The package has the analyzer DLL and XML under `analyzers/dotnet/cs`, props under `build/` and `buildTransitive/`, and no `lib/` entry. The packed README contains the line-comment sentence, and the nuspec release notes contain the Unreleased CCCPL002 note.
+- `git diff --check` on the implementation diff was clean.
+
+No public diagnostic ID, severity, maximum, or other analyzer changed. CCCPL001 was not modified. Literal whitespace measurement was not modified. Expected consumer benefit remains unmeasured. Rollback is reverting `70ce095` together with this explanation.
 
 ## Incidental Discoveries (Out of Scope)
 
