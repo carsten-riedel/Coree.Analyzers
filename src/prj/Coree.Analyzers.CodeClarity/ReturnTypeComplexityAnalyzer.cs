@@ -7,14 +7,14 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace Coree.Analyzers.CodeClarity
 {
     /// <summary>
-    /// Warns when a <c>return</c> or <c>yield return</c> expression exceeds the allowed number of calculation steps.
+    /// Warns when a <c>return</c>, <c>yield return</c>, or returned arrow expression exceeds the allowed number of calculation steps.
     /// The default maximum is one. Extract the extra steps into named locals.
     /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public sealed class ReturnTypeComplexityAnalyzer : DiagnosticAnalyzer
     {
         /// <summary>
-        /// Diagnostic identifier for a return or yield return expression that exceeds the complexity maximum.
+        /// Diagnostic identifier for a return, yield return, or returned arrow expression that exceeds the complexity maximum.
         /// </summary>
         public const string DiagnosticId = "CCCRC001";
 
@@ -31,7 +31,7 @@ namespace Coree.Analyzers.CodeClarity
             "Clarity",
             DiagnosticSeverity.Warning,
             isEnabledByDefault: true,
-            description: "Counts arithmetic operators (except string concatenation), method calls other than nameof, and conditional operators in a return or yield return expression. A user-defined operator + counts even when one operand is a string. ReturnTypeComplexityAnalyzerMaximum is the allowed score; the default is 1.");
+            description: "Counts arithmetic operators (except string concatenation), method calls other than nameof, and conditional operators in a return, yield return, or returned arrow expression. A user-defined operator + counts even when one operand is a string. A void arrow, a constructor, a setter, a lambda, and an async method that returns a non-generic Task or ValueTask are not scored. ReturnTypeComplexityAnalyzerMaximum is the allowed score; the default is 1.");
 
         private static readonly DiagnosticDescriptor ErrorRule =
             AnalyzerSeverity.WithSeverity(Rule, DiagnosticSeverity.Error);
@@ -57,6 +57,15 @@ namespace Coree.Analyzers.CodeClarity
                 AnalyzeReturn,
                 SyntaxKind.ReturnStatement,
                 SyntaxKind.YieldReturnStatement);
+            // int M() => a + b + c is the same returned value as return a + b + c.
+            // A void arrow and an async Task or ValueTask arrow are statements, not returned values.
+            context.RegisterSyntaxNodeAction(AnalyzeMethodArrow, SyntaxKind.MethodDeclaration);
+            context.RegisterSyntaxNodeAction(AnalyzeLocalFunctionArrow, SyntaxKind.LocalFunctionStatement);
+            context.RegisterSyntaxNodeAction(AnalyzePropertyArrow, SyntaxKind.PropertyDeclaration);
+            context.RegisterSyntaxNodeAction(AnalyzeIndexerArrow, SyntaxKind.IndexerDeclaration);
+            context.RegisterSyntaxNodeAction(AnalyzeGetAccessorArrow, SyntaxKind.GetAccessorDeclaration);
+            context.RegisterSyntaxNodeAction(AnalyzeOperatorArrow, SyntaxKind.OperatorDeclaration);
+            context.RegisterSyntaxNodeAction(AnalyzeConversionArrow, SyntaxKind.ConversionOperatorDeclaration);
         }
 
         private static void AnalyzeReturn(SyntaxNodeAnalysisContext context)
@@ -77,6 +86,58 @@ namespace Coree.Analyzers.CodeClarity
                 return;
             }
 
+            ReportIfExceeds(context, expression);
+        }
+
+        private static void AnalyzeMethodArrow(SyntaxNodeAnalysisContext context)
+        {
+            MethodDeclarationSyntax method = (MethodDeclarationSyntax)context.Node;
+            ReportArrow(context, ValueExpression(method.ExpressionBody, context.SemanticModel.GetDeclaredSymbol(method) as IMethodSymbol));
+        }
+
+        private static void AnalyzeLocalFunctionArrow(SyntaxNodeAnalysisContext context)
+        {
+            LocalFunctionStatementSyntax localFunction = (LocalFunctionStatementSyntax)context.Node;
+            ReportArrow(context, ValueExpression(localFunction.ExpressionBody, context.SemanticModel.GetDeclaredSymbol(localFunction) as IMethodSymbol));
+        }
+
+        private static void AnalyzePropertyArrow(SyntaxNodeAnalysisContext context)
+        {
+            ReportArrow(context, ((PropertyDeclarationSyntax)context.Node).ExpressionBody?.Expression);
+        }
+
+        private static void AnalyzeIndexerArrow(SyntaxNodeAnalysisContext context)
+        {
+            ReportArrow(context, ((IndexerDeclarationSyntax)context.Node).ExpressionBody?.Expression);
+        }
+
+        private static void AnalyzeGetAccessorArrow(SyntaxNodeAnalysisContext context)
+        {
+            ReportArrow(context, ((AccessorDeclarationSyntax)context.Node).ExpressionBody?.Expression);
+        }
+
+        private static void AnalyzeOperatorArrow(SyntaxNodeAnalysisContext context)
+        {
+            ReportArrow(context, ((OperatorDeclarationSyntax)context.Node).ExpressionBody?.Expression);
+        }
+
+        private static void AnalyzeConversionArrow(SyntaxNodeAnalysisContext context)
+        {
+            ReportArrow(context, ((ConversionOperatorDeclarationSyntax)context.Node).ExpressionBody?.Expression);
+        }
+
+        private static void ReportArrow(SyntaxNodeAnalysisContext context, ExpressionSyntax? expression)
+        {
+            if (expression == null)
+            {
+                return;
+            }
+
+            ReportIfExceeds(context, expression);
+        }
+
+        private static void ReportIfExceeds(SyntaxNodeAnalysisContext context, ExpressionSyntax expression)
+        {
             AnalyzerConfigOptions options = context.Options.AnalyzerConfigOptionsProvider.GlobalOptions;
             DiagnosticSeverity? severity = AnalyzerSeverity.Read(options, SeverityPropertyName);
             if (!severity.HasValue)
@@ -92,6 +153,37 @@ namespace Coree.Analyzers.CodeClarity
 
             DiagnosticDescriptor rule = AnalyzerSeverity.SelectDescriptor(Rule, ErrorRule, InfoRule, severity.Value);
             context.ReportDiagnostic(Diagnostic.Create(rule, expression.GetLocation()));
+        }
+
+        private static ExpressionSyntax? ValueExpression(ArrowExpressionClauseSyntax? arrow, IMethodSymbol? method)
+        {
+            if (arrow == null || !ReturnsValue(method))
+            {
+                return null;
+            }
+
+            return arrow.Expression;
+        }
+
+        // A block body reports only a return expression. void M() { Write(a + b + c); } stays quiet,
+        // and so does async Task M() { Write(a + b + c); }. Those arrows are statements, not returned
+        // values. Scoring them would warn where the block form does not. A missing symbol stays quiet.
+        internal static bool ReturnsValue(IMethodSymbol? method)
+        {
+            if (method == null || method.ReturnsVoid)
+            {
+                return false;
+            }
+
+            if (!method.IsAsync)
+            {
+                return true;
+            }
+
+            // Task<int> displays as System.Threading.Tasks.Task<int>, so that arrow is still scored.
+            string fullName = method.ReturnType.ToDisplayString();
+            return fullName != "System.Threading.Tasks.Task"
+                && fullName != "System.Threading.Tasks.ValueTask";
         }
 
         private static int ReadMaximum(AnalyzerConfigOptions options)
