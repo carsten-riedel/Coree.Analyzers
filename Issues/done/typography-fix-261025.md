@@ -10,26 +10,27 @@ Coree.Analyzers.Typography reports CTYED001 on that character and tells the deve
 
 ## Change
 
-Add one code fix for those six diagnostics on C# documents. The fix replaces only the flagged character:
+A C# document can replace each flagged character with the ASCII character that warning names:
 
-- U+2013 and U+2014 become U+002D (`-`)
-- U+201C, U+201D, U+201E, U+201F, U+00AB, and U+00BB become U+0022 (`"`)
-- U+2018, U+201A, U+201B, and U+2019 become U+0027 (`'`)
-- U+2026 becomes three U+002E (`.`)
-- U+2212 becomes U+002D (`-`)
-- U+00A0 and U+202F become U+0020 (space)
+- U+2013, U+2014, and U+2212 become `-`
+- U+201C, U+201D, U+201E, U+201F, U+00AB, and U+00BB become `"`
+- U+2018, U+201A, U+201B, and U+2019 become `'`
+- U+2026 becomes three `.`
+- U+00A0 and U+202F become a space
 
-A document-scoped fix-all for one diagnostic id applies that same mapping to every match of that diagnostic in the document, from the end of the text so a longer replacement (the ellipsis) does not move a later span. Additional files that are not C# documents still report and do not get this fix. Which characters are reported does not change.
+In a comment the character is written as itself. In a regular or interpolated string, `"` is written as `\"`. In a verbatim string, `"` is written as `""`. In a character literal, `'` is written as `\'`. A raw string (`"""`) is not offered a fix, and the diagnostic still reports. Fix-all applies that same edit to each C# document in the document, the project, or the solution, from the end of the text so an ellipsis does not move a later span. Additional files that are not C# documents still report and are not edited. Which characters are reported does not change.
 
-The repository README, the Typography NuGet readme, and the unreleased package notes say the IDE can apply these replacements.
+The repository README, the Typography NuGet readme, the unreleased package notes, and `docs/typography/user/ascii-replacement.md` describe these replacements.
 
 ## After
 
-Not implemented yet.
+Applying the fix to `class C { string s = "a—b"; }` replaces the em dash with `-`, and CTYED001 is gone from that span. The same action writes the ASCII character named above for the other five diagnostics. A curly double quote in a comment becomes `"`. Inside a normal string `"x“y"` it becomes `"x\"y"`. A raw string that contains U+201C still reports CTYQM001 and is not offered a fix. The compiler does not apply the edit. Whether a developer applies the fix was not measured.
 
 ## Evidence
 
 At `origin/main` `085bac71d656d7740ec728cb13137750cd183fc9`, the Typography project has six `DiagnosticAnalyzer` types and no `CodeFixProvider`. `EmDashAnalyzer` reports CTYED001 and its message says "Use ASCII hyphen-minus." `FunctionalTests.EmDashInStringReportsDiagnostic` expects that warning on `"a\u2014b"` and does not apply a fix. The same file locks the other five diagnostics. A search of `src` for `CodeFix` and `RegisterCodeFixes` found no fixer.
+
+After implementation `ed72438302043d3c08fee6cd969fe34354f0c636`, from `src/sln/Coree.Analyzers.Typography`: `dotnet test -m:1` passed 87 tests, and Coverlet reported 100% line, branch, and method coverage of `Coree.Analyzers.Typography`. `dotnet build -m:1` succeeded. The analyzer project warns RS1038 because the assembly references Workspaces; DebugHost, included in that build, still reports CTYED001, CTYQM001, CTYAP001, CTYEL001, CTYMN001, and CTYNB001 on `Program.cs` and `SampleTypography.txt`. `dotnet pack -m:1` produced `Coree.Analyzers.Typography.1.0.7-ged72438302.nupkg` with one analyzer dll under `analyzers/dotnet/cs/`, props under `build/` and `buildTransitive/`, no `lib/`, and no package dependencies. That dll contains `TypographyCharacterFixProvider`. `TypographyCharacterFixTests` covers each replacement, quote escaping, a raw string with no fix, two dashes, and two ellipses. Consumer uptake is unmeasured.
 
 ## Understood assignment and provenance
 
@@ -93,17 +94,21 @@ The main risk is a fix-all that uses spans from before a longer replacement, so 
 
 ## Selected improvement and baseline
 
+Status: Done. Implementation is verified and ready for review. It is not merged.
+
 - Integration target: `main`, refreshed `origin/main` at `085bac71d656d7740ec728cb13137750cd183fc9`.
 - Feature branch: `feature/pevo/typography-fix-261025`.
 - Worktree: `.worktrees/typography-fix-261025`.
-- Issue path: `Issues/open/typography-fix-261025.md`.
-- Early push of this issue-only commit is the next step and is not done yet. Publication of a later closure commit, pull request, merge, and worktree cleanup are not started.
+- Issue path: `Issues/done/typography-fix-261025.md`.
+- Issue-only baseline: `45847906125a98c8613a95bf35d15383982d4980`, published to `origin` before product edits. Quote escaping is `c7a012f64089ad685c2f8155300155a28aa2ab7e`. Fix-all scopes are `4c7e89bed32aea814d00291f90c8f29bd747f4d7`.
+- Implementation: `ed72438302043d3c08fee6cd969fe34354f0c636`.
+- Publication of this closure commit, pull-request creation, merge, and worktree cleanup are still pending.
 
 ## Decision revision — quote and apostrophe escaping
 
-The original Change above stands for dashes, the ellipsis, the minus sign, and no-break spaces: one flagged character becomes the raw ASCII text.
+The issue-only baseline's Change stood for dashes, the ellipsis, the minus sign, and no-break spaces: one flagged character becomes the raw ASCII text. The Change section above now states the rule that was implemented.
 
-It does not stand for a raw `"` or `'` dropped into a literal. That was not visible from the diagnostic text. A curly quote inside a normal string is one character of the literal. Replacing it with a raw `"` ends the literal (`"x"y"`). A typographic apostrophe inside a character literal does the same with `'`. The warning tells the developer to use the ASCII mark. It does not tell them to break the file. The functional tests that put these characters in strings made that obvious only when the replacement was written into that same position.
+That baseline text does not stand for a raw `"` or `'` dropped into a literal. That was not visible from the diagnostic text. A curly quote inside a normal string is one character of the literal. Replacing it with a raw `"` ends the literal (`"x"y"`). A typographic apostrophe inside a character literal does the same with `'`. The warning tells the developer to use the ASCII mark. It does not tell them to break the file. The functional tests that put these characters in strings made that obvious only when the replacement was written into that same position.
 
 Revised rule for CTYQM001 and CTYAP001 only:
 
@@ -116,6 +121,12 @@ Revised rule for CTYQM001 and CTYAP001 only:
 Acceptance criteria 2 and 3 are read with this rule. Add: a raw string that contains U+201C still reports CTYQM001 and is not offered a fix. The other criteria are unchanged.
 
 Fix-all uses that same replacement for every C# document in the scope the IDE requests: the document, the project, or the solution. The first write-up named only the document. A project or solution fix-all is the same edit, applied to each document the developer included. Raw strings in those documents are still skipped.
+
+## Final outcome
+
+The fixer, its tests, and the notes were implemented with the two decision revisions already on this branch: quotes and apostrophes are escaped inside literals, raw strings are left alone, and fix-all covers the document, project, and solution. Diagnostic ids, reported characters, severity, and additional-file scanning stayed as they were. RS1038 remains a warning on the analyzer project. DebugHost still loads the diagnostics from that same assembly, so the warning was not suppressed and the fixer was not split into a second dll.
+
+Rollback is reverting the fixer, its tests, and the accompanying notes together. No configuration migration is required. Consumer uptake remains unmeasured.
 
 ## Incidental Discoveries (Out of Scope)
 
