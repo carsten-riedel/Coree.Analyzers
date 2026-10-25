@@ -233,6 +233,77 @@ class PackedFollowing{|#14:(
         }
 
         [TestMethod]
+        public async Task ContinuedParameterSharingALineReports()
+        {
+            const string test = """
+[System.AttributeUsage(System.AttributeTargets.Parameter)]
+class MarkAttribute : System.Attribute
+{
+    public MarkAttribute(string note) { }
+}
+
+class Terrain
+{
+    public void Verbatim{|#0:(
+        string value = @"one
+two", int other = 1
+    )|}
+    {
+    }
+
+    public void Attributed{|#1:(
+        [Mark(
+            "note")] int left, int right
+    )|}
+    {
+    }
+}
+""";
+            var expected0 = DiagnosticResult
+                .CompilerWarning(ParameterListLayoutAnalyzer.DiagnosticId)
+                .WithLocation(0);
+            var expected1 = DiagnosticResult
+                .CompilerWarning(ParameterListLayoutAnalyzer.DiagnosticId)
+                .WithLocation(1);
+            await CSharpAnalyzerVerifier<ParameterListLayoutAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(
+                test,
+                expected0,
+                expected1);
+        }
+
+        [TestMethod]
+        public async Task MultilineParameterOnItsOwnLinesStaysQuiet()
+        {
+            const string test = """
+[System.AttributeUsage(System.AttributeTargets.Parameter)]
+class MarkAttribute : System.Attribute
+{
+    public MarkAttribute(string note) { }
+}
+
+class Terrain
+{
+    public void Separate(
+        string value = @"one
+two",
+        int other = 1
+    )
+    {
+    }
+
+    public void Attributed(
+        [Mark(
+            "note")] int left,
+        int right
+    )
+    {
+    }
+}
+""";
+            await CSharpAnalyzerVerifier<ParameterListLayoutAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(test);
+        }
+
+        [TestMethod]
         public async Task SeverityErrorReportsError()
         {
             const string source = "class C { void M(int a, int b,\n    int c) { } }";

@@ -16,15 +16,17 @@ namespace Coree.Analyzers.CodeClarity
 
             int openLine = Line(parameterList.OpenParenToken.GetLocation());
             int closeLine = Line(parameterList.CloseParenToken.GetLocation());
-            int firstLine = Line(parameters[0].GetLocation());
+            FileLinePositionSpan firstSpan = parameters[0].GetLocation().GetLineSpan();
+            int firstLine = firstSpan.StartLinePosition.Line;
             bool oneLine = firstLine == openLine && firstLine == closeLine;
             bool onOpenLine = firstLine == openLine;
             bool sharesLine = false;
-            int previousLine = firstLine;
+            FileLinePositionSpan previousSpan = firstSpan;
 
             for (int index = 1; index < parameters.Count; index++)
             {
-                int line = Line(parameters[index].GetLocation());
+                FileLinePositionSpan span = parameters[index].GetLocation().GetLineSpan();
+                int line = span.StartLinePosition.Line;
                 if (line != openLine)
                 {
                     oneLine = false;
@@ -35,7 +37,7 @@ namespace Coree.Analyzers.CodeClarity
                     oneLine = false;
                 }
 
-                if (line == previousLine)
+                if (SpansShareLine(previousSpan, span))
                 {
                     sharesLine = true;
                 }
@@ -45,7 +47,7 @@ namespace Coree.Analyzers.CodeClarity
                     onOpenLine = true;
                 }
 
-                previousLine = line;
+                previousSpan = span;
             }
 
             if (oneLine)
@@ -73,6 +75,13 @@ namespace Coree.Analyzers.CodeClarity
         private static int EndLine(Location location)
         {
             return location.GetLineSpan().EndLinePosition.Line;
+        }
+
+        private static bool SpansShareLine(FileLinePositionSpan earlier, FileLinePositionSpan later)
+        {
+            // Parameters are visited in source order, so a shared line is a later parameter
+            // that begins on or above the earlier parameter's last line.
+            return later.StartLinePosition.Line <= earlier.EndLinePosition.Line;
         }
     }
 }

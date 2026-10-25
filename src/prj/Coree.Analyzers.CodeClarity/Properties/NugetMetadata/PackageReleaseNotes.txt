@@ -4,6 +4,7 @@ Unreleased
  - Fix CCCRC001 undercounting calls to user-defined methods named nameof or @nameof. The C# nameof operator remains exempt.
  - CCCRC001 counts a user-defined operator + even when one operand is a string. Built-in string concatenation still does not count.
  - CCCPL001 puts the closing parenthesis on the line after the last parameter ends. An attribute or a default may span lines. A closing parenthesis on that parameter's last line reports.
+ - CCCPL001 reports two parameters that share a line even when the earlier parameter began on a previous line. A wrapped parameter that ends before the next parameter starts stays quiet.
 
 0.1.5 (2026-10-08)
 

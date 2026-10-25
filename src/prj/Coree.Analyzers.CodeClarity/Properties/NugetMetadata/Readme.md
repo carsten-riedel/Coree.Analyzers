@@ -55,7 +55,7 @@ int FromLocal(int a, int b, int c)
 }
 ```
 
-CCCPL001 looks at methods, local functions, constructors, and primary constructors of classes, structs, and records. Calls, indexers, delegates, and lambdas stay out of it. An empty list and a single parameter stay quiet. The first two samples report CCCPL001. The other two do not: one line, parentheses included, or one parameter per line with the closing parenthesis on the following line.
+CCCPL001 looks at methods, local functions, constructors, and primary constructors of classes, structs, and records. Calls, indexers, delegates, and lambdas stay out of it. An empty list and a single parameter stay quiet. The first two samples report CCCPL001. The other two do not: one line, parentheses included, or one parameter per line with the closing parenthesis on the following line. A parameter that began higher still shares a line when the next parameter sits on its last line, and that list reports CCCPL001. The same parameter stays quiet when the next one starts on a later line.
 
 ```csharp
 public void M(
