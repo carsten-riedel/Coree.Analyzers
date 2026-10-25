@@ -1,3 +1,7 @@
+Unreleased
+
+ - CCCPL001 reports two parameters that share a line even when the earlier parameter began on a previous line. A wrapped parameter that ends before the next parameter starts stays quiet.
+
 0.1.5 (2026-10-08)
 
  - CCCPL001 flags a parameter list that spans more than one line while one of those lines still starts more than one parameter.
