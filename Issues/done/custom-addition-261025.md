@@ -19,15 +19,15 @@ That addition calls `Meter`'s operator and returns an int. It is not string conc
 
 ## Change
 
-Count a user-defined `operator +` as one calculation step even when an operand is a string. Leave built-in string concatenation uncounted, including `return a + " " + b` at maximum 0. Cover a string on either side, a custom addition combined with another counted step, and the existing maximum and severity settings. Say this in the return-complexity explanation and the package notes.
+`ReturnExpressionComplexity` treats a user-defined `operator +` as one calculation step even when an operand is a string. Built-in string concatenation is unchanged. The return-complexity description, repository README, NuGet readme, package description, and unreleased package notes say so. Regressions cover a string on either side, a custom addition beside another counted step, and concatenation at maximum 0.
 
 ## After
 
-Not implemented yet.
+At maximum 0, `return label + value` and `return value + label` report CCCRC001. At the default maximum of 1 they stay quiet, the same as `return a + b`. `return label + value + extra` reports at maximum 1 and stays quiet at maximum 2. `return a + " " + b + c` stays quiet at maximum 0. A custom addition is no longer invisible just because one operand is a string.
 
 ## Evidence
 
-At `origin/main` `ab21473c4e2051b8b0cc2abcbe38ddb35e7f7c8d`, `ReturnExpressionComplexity.IsStringConcatenation` returns true when either operand's type is `string`, and `IsCalculation` then skips the addition. The published rule counts arithmetic other than string concatenation. Existing return tests cover built-in `a + " " + b` and int addition, not a user-defined operator. Consumer benefit is not measured.
+At `origin/main` `ab21473c4e2051b8b0cc2abcbe38ddb35e7f7c8d`, `ReturnExpressionComplexity.IsStringConcatenation` returned true when either operand's type was `string`, and `IsCalculation` then skipped the addition. Before the scorer change, `UserDefinedAdditionWithStringOperandCounts` expected 1 diagnostic and got 0, and `UserDefinedAdditionReportsAtZeroMaximum` expected 2 and got 0. After the change those tests passed, along with `UserDefinedAdditionAllowsTwoStepsAtHigherMaximum` and `BuiltInStringConcatenationStaysQuietAtZeroMaximum`. From `src/sln/Coree.Analyzers.CodeClarity`, `dotnet build --no-restore -m:1` succeeded with 0 errors. The DebugHost warnings are the existing sample diagnostics. `dotnet test --no-build` passed 47 tests with 100% line, branch, and method coverage. `dotnet pack -m:1` on implementation commit `98549d98cdae22c0debd3d918067450e6b20fd4a` produced `Coree.Analyzers.CodeClarity.0.1.10-g98549d98cd.nupkg`: the analyzer is under `analyzers/dotnet/cs`, the props are under `build/` and `buildTransitive/`, there is no `lib/` group, and the nuspec notes and packed readme mention the user-defined operator. Consumer benefit is not measured.
 
 ## Understood assignment
 
@@ -69,13 +69,18 @@ Consumers are C# developers using CodeClarity. Projects with a user-defined `ope
 
 ## Baseline and execution
 
-- Status: Open.
+- Status: Done. Implementation verified on 2026-10-25. Not merged.
 - Integration target: `origin/main` at `ab21473c4e2051b8b0cc2abcbe38ddb35e7f7c8d`.
 - Feature branch: `feature/pevo/custom-addition-261025`.
 - Temporary worktree: `.worktrees/custom-addition-261025`, ignored by the caller checkout.
-- The caller's checkout is not the implementation workspace.
-- This file is the only content of the first commit. Publish that commit and verify the remote ref before product edits.
-- Run from `src/sln/Coree.Analyzers.CodeClarity`: restore, serialized build, full test, and pack. A focused red/green run may turn coverage collection off because a filtered run cannot meet the whole-assembly threshold.
+- The caller's checkout was not used for implementation.
+- Issue-only baseline: `9151c08fe16ac2ce1ffdfbcda7da5c1bd1d88558`, published and matched on `origin/feature/pevo/custom-addition-261025` before product edits.
+- Implementation: `98549d98cdae22c0debd3d918067450e6b20fd4a`.
+- Publication of this Done commit, pull request, merge, and worktree cleanup are pending.
+
+## Final outcome
+
+The scorer checks for a user-defined operator before the string-operand shortcut. No acceptance criterion was dropped. Focused runs that established the regression used `-p:CollectCoverage=false` because a filtered run cannot meet the whole-assembly threshold. The full suite then met 100% line, branch, and method coverage. Expected consumer benefit is not measured. Rollback remains reverting the scorer and the accompanying explanation together. This closure commit does not yet know its own SHA. Remote publication of this commit and local cleanup are not done yet.
 
 ## Incidental Discoveries (Out of Scope)
 
