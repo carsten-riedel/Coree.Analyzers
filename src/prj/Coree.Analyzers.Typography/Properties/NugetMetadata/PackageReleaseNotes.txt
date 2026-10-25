@@ -1,3 +1,8 @@
+2026-10-25
+
+ - CTYQM001 flags the opening single quotation mark (U+2018), the single low-9 quotation mark (U+201A), and the single high-reversed-9 quotation mark (U+201B), in addition to the curly double quotes and guillemets it already flags.
+ - The closing single quotation mark (U+2019) stays on CTYAP001 only.
+
 1.0.2 (2026-10-08)
 
  - A file already in Compile stays on the C# syntax tree and is not registered again as an AdditionalFile.
