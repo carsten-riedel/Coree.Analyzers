@@ -172,6 +172,25 @@ public void M(
 )
 ```
 
+The closing parenthesis follows the last line of the last parameter. An attribute or a default may occupy earlier lines of that parameter. This stays quiet:
+
+```csharp
+public void M(
+    int a,
+    [NotNull]
+    int b
+)
+```
+
+This reports CCCPL001, because `)` is on that parameter's last line:
+
+```csharp
+public void M(
+    int a,
+    [NotNull]
+    int b)
+```
+
 CCCPL002 is separate from that shape rule. The last sample stays within CCCPL001 and still reports CCCPL002, because the parameters would fit on one line. The length is the parameters joined by `, ` after tabs, line breaks, and repeated spaces collapse. Parentheses are not counted. `float a, float b, float c` is 25 characters, so it reports at the default of 120. The one-line record does not. A longer list that uses the same legal break stays quiet.
 
 CCCNS001 reports a class, struct, record, interface, enum, or delegate that is not inside a namespace. Nested types are not reported on their own. The first sample reports CCCNS001. The block namespace and the file-scoped namespace do not.

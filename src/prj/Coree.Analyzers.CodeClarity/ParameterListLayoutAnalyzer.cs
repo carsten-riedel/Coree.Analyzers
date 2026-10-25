@@ -8,7 +8,7 @@ namespace Coree.Analyzers.CodeClarity
 {
     /// <summary>
     /// Warns when a parameter list is neither one line nor one parameter per line.
-    /// One line includes both parentheses. The list form starts each parameter on its own line and puts the closing parenthesis on the following line.
+    /// One line includes both parentheses. The list form starts each parameter on its own line and puts the closing parenthesis on the line after the last parameter ends.
     /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public sealed class ParameterListLayoutAnalyzer : DiagnosticAnalyzer
@@ -27,7 +27,7 @@ namespace Coree.Analyzers.CodeClarity
             "Clarity",
             DiagnosticSeverity.Warning,
             isEnabledByDefault: true,
-            description: "Reports a method, constructor, or primary-constructor parameter list that is neither M(a, b, c) nor M(\\n    a,\\n    b,\\n    c\\n). The one-line form keeps both parentheses on that line. The list form ends the signature with (, starts one parameter on each following line, and puts ) alone on the line after the last parameter.");
+            description: "Reports a method, constructor, or primary-constructor parameter list that is neither M(a, b, c) nor M(\\n    a,\\n    b,\\n    c\\n). The one-line form keeps both parentheses on that line. The list form ends the signature with (, starts one parameter on each following line, and puts ) alone on the line after the last line of the last parameter. A parameter may span lines.");
 
         private static readonly DiagnosticDescriptor ErrorRule =
             AnalyzerSeverity.WithSeverity(Rule, DiagnosticSeverity.Error);
