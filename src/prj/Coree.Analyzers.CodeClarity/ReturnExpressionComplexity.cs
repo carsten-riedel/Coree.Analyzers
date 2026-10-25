@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Operations;
 
 namespace Coree.Analyzers.CodeClarity
 {
@@ -20,7 +21,7 @@ namespace Coree.Analyzers.CodeClarity
             }
 
             int score = 0;
-            if (node is InvocationExpressionSyntax invocation && !IsNameof(invocation))
+            if (node is InvocationExpressionSyntax invocation && !IsNameof(invocation, model))
             {
                 score++;
             }
@@ -41,10 +42,12 @@ namespace Coree.Analyzers.CodeClarity
             return score;
         }
 
-        private static bool IsNameof(InvocationExpressionSyntax invocation)
+        private static bool IsNameof(InvocationExpressionSyntax invocation, SemanticModel model)
         {
             IdentifierNameSyntax? name = invocation.Expression as IdentifierNameSyntax;
-            return name != null && name.Identifier.ValueText == "nameof";
+            // This spelling can also bind to a user-defined method, including an escaped @nameof.
+            return name != null && name.Identifier.ValueText == "nameof"
+                && model.GetOperation(invocation) is INameOfOperation;
         }
 
         private static bool IsCalculation(BinaryExpressionSyntax binary, SemanticModel model)
