@@ -21,6 +21,12 @@ namespace Coree.Analyzers.CodeClarity
                 return false;
             }
 
+            // A line break inside a token is literal text. The one-line spelling cannot keep it.
+            if (ContainsLiteralLineBreak(parameterList.Parameters))
+            {
+                return false;
+            }
+
             return JoinedLength(parameterList.Parameters) <= maximum;
         }
 
@@ -42,6 +48,41 @@ namespace Coree.Analyzers.CodeClarity
             foreach (SyntaxTrivia trivia in parameterList.DescendantTrivia())
             {
                 if (trivia.IsDirective)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool ContainsLiteralLineBreak(SeparatedSyntaxList<ParameterSyntax> parameters)
+        {
+            foreach (ParameterSyntax parameter in parameters)
+            {
+                foreach (SyntaxToken token in parameter.DescendantTokens())
+                {
+                    if (HasSourceLineBreak(token.Text))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private static bool HasSourceLineBreak(string text)
+        {
+            // token.Text is the source spelling. ValueText would decode a regular "\n"
+            // into a line break and silence a list that still fits on one line.
+            foreach (char character in text)
+            {
+                if (character == '\r'
+                    || character == '\n'
+                    || character == '\u0085'
+                    || character == '\u2028'
+                    || character == '\u2029')
                 {
                     return true;
                 }

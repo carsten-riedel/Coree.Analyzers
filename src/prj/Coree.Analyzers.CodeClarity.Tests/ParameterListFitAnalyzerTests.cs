@@ -254,6 +254,42 @@ public record Profile{|#7:(
         }
 
         [TestMethod]
+        [DataRow("@\"select\nid\"")]
+        [DataRow("@\"select\rid\"")]
+        [DataRow("@\"select\r\nid\"")]
+        [DataRow("@\"select\u0085id\"")]
+        [DataRow("@\"select\u2028id\"")]
+        [DataRow("@\"select\u2029id\"")]
+        [DataRow("\"\"\"\n        select\n        id\n        \"\"\"")]
+        [DataRow("$@\"select\nid\"")]
+        [DataRow("$\"\"\"\n        select\n        id\n        \"\"\"")]
+        public async Task LiteralLineBreakStaysQuiet(string literal)
+        {
+            string source = "class C { void M(\n    int limit,\n    string value = " + literal + "\n) { } }";
+            await VerifyAsync(source, "warning", null);
+        }
+
+        [TestMethod]
+        public async Task EscapedNewlineInsideRegularStringStillReports()
+        {
+            const string source = "class C { void M(\n    int limit,\n    string value = \"select\\nid\"\n) { } }";
+            var expected = DiagnosticResult
+                .CompilerWarning(ParameterListFitAnalyzer.DiagnosticId)
+                .WithSpan(1, 17, 4, 2);
+            await VerifyAsync(source, "warning", null, expected);
+        }
+
+        [TestMethod]
+        public async Task MultilineBlockCommentStillReports()
+        {
+            const string source = "class C { void M(\n    int /* amplitude\n    scale */ a,\n    int b\n) { } }";
+            var expected = DiagnosticResult
+                .CompilerWarning(ParameterListFitAnalyzer.DiagnosticId)
+                .WithSpan(1, 17, 5, 2);
+            await VerifyAsync(source, "warning", null, expected);
+        }
+
+        [TestMethod]
         public async Task BlockCommentStillReports()
         {
             const string source = "class C { void M(\n    int /* amplitude */ a,\n    int b\n) { } }";
