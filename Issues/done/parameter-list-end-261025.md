@@ -14,15 +14,19 @@ public void M(
 
 ## Change
 
-Measure the closing parenthesis from the last line of the last parameter. Leave the other shape checks in place: both parentheses and every parameter on one line, no two parameters starting on the same line, no parameter starting on the opening parenthesis line, and no closing parenthesis on the last parameter's last line or later than the immediately following line. Cover a last-parameter attribute and a last-parameter multiline default, including the closing parenthesis on that parameter's last line and a blank line before `)`. State this span in the consumer explanations and package notes.
+`ParameterListLayout` now compares the closing parenthesis with the last line of the last parameter. The other shape checks are unchanged: one line including both parentheses, parameters that start on the same line, a parameter that starts on the opening parenthesis line, and a closing parenthesis that is not on the immediately following line. The repository README, the NuGet README, the package notes, and the analyzer description state that a parameter may span lines. The diagnostic message is unchanged.
 
 ## After
 
-Not implemented yet.
+The method in Before stays quiet. So does the same shape on a record primary constructor, and a last parameter whose default is a multiline verbatim string, when `)` is on the next line. Putting `)` on the last line of that spanning parameter reports CCCPL001. A blank line before `)` still reports. A one-line last parameter behaves as before, so reordering parameters is no longer a way to silence this shape.
 
 ## Evidence
 
-At `origin/main` `ab21473c4e2051b8b0cc2abcbe38ddb35e7f7c8d`, `ParameterListLayout.IsDisallowed` keeps the last parameter's start line and allows the list only when the closing parenthesis is on that line plus one. `AcceptedLayoutsStayQuiet` already allows an attribute on the same line as an earlier parameter. `MixedLayoutsReport` already requires a warning when `)` shares the last parameter line or a blank line precedes `)`. Nothing in those tests gives the last parameter a different start and end line. Consumer benefit is not measured.
+At `origin/main` `ab21473c4e2051b8b0cc2abcbe38ddb35e7f7c8d`, `ParameterListLayout.IsDisallowed` kept the last parameter's start line and allowed the list only when the closing parenthesis was on that line plus one. `AcceptedLayoutsStayQuiet` already allowed an attribute on the same line as an earlier parameter. `MixedLayoutsReport` already required a warning when `)` shares a one-line parameter's line or a blank line precedes `)`.
+
+Before the repair, the new quiet cases were run with coverage collection off: `AcceptedLayoutsStayQuiet` returned three CCCPL001 warnings, on the last-attribute method, the multiline default, and the record. It also returned CS1737 for an optional parameter placed before a required one. That fixture was invalid and was replaced, before the repair, by an attribute on an earlier parameter. `MixedLayoutsReport` expected 19 diagnostics and returned 17. The two missing ones were `)` on the last line of a spanning attribute and of a multiline default; the start-line check treated that line as the allowed next line. The blank-line case was already present.
+
+After the repair, from `src/sln/Coree.Analyzers.CodeClarity` in this worktree: the five layout tests passed. `dotnet test --no-restore -m:1` passed 43 tests, with 100% line, branch, and method coverage. `dotnet build --no-restore -m:1` finished with 0 errors and the six existing DebugHost sample warnings. `dotnet pack --no-restore -m:1` produced a package whose paths are `analyzers/dotnet/cs`, `build`, and `buildTransitive`, with no `lib` group. The packed README and release notes contain the last-line wording. `git diff --check` against `origin/main` was clean. Consumer benefit is not measured.
 
 ## Understood assignment
 
@@ -69,7 +73,7 @@ A fresh branch and issue-name check immediately before this worktree found no `p
 ### Acceptance criteria
 
 1. A method and a record primary constructor whose last parameter spans lines, with `)` on the immediately following line, do not report CCCPL001. Cover an attribute on its own line and a multiline string default.
-2. Those same last parameters still report when `)` is on the parameter's last line, and when a blank line sits between that last line and `)`.
+2. Those same last parameters report when `)` is on the parameter's last line, and when a blank line sits between that last line and `)`. The red run showed the shared-last-line shapes were quiet before the repair; "still" in the original wording was imprecise.
 3. Existing quiet and reported shapes stay put: one line, a multiline parameter that is not last, shared start lines, a parameter on the opening line, and `)` on the last single-line parameter.
 4. Show the new accepted cases failing against the original check, then pass the full CodeClarity suite with its configured 100% line, branch, and method coverage. Build and pack the package.
 5. Repository and NuGet explanations and the package notes describe the last-line rule. Public IDs, severities, CCCPL002, and the other analyzers stay unchanged.
@@ -82,13 +86,21 @@ The main risk is treating the end position as the following line when a span end
 
 ## Baseline and execution
 
-- Status: Open.
+- Status: Done. Implementation verified on 2026-10-25. Not merged.
 - Integration target: `origin/main` at `ab21473c4e2051b8b0cc2abcbe38ddb35e7f7c8d`, refreshed on 2026-10-25.
 - Feature branch: `feature/pevo/parameter-list-end-261025`.
 - Temporary ignored worktree: `.worktrees/parameter-list-end-261025`.
-- This issue is the only content of the first commit. Publish that commit and verify the remote ref before any product edit.
-- Run from `src/sln/Coree.Analyzers.CodeClarity`: documented restore, serialized build, full test, and pack. A filtered red run may disable coverage because a filtered run cannot meet the whole-assembly threshold.
-- Verification, final publication, and cleanup are pending.
+- Issue-only baseline: `b547726c666c40f4da11c9b3f51fb0140ae83eda`. Published to `origin` and checked with `ls-remote` before product edits.
+- Implementation: `9cae39d0ca7c43b6dfccae6c2e75a5ed039c67da`.
+- The red run did not change the selected outcome. It showed that the same end-line comparison also reports a closing parenthesis on the last line of a spanning parameter, which the start-line check had allowed. Acceptance criterion 2 already required that report.
+- Commands ran from `src/sln/Coree.Analyzers.CodeClarity`. The filtered red run used `-p:CollectCoverage=false` because a filtered run cannot meet the whole-assembly threshold.
+- Final publication of this closure commit, pull request, merge, and worktree cleanup are pending. This status means the implementation is verified, not that it is integrated.
+
+## Verification and final outcome
+
+Acceptance criteria 1-5 are met by the layout regressions, the full CodeClarity suite, the build, the package inspection, and the README and package-note updates. CCCPL002, diagnostic IDs, severities, and the other analyzers were not changed. Typography was not run. Real consumer use was not measured.
+
+Rollback remains a revert of `9cae39d0ca7c43b6dfccae6c2e75a5ed039c67da` together with this closure. No configuration migration is required.
 
 ## Incidental Discoveries (Out of Scope)
 
