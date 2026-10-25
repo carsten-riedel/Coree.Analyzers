@@ -22,6 +22,9 @@ Thumbs.db
 *[Ss][Ee][Cc][Rr][Ee][Tt]*.[Pp][Ss]1
 *[Ss][Ee][Cc][Rr][Ee][Tt]*.[Jj][Ss][Oo][Nn]
 
+# Local-only product work traces
+docs/*/workhistory.md
+
 # Local agent instruction files
 AGENTS.md
 AGENTS/
