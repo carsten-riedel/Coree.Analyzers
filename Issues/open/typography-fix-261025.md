@@ -99,6 +99,22 @@ The main risk is a fix-all that uses spans from before a longer replacement, so 
 - Issue path: `Issues/open/typography-fix-261025.md`.
 - Early push of this issue-only commit is the next step and is not done yet. Publication of a later closure commit, pull request, merge, and worktree cleanup are not started.
 
+## Decision revision — quote and apostrophe escaping
+
+The original Change above stands for dashes, the ellipsis, the minus sign, and no-break spaces: one flagged character becomes the raw ASCII text.
+
+It does not stand for a raw `"` or `'` dropped into a literal. That was not visible from the diagnostic text. A curly quote inside a normal string is one character of the literal. Replacing it with a raw `"` ends the literal (`"x"y"`). A typographic apostrophe inside a character literal does the same with `'`. The warning tells the developer to use the ASCII mark. It does not tell them to break the file. The functional tests that put these characters in strings made that obvious only when the replacement was written into that same position.
+
+Revised rule for CTYQM001 and CTYAP001 only:
+
+- In a comment or other trivia, insert the raw ASCII quote or apostrophe.
+- In a regular or interpolated string, insert `"` as `\"`. An apostrophe stays `'`.
+- In a verbatim string, insert `"` as `""`.
+- In a character literal, insert `'` as `\'`. A double quote stays `"`.
+- In a raw string literal (`"""`), do not offer the fix. The quotes that keep that literal valid depend on its delimiter. The diagnostic still reports.
+
+Acceptance criteria 2 and 3 are read with this rule. Add: a raw string that contains U+201C still reports CTYQM001 and is not offered a fix. The other criteria are unchanged.
+
 ## Incidental Discoveries (Out of Scope)
 
 - `ProjectDirectoryTextFiles.ContainsNul` returns false when U+0000 appears after the first 512 characters. `ContainsNulReadsOnlyTheFirst512Characters` locks that limit. Whether a later NUL should skip the rest of an additional file was not established.
