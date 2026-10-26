@@ -12,16 +12,19 @@ A normal string without `u8` is escaped (`\"`). A verbatim string doubles the qu
 
 ## Change
 
-Treat a UTF-8 string literal the same way as the ordinary literal it suffixes.
+A UTF-8 string literal is now treated the same way as the ordinary literal it suffixes.
 
 - `"..."u8` uses the same escaping as a normal string. A straight double quote is written as `\"`. An apostrophe, hyphen, ellipsis, or space is written as that character.
+- `@"..."u8` is the same token kind with a verbatim prefix, so a double quote is written as `""`.
 - `"""..."""u8`, on one line or across lines, is not offered a fix. The diagnostic still reports.
 
-Reported characters, diagnostic ids, and severity stay as they are. A raw string without `u8`, a verbatim string, a comment, and an interpolated string keep the behavior they already have. The repository README, the Typography NuGet readme, the package notes, and `docs/typography/user/ascii-replacement.md` say that the `u8` suffix follows those same two rules.
+Reported characters, diagnostic ids, and severity stay as they are. A raw string without `u8`, a verbatim string without `u8`, a comment, and an interpolated string keep the behavior they already have. The repository README, the Typography NuGet readme, the package notes, and `docs/typography/user/ascii-replacement.md` say that the `u8` suffix follows those rules. `@"..."u8` was not a separate candidate; it is the verbatim form of `Utf8StringLiteralToken`, and leaving it on the old path would still have inserted a raw quote.
 
 ## After
 
-Not implemented yet.
+Applying the fix to `class C { void M() { var s = "x“y"u8; } }` writes `"x\"y"u8`, and CTYQM001 is gone from that span. Two curly quotes in one `u8` literal both become escaped quotes, and the literal still ends at its original closing quote. An em dash in `"a—b"u8` becomes `-`. A typographic apostrophe in a `u8` string becomes `'` with no backslash. `@"x“y"u8` becomes `@"x""y"u8`.
+
+`"""x“y"""u8` and a multi-line `"""..."""u8` that contain U+201C still report CTYQM001 and are not offered a fix. A normal string, a verbatim string without `u8`, a raw string without `u8`, and a comment behave as they did before. Whether a developer applies the fix was not measured.
 
 ## Evidence
 
@@ -33,7 +36,9 @@ Roslyn 4.14.0, language version C# 13, parses the suffixes as different tokens:
 - `"""x“y"""u8` is `Utf8SingleLineRawStringLiteralToken`
 - a multi-line `"""..."""u8` is `Utf8MultiLineRawStringLiteralToken`
 
-`TypographyCharacterFixTests.QuoteInNormalStringIsEscaped` locks `\"` for a normal string. `RawStringIsNotOfferedAFix` locks the no-fix result for a raw string without `u8`. Neither sample has a `u8` suffix. `Apply` was not executed on these tokens before this issue. The fall-through is the `return replacement` at the end of `Escape`, which inserts the quote with no backslash and still offers the fix.
+`TypographyCharacterFixTests.QuoteInNormalStringIsEscaped` locks `\"` for a normal string. `RawStringIsNotOfferedAFix` locks the no-fix result for a raw string without `u8`. Neither sample has a `u8` suffix. Before the change, the fall-through at the end of `Escape` inserted the quote with no backslash and still offered the fix.
+
+After implementation `8ae5a6126a9d3dee901222098bdfc5b92944f4cf`, from `src/sln/Coree.Analyzers.Typography`: `dotnet test --verbosity minimal -m:1` passed 93 tests. Coverlet reported 100% line, branch, and method coverage of `Coree.Analyzers.Typography`. The new tests are `QuoteInUtf8StringIsEscaped`, `TwoQuotesInOneUtf8StringStayInsideTheLiteral`, `EmDashInUtf8StringFixesToHyphen`, `ApostropheInUtf8StringNeedsNoBackslash`, `QuoteInVerbatimUtf8StringIsDoubled`, and `Utf8RawStringIsNotOfferedAFix`. The analyzer project still warns RS1038 because it references Workspaces. Consumer uptake is unmeasured.
 
 ## Understood assignment and provenance
 
@@ -85,7 +90,7 @@ The overlap recheck after `git fetch --prune origin` found no Typography UTF-8 f
 
 Consumers are C# developers who apply the Typography lightbulb or fix-all in a document that contains a `u8` string. Diagnostic ids, reported characters, and severity stay. Non-`u8` replacements stay. A raw string, with or without `u8`, is still not edited.
 
-Integration target is `origin/main` at `f8e6c5f3e35f864aad9613843eacd0cee0c16ce9`. Local branch: `feature/pevo/u8-string-fix-261026`. Worktree: `.worktrees/u8-string-fix`. Early push of this issue commit is the next step and is not done yet.
+Integration target is `origin/main` at `f8e6c5f3e35f864aad9613843eacd0cee0c16ce9`. Local branch: `feature/pevo/u8-string-fix-261026`. Worktree: `.worktrees/u8-string-fix`. The issue-only baseline `f151ce5958001a021d61e0ec00bb0fa7eac4c60e` was pushed to `origin/feature/pevo/u8-string-fix-261026` before the fixer change. The implementation commit is `8ae5a6126a9d3dee901222098bdfc5b92944f4cf`. Publication of this closure commit, and removal of the worktree, are not done yet.
 
 ### Acceptance criteria
 
@@ -101,3 +106,13 @@ Rollback is reverting the escape helper, the new tests, and the notes that menti
 ### Incidental Discoveries (Out of Scope)
 
 - CodeClarity `PackageReleaseNotes.txt` does not name CCCNS001. The repository README already describes that diagnostic. Whether an older notes section was dropped on purpose was not checked.
+
+## Final outcome
+
+Status: Done. The implementation is verified and not merged.
+
+`Escape` now recognizes `Utf8StringLiteralToken`, `Utf8SingleLineRawStringLiteralToken`, and `Utf8MultiLineRawStringLiteralToken`. The verbatim `u8` form was included because `IsVerbatimStringLiteral` is already true for `@"..."u8`; skipping it would have left that token on the path that inserts a raw quote. No other scope was added.
+
+From `src/sln/Coree.Analyzers.Typography`, `dotnet test --verbosity minimal -m:1` passed 93 tests with 100% line, branch, and method coverage of `Coree.Analyzers.Typography`. Existing non-`u8` fix tests in `TypographyCharacterFixTests` still passed. Real consumer uptake was not measured.
+
+Rollback is reverting `8ae5a6126a9d3dee901222098bdfc5b92944f4cf`. The remote feature branch existed at the issue baseline before this closure. Pushing this commit, and deleting the local worktree, are still pending.
