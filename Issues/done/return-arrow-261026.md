@@ -19,22 +19,28 @@ int TwoSteps(int a, int b, int c)
 
 ## Change
 
-Keep the current sentence for a `return` and a `yield return`. For a returned arrow, say to move that arrow into a block and extract the extra steps into local variables there.
+A `return` and a `yield return` still say to extract the extra steps into local variables. A returned arrow now says to move that arrow into a block and extract the extra steps into local variables there.
 
-The planned sentences are:
+The sentences are:
 
 - Block: `Return expression is too complex. Extract intermediate calculations into local variables.`
 - Arrow: `Return expression is too complex. Move this arrow into a block and extract the extra steps into local variables there.`
 
-CCCRC001, the title, the severity settings, and which expressions report stay as they are. `docs/codeclarity/user/return-expression-complexity.md` and the CodeClarity package notes will describe the two sentences. A single-step arrow, a void arrow, a constructor, a setter, a lambda, and an async method that returns a non-generic `Task` or `ValueTask` stay quiet.
+CCCRC001, the title, the severity settings, and which expressions report are unchanged. `docs/codeclarity/user/return-expression-complexity.md` and the CodeClarity package notes describe the two sentences. A single-step arrow, a void arrow, a constructor, a setter, a lambda, and an async method that returns a non-generic `Task` or `ValueTask` stay quiet.
 
 ## After
 
-Not implemented yet.
+`int Property => Raw + Raw + 1` still reports CCCRC001. The sentence is now `Return expression is too complex. Move this arrow into a block and extract the extra steps into local variables there.` The same sentence is used for a returned method arrow, a local-function arrow, an indexer arrow, a `get =>` arrow, an operator, a conversion, and a returned `Task<int>` or `ValueTask<int>` arrow.
+
+`return a + b + c` and `yield return a + b + c` still report CCCRC001 with `Return expression is too complex. Extract intermediate calculations into local variables.`
+
+The arrow warning no longer tells the reader to declare a local in a form that cannot hold one. Whether a developer follows the new sentence was not measured.
 
 ## Evidence
 
-At `origin/main` `d6771796304860aed617c6351ed40adcff06729a`, `ReturnTypeComplexityAnalyzer` has one message, `Return expression is too complex. Extract intermediate calculations into local variables.` `ReportIfExceeds` uses that message for both `AnalyzeReturn` and `ReportArrow`. `ExpressionBodiedReturnedValuesReport` expects CCCRC001 on the property `Raw + Raw + 1` and on the other returned arrows, and it does not check the sentence. `docs/codeclarity/user/return-expression-complexity.md` says the warning asks for local variables, including for a returned arrow. Whether a developer is actually stopped by that sentence was not measured.
+At `origin/main` `d6771796304860aed617c6351ed40adcff06729a`, `ReturnTypeComplexityAnalyzer` had one message, `Return expression is too complex. Extract intermediate calculations into local variables.` `ReportIfExceeds` used that message for both `AnalyzeReturn` and `ReportArrow`. `ExpressionBodiedReturnedValuesReport` expected CCCRC001 on the property `Raw + Raw + 1` and on the other returned arrows, and it did not check the sentence.
+
+After the change, from `src/sln/Coree.Analyzers.CodeClarity`, `dotnet test --verbosity minimal -m:1` passed 126 tests. Coverlet reported 100% line, branch, and method coverage of `Coree.Analyzers.CodeClarity`. `NestedCallAndSecondOperatorAreTooComplex` and `TwoStepYieldReturnReports` lock the block sentence. `ExpressionBodiedReturnedValuesReport` locks the arrow sentence on all nine returned arrows. Quiet cases in `ExpressionBodiedNonValuesAndSingleStepsStayQuiet` still pass. Consumer uptake is unmeasured.
 
 ## Understood assignment and provenance
 
@@ -81,4 +87,14 @@ Acceptance:
 
 Rollback is reverting the message split, the tests that lock it, and the notes.
 
-Integration base: `origin/main` `d6771796304860aed617c6351ed40adcff06729a`. Local branch: `feature/pevo/return-arrow-261026`. Worktree: `.worktrees/return-arrow`. Early publication of this issue commit is pending.
+Integration base: `origin/main` `d6771796304860aed617c6351ed40adcff06729a`. Local branch: `feature/pevo/return-arrow-261026`. Worktree: `.worktrees/return-arrow`. The issue-only baseline `ddcfbf55a588d839d64e8c97a2b4b6f393e9e1ad` is on `origin/feature/pevo/return-arrow-261026`.
+
+## Final outcome
+
+Status: Done. The implementation is verified and ready for review. It is not merged.
+
+`79bb0fa47ef06e44d7258b4ee8514ad9fc2e4c3f` is the message change. `a87ee947c8f3d649636f4e1f942d564c9f4b0ad7` is the user page and package-note change. The block sentence is the one that was already published. The arrow sentence is the only new wording. Rollback is reverting those two commits.
+
+From `src/sln/Coree.Analyzers.CodeClarity`, `dotnet test --verbosity minimal -m:1` passed 126 tests, with 100% line, branch, and method coverage of `Coree.Analyzers.CodeClarity`. Real consumer uptake was not measured.
+
+Publication of this Done commit, pull-request creation, merge, and worktree cleanup are not done yet.
