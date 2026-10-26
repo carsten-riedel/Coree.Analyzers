@@ -1,6 +1,7 @@
 2026-10-26
 
  - CCCMB001 can insert the blank line it asks for. A comment, documentation comment, or attribute between the methods stays below that line. Two methods on one line are split by that empty line. The warning still reports until the fix is applied.
+ - CCCRC001 counts the conditional operator ?: as one step. && and || do not count. Which expressions report is unchanged.
  - CCCPL002 stays quiet when a parameter list contains a /// documentation comment, so it does not recommend a one-line spelling that would comment out the rest of the signature. A /// sequence inside a string can still report. A /// comment above the method is outside the list and can still report.
 
 2026-10-25

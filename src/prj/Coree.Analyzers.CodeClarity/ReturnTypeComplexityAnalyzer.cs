@@ -31,7 +31,7 @@ namespace Coree.Analyzers.CodeClarity
             "Clarity",
             DiagnosticSeverity.Warning,
             isEnabledByDefault: true,
-            description: "Counts arithmetic operators (except string concatenation), method calls other than nameof, and conditional operators in a return, yield return, or returned arrow expression. A user-defined operator + counts even when one operand is a string. A void arrow, a constructor, a setter, a lambda, and an async method that returns a non-generic Task or ValueTask are not scored. ReturnTypeComplexityAnalyzerMaximum is the allowed score; the default is 1.");
+            description: "Counts arithmetic operators (except string concatenation), method calls other than nameof, and the conditional operator ?: in a return, yield return, or returned arrow expression. && and || do not count. A user-defined operator + counts even when one operand is a string. A void arrow, a constructor, a setter, a lambda, and an async method that returns a non-generic Task or ValueTask are not scored. ReturnTypeComplexityAnalyzerMaximum is the allowed score; the default is 1.");
 
         private static readonly DiagnosticDescriptor ErrorRule =
             AnalyzerSeverity.WithSeverity(Rule, DiagnosticSeverity.Error);
