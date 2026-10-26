@@ -1,3 +1,7 @@
+2026-10-26
+
+ - A u8 string literal uses the same quote escaping as the string it suffixes. "..."u8 writes a double quote as \", and @"..."u8 writes it as "". A raw string with a u8 suffix is not edited, and the warning still reports.
+
 2026-10-25
 
  - In a C# document, the editor can replace a flagged character with the ASCII character that warning already names. An en dash, em dash, or minus sign becomes a hyphen. A curly double quote or guillemet becomes a straight double quote, escaped so a string literal still parses. A single quotation mark or typographic apostrophe becomes an apostrophe. An ellipsis becomes three periods. A no-break space becomes a normal space. A raw string is not edited. The fix runs only when you apply it.

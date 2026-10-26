@@ -135,6 +135,7 @@ namespace Coree.Analyzers.Typography
             if (IsRawString(token))
             {
                 // A raw string's delimiter is a run of quotes. Inserting one more can close it early.
+                // """..."""u8 is a raw string too, but Roslyn gives it a Utf8 raw token kind.
                 return null;
             }
 
@@ -143,7 +144,11 @@ namespace Coree.Analyzers.Typography
                 return replacement.Replace("'", "\\'");
             }
 
-            if (token.IsKind(SyntaxKind.StringLiteralToken) || token.IsKind(SyntaxKind.InterpolatedStringTextToken))
+            // "..."u8 and @"..."u8 are Utf8StringLiteralToken, not StringLiteralToken.
+            // Without that kind, a curly quote is inserted as a raw " and the literal splits.
+            if (token.IsKind(SyntaxKind.StringLiteralToken)
+                || token.IsKind(SyntaxKind.Utf8StringLiteralToken)
+                || token.IsKind(SyntaxKind.InterpolatedStringTextToken))
             {
                 if (IsVerbatim(token))
                 {
@@ -159,7 +164,9 @@ namespace Coree.Analyzers.Typography
         private static bool IsRawString(SyntaxToken token)
         {
             if (token.IsKind(SyntaxKind.SingleLineRawStringLiteralToken)
-                || token.IsKind(SyntaxKind.MultiLineRawStringLiteralToken))
+                || token.IsKind(SyntaxKind.MultiLineRawStringLiteralToken)
+                || token.IsKind(SyntaxKind.Utf8SingleLineRawStringLiteralToken)
+                || token.IsKind(SyntaxKind.Utf8MultiLineRawStringLiteralToken))
             {
                 return true;
             }

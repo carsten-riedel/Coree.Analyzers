@@ -12,9 +12,9 @@ Typography warns when a word processor leaves a special character in source. In 
 | CTYMN001 | Minus sign (U+2212) | Hyphen (`-`) |
 | CTYNB001 | No-break space (U+00A0), narrow no-break space (U+202F) | Normal space |
 
-A comment keeps that character as it is. Inside a normal or interpolated string, a straight double quote is written as `\"`, so the literal does not end early. Inside a verbatim string, it is written as `""`. Inside a character literal, an apostrophe is written as `\'`.
+A comment keeps that character as it is. Inside a normal or interpolated string, a straight double quote is written as `\"`, so the literal does not end early. Inside a verbatim string, it is written as `""`. Inside a character literal, an apostrophe is written as `\'`. A `u8` suffix uses that same escaping: `"..."u8` writes `\"`, and `@"..."u8` writes `""`.
 
-A raw string (`"""`) is left unchanged. The warning still reports there. Changing the quotes that keep a raw string valid depends on its delimiter, and this fix does not guess.
+A raw string (`"""`) is left unchanged, including one with a `u8` suffix. The warning still reports there. Changing the quotes that keep a raw string valid depends on its delimiter, and this fix does not guess.
 
 Files that are not C# documents can still report these diagnostics. This replacement is only offered for a C# document.
 
