@@ -179,6 +179,16 @@ namespace Coree.Analyzers.Typography.Tests
         }
 
         [TestMethod]
+        public async Task VerbatimStringInsideRawInterpolationHoleDoublesQuote()
+        {
+            await VerifyAsync<SmartQuotesAnalyzer>(
+                SmartQuotesAnalyzer.DiagnosticId,
+                "class C { string s = $\"\"\"pre { @\"x\u201Cy\" } post\"\"\"; }",
+                "class C { string s = $\"\"\"pre { @\"x\"\"y\" } post\"\"\"; }",
+                '\u201C');
+        }
+
+        [TestMethod]
         public async Task TwoQuotesInOneInterpolationHoleStayInsideTheInnerLiteral()
         {
             const string source = "class C { string s = $@\"pre { \"\u201Cx\u201D\" } post\"; }";
