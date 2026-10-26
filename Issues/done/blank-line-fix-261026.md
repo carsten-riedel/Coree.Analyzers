@@ -14,17 +14,19 @@ Coree.Analyzers.CodeClarity reports CCCMB001 on `StaticSegmentClear` and says to
 
 ## Change
 
-Offer a code fix for CCCMB001 that inserts one blank line immediately after the previous method, using the line ending already in the file. A comment, documentation comment, attribute, or preprocessor directive that sits between the methods stays where it is, and the empty line is above it. Methods that already have a blank line are left alone. The warning still reports until the fix is applied. Fix-all uses that same edit for each CCCMB001 in the document, project, or solution.
+CCCMB001 now has a code fix that inserts one blank line immediately after the previous method, using the line ending already in the file. A comment, documentation comment, attribute, or other text between the methods stays where it is, and the empty line is above it. Two methods on one line are split by that empty line; a same-line comment is kept. Methods that already have a blank line are left alone. The warning still reports until the fix is applied. Fix-all uses that same edit for each CCCMB001 in the document, the project, or the solution.
 
 The repository README, the CodeClarity NuGet readme, the package notes, and `docs/codeclarity/user/method-blank-line.md` say the editor can insert that line. Which pairs report does not change.
 
 ## After
 
-Not implemented yet.
+Applying the fix to the two methods in Before inserts a blank line between `Walkable` and `StaticSegmentClear`, and CCCMB001 is gone from `StaticSegmentClear`. A comment or attribute that sat between the methods stays below that line. Two methods on one line are split by an empty line. A pair that already had a blank line is left alone. The compiler does not apply the edit. Whether a developer applies the fix was not measured.
 
 ## Evidence
 
-At `origin/main` `d6771796304860aed617c6351ed40adcff06729a`, `MethodBlankLineAnalyzer` reports CCCMB001 and its message says "Put a blank line before this method." `MethodBlankLineAnalyzerTests.MissingBlankLineReports` expects that warning for adjacent methods, a shared line, a comment, a documentation comment, and an attribute. A search of `src/prj/Coree.Analyzers.CodeClarity` found no `CodeFixProvider`. The CodeClarity test project references `Microsoft.CodeAnalysis.CSharp.Analyzer.Testing` and does not reference the code-fix testing package. Whether developers apply the fix was not measured.
+At `origin/main` `d6771796304860aed617c6351ed40adcff06729a`, `MethodBlankLineAnalyzer` reports CCCMB001 and its message says "Put a blank line before this method." `MethodBlankLineAnalyzerTests.MissingBlankLineReports` expects that warning for adjacent methods, a shared line, a comment, a documentation comment, and an attribute. A search of `src/prj/Coree.Analyzers.CodeClarity` found no `CodeFixProvider`. The CodeClarity test project referenced `Microsoft.CodeAnalysis.CSharp.Analyzer.Testing` and did not reference the code-fix testing package.
+
+After the fixer, from `src/sln/Coree.Analyzers.CodeClarity`, `dotnet test -m:1` passed 144 tests. Coverlet reported 100% line, branch, and method coverage of `Coree.Analyzers.CodeClarity`. `dotnet build -m:1` succeeded with 0 errors. The DebugHost still reports its six sample warnings, including CCCMB001. `dotnet pack -m:1` wrote `src/prj/Coree.Analyzers.CodeClarity/bin/Pack/Coree.Analyzers.CodeClarity.1.0.11-gbaa7db670f.nupkg` with the analyzer dll under `analyzers/dotnet/cs`, props under `build/` and `buildTransitive/`, the readme, and no package dependencies. That dll contains `MethodBlankLineFixProvider`. The packed readme and release notes describe the blank-line fix. Referencing Workspaces reports RS1038 and does not fail the build; the DebugHost warnings show the command-line compiler still loads the diagnostics. Implementation commit: `2989565b1e0535e67e56b2d140ae4d1c17c76da6`. Documentation commit: `baa7db670f7291a1f3621b970cc2bc89250f8ebd`. Consumer uptake was not measured.
 
 ## Understood assignment and provenance
 
@@ -62,7 +64,15 @@ Consumers are C# developers who see CCCMB001. The warning, its id, and its sever
 
 Acceptance: a missing blank line, including two methods on one line and a comment or attribute between them, can be fixed to one empty line above that following text, and CCCMB001 is gone from that method. The file's line ending is kept. An existing blank line is not offered a second one. `dotnet test` from `src/sln/Coree.Analyzers.CodeClarity` passes, with Coverlet still at 100% line, branch, and method coverage of `Coree.Analyzers.CodeClarity`. Rollback is reverting the fixer, its tests, the private Workspaces reference, and the notes.
 
-Integration base: `origin/main` `d6771796304860aed617c6351ed40adcff06729a`. Local branch: `feature/pevo/blank-line-fix-261026`. Worktree: `.worktrees/blank-line-fix`. Early publication of this issue commit is pending.
+Integration base: `origin/main` `d6771796304860aed617c6351ed40adcff06729a`. Local branch: `feature/pevo/blank-line-fix-261026`. Worktree: `.worktrees/blank-line-fix`. The issue-only commit `1fa6c00c7e12d4eeaf6ffc6c4107e33f17899cb6` was published to `origin/feature/pevo/blank-line-fix-261026` before product edits.
+
+## Final outcome
+
+Status: Done. The blank-line fix is implemented and the checks above passed. Done means verified and ready for review, not merged.
+
+Publication of this closure commit, pull-request creation, merge, and worktree cleanup are pending. The remote branch still points at the issue-only commit until that publication.
+
+Rollback remains reverting the fixer, its tests, the private Workspaces reference, and the notes.
 
 ## Incidental Discoveries (Out of Scope)
 
