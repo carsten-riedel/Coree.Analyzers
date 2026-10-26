@@ -12,19 +12,21 @@ The same ellipsis in a string is already replaced with three periods, and that s
 
 ## Change
 
-The fixer will not edit U+2026 when it sits in a character literal. CTYEL001 still reports there. A string ellipsis still becomes three periods. An apostrophe in a character literal still becomes `\'`. A one-character replacement in a character literal, such as an em dash becoming a hyphen, still applies.
+The fixer does not edit U+2026 when it sits in a character literal. CTYEL001 still reports there. A string ellipsis still becomes three periods. An apostrophe in a character literal still becomes `\'`. A one-character replacement in a character literal, such as an em dash becoming a hyphen, still applies.
 
-The repository README, the Typography NuGet readme, `docs/typography/user/ascii-replacement.md`, and the package notes will say that an ellipsis in a character literal is not edited and that the warning still reports. The diagnostic text stays "Use three ASCII periods." Reported characters, diagnostic ids, and severity stay as they are.
+The repository README, the Typography NuGet readme, `docs/typography/user/ascii-replacement.md`, and the package notes say that an ellipsis in a character literal is not edited and that the warning still reports. The diagnostic text stays "Use three ASCII periods." Reported characters, diagnostic ids, and severity stay as they are.
 
 ## After
 
-Not implemented yet.
+Applying the fix to `class C { char c = '…'; }` leaves that source unchanged. CTYEL001 still reports on that ellipsis, and the lightbulb does not offer a code action for it. The character literal still parses.
+
+`class C { char c = '’'; }` still becomes `class C { char c = '\''; }`. `class C { char c = '—'; }` still becomes `class C { char c = '-'; }`. `class C { string s = "x…y"; }` still becomes `class C { string s = "x...y"; }`. Whether a developer wanted a different character in that literal was not measured.
 
 ## Evidence
 
-At `origin/main` `d6771796304860aed617c6351ed40adcff06729a`, `TypographyAsciiReplacement.ForCharacter` maps U+2026 to `...`. `Escape` then rewrites only an apostrophe inside a `CharacterLiteralToken` and returns that text. Nothing in `TypographyCharacterFixTests` covers an ellipsis in a character literal. `ApostropheInCharacterLiteralIsEscaped` locks `\'`. `EllipsisMinusAndSpacesFixToAscii` locks three periods in a string.
+Before the change, at `origin/main` `d6771796304860aed617c6351ed40adcff06729a`, `TypographyAsciiReplacement.ForCharacter` mapped U+2026 to `...`, and `Escape` returned that text for a `CharacterLiteralToken`. `EllipsisInCharacterLiteralIsNotOfferedAFix` failed on that build: `Apply` returned a `ChangedText` instead of the original source. `EmDashInCharacterLiteralFixesToHyphen` passed on that same run.
 
-Whether a developer applies the fix was not measured.
+After the change, from `src/sln/Coree.Analyzers.Typography`, `dotnet test --verbosity minimal -m:1` passed 102 tests. Coverlet reported 100% line, branch, and method coverage of `Coree.Analyzers.Typography`. `EllipsisInCharacterLiteralIsNotOfferedAFix` covers the warning, the unchanged source, and no code action. `EmDashInCharacterLiteralFixesToHyphen`, `ApostropheInCharacterLiteralIsEscaped`, and `EllipsisMinusAndSpacesFixToAscii` still pass. The implementation commit is `30ab0dc7440f665b9a0eadc604392219ff128950`. Consumer uptake is unmeasured.
 
 ## Understood assignment and provenance
 
@@ -88,10 +90,20 @@ Rollback is reverting this branch. No diagnostic id, severity, or reported chara
 - Integration base: `origin/main` `d6771796304860aed617c6351ed40adcff06729a`.
 - Local branch: `feature/pevo/char-ellipsis-261026`.
 - Worktree: `.worktrees/char-ellipsis`.
-- Issue path: `Issues/open/char-ellipsis-261026.md`.
-- Publication of this issue-only commit is the next step. It is not done yet.
+- Issue path: `Issues/open/char-ellipsis-261026.md` at the baseline commit, then `Issues/done/char-ellipsis-261026.md` in the closure commit.
+- The issue-only baseline `ff71ef5024b934c1b0ccf9a93a246c158f560ead` is on `origin/feature/pevo/char-ellipsis-261026`. The implementation commit is `30ab0dc7440f665b9a0eadc604392219ff128950`. The documentation commit is `412d84890d05c3f42788c199e31612c9165aecf1`. Remote publication of those two commits and of this closure is still pending.
 
 ## Incidental Discoveries (Out of Scope)
 
 - The CodeClarity install sample still shows package version 0.1.2 while NuGet lists 1.0.9. The page also has an unversioned `dotnet add package` line.
 - An empty Typography `Includes` value set before the package props import is still replaced with `**`.
+
+## Final outcome
+
+Status: Done. The implementation is verified and ready for review. It is not merged.
+
+`Escape` withholds a character-literal replacement when the ASCII text is not one character and is not an escaped apostrophe. U+2026 is the replacement that takes that path. The diagnostic message is unchanged. Rollback is reverting `30ab0dc7440f665b9a0eadc604392219ff128950` and `412d84890d05c3f42788c199e31612c9165aecf1`.
+
+From `src/sln/Coree.Analyzers.Typography`, `dotnet test --verbosity minimal -m:1` passed 102 tests with 100% line, branch, and method coverage of `Coree.Analyzers.Typography`. `dotnet build --no-restore -m:1` succeeded with 0 errors. The existing DebugHost sample warnings are unchanged. Real consumer uptake was not measured.
+
+The move into `Issues/done/` is the previous commit. This outcome text is not on the remote yet. Pushing it, opening a pull request, merging, and removing the worktree are not done yet.
