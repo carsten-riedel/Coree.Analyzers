@@ -1,3 +1,7 @@
+2026-10-26
+
+ - A literal inside an interpolation hole is escaped for that inner literal. A normal string in a hole of a verbatim or raw interpolated string writes a straight double quote as \". A verbatim string in a hole still doubles it. Text of the outer string is unchanged, and a raw string's own text is still not edited.
+
 2026-10-25
 
  - In a C# document, the editor can replace a flagged character with the ASCII character that warning already names. An en dash, em dash, or minus sign becomes a hyphen. A curly double quote or guillemet becomes a straight double quote, escaped so a string literal still parses. A single quotation mark or typographic apostrophe becomes an apostrophe. An ellipsis becomes three periods. A no-break space becomes a normal space. A raw string is not edited. The fix runs only when you apply it.
