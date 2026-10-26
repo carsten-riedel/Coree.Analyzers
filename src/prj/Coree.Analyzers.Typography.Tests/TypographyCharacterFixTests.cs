@@ -149,6 +149,94 @@ namespace Coree.Analyzers.Typography.Tests
         }
 
         [TestMethod]
+        public async Task QuoteInVerbatimInterpolationHoleIsEscaped()
+        {
+            await VerifyAsync<SmartQuotesAnalyzer>(
+                SmartQuotesAnalyzer.DiagnosticId,
+                "class C { string s = $@\"pre { \"x\u201Cy\" } post\"; }",
+                "class C { string s = $@\"pre { \"x\\\"y\" } post\"; }",
+                '\u201C');
+        }
+
+        [TestMethod]
+        public async Task QuoteInRawInterpolationHoleIsEscaped()
+        {
+            await VerifyAsync<SmartQuotesAnalyzer>(
+                SmartQuotesAnalyzer.DiagnosticId,
+                "class C { string s = $\"\"\"pre { \"x\u201Cy\" } post\"\"\"; }",
+                "class C { string s = $\"\"\"pre { \"x\\\"y\" } post\"\"\"; }",
+                '\u201C');
+        }
+
+        [TestMethod]
+        public async Task VerbatimStringInsideInterpolationHoleDoublesQuote()
+        {
+            await VerifyAsync<SmartQuotesAnalyzer>(
+                SmartQuotesAnalyzer.DiagnosticId,
+                "class C { string s = $@\"pre { @\"x\u201Cy\" } post\"; }",
+                "class C { string s = $@\"pre { @\"x\"\"y\" } post\"; }",
+                '\u201C');
+        }
+
+        [TestMethod]
+        public async Task TwoQuotesInOneInterpolationHoleStayInsideTheInnerLiteral()
+        {
+            const string source = "class C { string s = $@\"pre { \"\u201Cx\u201D\" } post\"; }";
+            const string fixedSource = "class C { string s = $@\"pre { \"\\\"x\\\"\" } post\"; }";
+            await CSharpCodeFixVerifier<SmartQuotesAnalyzer, TypographyCharacterFixProvider, DefaultVerifier>
+                .VerifyCodeFixAsync(
+                    source,
+                    new[]
+                    {
+                        Warning(SmartQuotesAnalyzer.DiagnosticId, source, '\u201C'),
+                        Warning(SmartQuotesAnalyzer.DiagnosticId, source, '\u201D'),
+                    },
+                    fixedSource);
+        }
+
+        [TestMethod]
+        public async Task RawInterpolatedTextIsNotOfferedAFix()
+        {
+            const string source = "class C { string s = $\"\"\"x\u201Cy\"\"\"; }";
+            SyntaxTree tree = CSharpSyntaxTree.ParseText(source);
+            SourceText text = tree.GetText();
+            TextSpan span = new TextSpan(source.IndexOf('\u201C'), 1);
+            Assert.AreSame(text, TypographyAsciiReplacement.Apply(text, span, tree.GetRoot()));
+
+            using (AdhocWorkspace workspace = new AdhocWorkspace())
+            {
+                Project project = workspace.AddProject("p", LanguageNames.CSharp);
+                Document document = workspace.AddDocument(project.Id, "A.cs", text);
+                Location location = Location.Create(tree, span);
+                Diagnostic diagnostic = Diagnostic.Create(
+                    new DiagnosticDescriptor(SmartQuotesAnalyzer.DiagnosticId, "t", "m", "Typography", DiagnosticSeverity.Warning, true),
+                    location);
+                var actions = new List<CodeAction>();
+                var context = new CodeFixContext(
+                    document,
+                    diagnostic,
+                    (action, _) => actions.Add(action),
+                    CancellationToken.None);
+                await new TypographyCharacterFixProvider().RegisterCodeFixesAsync(context);
+                Assert.AreEqual(0, actions.Count);
+            }
+        }
+
+        [TestMethod]
+        public void RawTextStaysWhileHoleQuoteIsEscaped()
+        {
+            const string source = "class C { string s = $\"\"\"x\u201Cy { \"\u201C\" } z\"\"\"; }";
+            SyntaxTree tree = CSharpSyntaxTree.ParseText(source);
+            SourceText text = tree.GetText();
+            int rawIndex = source.IndexOf('\u201C');
+            int holeIndex = source.IndexOf('\u201C', rawIndex + 1);
+            Assert.AreSame(text, TypographyAsciiReplacement.Apply(text, new TextSpan(rawIndex, 1), tree.GetRoot()));
+
+            SourceText updated = TypographyAsciiReplacement.Apply(text, new TextSpan(holeIndex, 1), tree.GetRoot());
+            Assert.AreEqual("class C { string s = $\"\"\"x\u201Cy { \"\\\"\" } z\"\"\"; }", updated.ToString());
+        }
+
+        [TestMethod]
         public void ReplacementCoversEveryFlaggedCharacterAndBadSpan()
         {
             SourceText plain = SourceText.From("ab");

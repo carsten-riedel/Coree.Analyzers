@@ -164,15 +164,8 @@ namespace Coree.Analyzers.Typography
                 return true;
             }
 
-            for (SyntaxNode? node = token.Parent; node != null; node = node.Parent)
-            {
-                if (node is InterpolatedStringExpressionSyntax interpolated)
-                {
-                    return interpolated.StringStartToken.Text.Contains("\"\"\"");
-                }
-            }
-
-            return false;
+            InterpolatedStringExpressionSyntax? interpolated = OwningInterpolatedString(token);
+            return interpolated != null && interpolated.StringStartToken.Text.Contains("\"\"\"");
         }
 
         private static bool IsVerbatim(SyntaxToken token)
@@ -182,15 +175,38 @@ namespace Coree.Analyzers.Typography
                 return true;
             }
 
+            InterpolatedStringExpressionSyntax? interpolated = OwningInterpolatedString(token);
+            return interpolated != null && interpolated.StringStartToken.Text.IndexOf('@') >= 0;
+        }
+
+        private static InterpolatedStringExpressionSyntax? OwningInterpolatedString(SyntaxToken token)
+        {
+            // A hole is its own expression. The outer string's quotes do not wrap the token inside it.
+            // Using that outer string doubles a quote in $@"{ "..." } and skips a fixable quote in $"""{ "..." }.
+            bool insideHole = false;
             for (SyntaxNode? node = token.Parent; node != null; node = node.Parent)
             {
-                if (node is InterpolatedStringExpressionSyntax interpolated)
+                if (node is InterpolationSyntax)
                 {
-                    return interpolated.StringStartToken.Text.IndexOf('@') >= 0;
+                    insideHole = true;
+                    continue;
                 }
+
+                if (node is not InterpolatedStringExpressionSyntax interpolated)
+                {
+                    continue;
+                }
+
+                if (insideHole)
+                {
+                    insideHole = false;
+                    continue;
+                }
+
+                return interpolated;
             }
 
-            return false;
+            return null;
         }
 
         private static int CompareEndFirst(TextSpan left, TextSpan right)
