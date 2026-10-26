@@ -85,6 +85,48 @@ namespace Coree.Analyzers.Typography.Tests
         }
 
         [TestMethod]
+        public async Task EmDashInCharacterLiteralFixesToHyphen()
+        {
+            await VerifyAsync<EmDashAnalyzer>(
+                EmDashAnalyzer.DiagnosticId,
+                "class C { char c = '\u2014'; }",
+                "class C { char c = '-'; }",
+                '\u2014');
+        }
+
+        [TestMethod]
+        public async Task EllipsisInCharacterLiteralIsNotOfferedAFix()
+        {
+            const string source = "class C { char c = '\u2026'; }";
+            DiagnosticResult expected = Warning(EllipsisAnalyzer.DiagnosticId, source, '\u2026');
+            await CSharpAnalyzerVerifier<EllipsisAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(source, expected);
+
+            SyntaxTree tree = CSharpSyntaxTree.ParseText(source);
+            SourceText text = tree.GetText();
+            TextSpan span = new TextSpan(source.IndexOf('\u2026'), 1);
+            Assert.IsTrue(tree.GetRoot().FindToken(span.Start).IsKind(SyntaxKind.CharacterLiteralToken));
+            Assert.AreSame(text, TypographyAsciiReplacement.Apply(text, span, tree.GetRoot()));
+
+            using (AdhocWorkspace workspace = new AdhocWorkspace())
+            {
+                Project project = workspace.AddProject("p", LanguageNames.CSharp);
+                Document document = workspace.AddDocument(project.Id, "A.cs", text);
+                Location location = Location.Create(tree, span);
+                Diagnostic diagnostic = Diagnostic.Create(
+                    new DiagnosticDescriptor(EllipsisAnalyzer.DiagnosticId, "t", "m", "Typography", DiagnosticSeverity.Warning, true),
+                    location);
+                var actions = new List<CodeAction>();
+                var context = new CodeFixContext(
+                    document,
+                    diagnostic,
+                    (action, _) => actions.Add(action),
+                    CancellationToken.None);
+                await new TypographyCharacterFixProvider().RegisterCodeFixesAsync(context);
+                Assert.AreEqual(0, actions.Count);
+            }
+        }
+
+        [TestMethod]
         public async Task EllipsisMinusAndSpacesFixToAscii()
         {
             await VerifyAsync<EllipsisAnalyzer>(EllipsisAnalyzer.DiagnosticId, "class C { string s = \"x\u2026y\"; }", "class C { string s = \"x...y\"; }", '\u2026');
