@@ -121,6 +121,66 @@ namespace Coree.Analyzers.Typography.Tests
         }
 
         [TestMethod]
+        public async Task QuoteInUtf8StringIsEscaped()
+        {
+            await VerifyUtf8Async<SmartQuotesAnalyzer>(
+                SmartQuotesAnalyzer.DiagnosticId,
+                "class C { void M() { var s = \"x\u201Cy\"u8; } }",
+                "class C { void M() { var s = \"x\\\"y\"u8; } }",
+                '\u201C');
+        }
+
+        [TestMethod]
+        public async Task TwoQuotesInOneUtf8StringStayInsideTheLiteral()
+        {
+            const string source = "class C { void M() { var s = \"\u201Cx\u201D\"u8; } }";
+            const string fixedSource = "class C { void M() { var s = \"\\\"x\\\"\"u8; } }";
+            await VerifyUtf8Async<SmartQuotesAnalyzer>(
+                SmartQuotesAnalyzer.DiagnosticId,
+                source,
+                fixedSource,
+                '\u201C',
+                '\u201D');
+        }
+
+        [TestMethod]
+        public async Task EmDashInUtf8StringFixesToHyphen()
+        {
+            await VerifyUtf8Async<EmDashAnalyzer>(
+                EmDashAnalyzer.DiagnosticId,
+                "class C { void M() { var s = \"a\u2014b\"u8; } }",
+                "class C { void M() { var s = \"a-b\"u8; } }",
+                '\u2014');
+        }
+
+        [TestMethod]
+        public async Task ApostropheInUtf8StringNeedsNoBackslash()
+        {
+            await VerifyUtf8Async<ApostropheAnalyzer>(
+                ApostropheAnalyzer.DiagnosticId,
+                "class C { void M() { var s = \"x\u2019y\"u8; } }",
+                "class C { void M() { var s = \"x'y\"u8; } }",
+                '\u2019');
+        }
+
+        [TestMethod]
+        public async Task QuoteInVerbatimUtf8StringIsDoubled()
+        {
+            await VerifyUtf8Async<SmartQuotesAnalyzer>(
+                SmartQuotesAnalyzer.DiagnosticId,
+                "class C { void M() { var s = @\"x\u201Cy\"u8; } }",
+                "class C { void M() { var s = @\"x\"\"y\"u8; } }",
+                '\u201C');
+        }
+
+        [TestMethod]
+        public async Task Utf8RawStringIsNotOfferedAFix()
+        {
+            await AssertUtf8RawNotOfferedAsync("class C { var s = \"\"\"x\u201Cy\"\"\"u8; }", SyntaxKind.Utf8SingleLineRawStringLiteralToken);
+            await AssertUtf8RawNotOfferedAsync("class C { var s = \"\"\"\nx\u201Cy\n\"\"\"u8; }", SyntaxKind.Utf8MultiLineRawStringLiteralToken);
+        }
+
+        [TestMethod]
         public async Task RawStringIsNotOfferedAFix()
         {
             const string source = "class C { string s = \"\"\"\nx\u201Cy\n\"\"\"; }";
@@ -208,6 +268,74 @@ namespace Coree.Analyzers.Typography.Tests
             CollectionAssert.AreEquivalent(
                 new[] { FixAllScope.Document, FixAllScope.Project, FixAllScope.Solution },
                 scopes);
+        }
+
+        private sealed class Utf8FixTest<TAnalyzer> : CSharpCodeFixTest<TAnalyzer, TypographyCharacterFixProvider, DefaultVerifier>
+            where TAnalyzer : DiagnosticAnalyzer, new()
+        {
+            protected override ParseOptions CreateParseOptions()
+            {
+                return new CSharpParseOptions(LanguageVersion.CSharp13, DocumentationMode.Diagnose);
+            }
+        }
+
+        private static async Task VerifyUtf8Async<TAnalyzer>(
+            string diagnosticId,
+            string source,
+            string fixedSource,
+            char flagged,
+            char? second = null)
+            where TAnalyzer : DiagnosticAnalyzer, new()
+        {
+            var test = new Utf8FixTest<TAnalyzer>
+            {
+                TestCode = source,
+                FixedCode = fixedSource,
+            };
+
+            test.ExpectedDiagnostics.Add(Warning(diagnosticId, source, flagged));
+            if (second.HasValue)
+            {
+                test.ExpectedDiagnostics.Add(Warning(diagnosticId, source, second.Value));
+            }
+
+            await test.RunAsync(CancellationToken.None);
+        }
+
+        private static async Task AssertUtf8RawNotOfferedAsync(string source, SyntaxKind kind)
+        {
+            CSharpParseOptions options = new CSharpParseOptions(LanguageVersion.CSharp13);
+            SyntaxTree tree = CSharpSyntaxTree.ParseText(source, options);
+            SourceText text = tree.GetText();
+            TextSpan span = new TextSpan(source.IndexOf('\u201C'), 1);
+            SyntaxToken token = tree.GetRoot().FindToken(span.Start);
+            Assert.IsTrue(token.IsKind(kind));
+            Assert.AreSame(text, TypographyAsciiReplacement.Apply(text, span, tree.GetRoot()));
+
+            using (AdhocWorkspace workspace = new AdhocWorkspace())
+            {
+                Project project = workspace.AddProject("p", LanguageNames.CSharp);
+                DocumentId documentId = DocumentId.CreateNewId(project.Id);
+                Solution solution = project.Solution
+                    .WithProjectParseOptions(project.Id, options)
+                    .AddDocument(documentId, "A.cs", text);
+                Assert.IsTrue(workspace.TryApplyChanges(solution));
+                Document document = workspace.CurrentSolution.GetDocument(documentId)!;
+                SyntaxNode documentRoot = (await document.GetSyntaxRootAsync())!;
+                Assert.IsTrue(documentRoot.FindToken(span.Start).IsKind(kind));
+                Location location = Location.Create(tree, span);
+                Diagnostic diagnostic = Diagnostic.Create(
+                    new DiagnosticDescriptor(SmartQuotesAnalyzer.DiagnosticId, "t", "m", "Typography", DiagnosticSeverity.Warning, true),
+                    location);
+                var actions = new List<CodeAction>();
+                var context = new CodeFixContext(
+                    document,
+                    diagnostic,
+                    (action, _) => actions.Add(action),
+                    CancellationToken.None);
+                await new TypographyCharacterFixProvider().RegisterCodeFixesAsync(context);
+                Assert.AreEqual(0, actions.Count);
+            }
         }
 
         private static string Replaced(string text, SyntaxNode? root)
