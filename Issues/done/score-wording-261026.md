@@ -13,17 +13,21 @@ The repository README, the CodeClarity NuGet readme, and the CCCRC001 descriptio
 
 ## Change
 
-State the rule the scorer already uses. CCCRC001 counts the conditional operator `?:`. It does not count `&&` or `||`.
+The scorer was not changed. The words that describe it now match it. CCCRC001 counts the conditional operator `?:` and does not count `&&` or `||`.
 
-The README, the NuGet readme, the diagnostic description, the user page, and the current package notes will say that. The 0.1 package note stays as the historical wording. Nothing in the score changes. The same expressions report or stay quiet as they do today. The diagnostic id, the message, and the severity stay as they are.
+That sentence is now in the diagnostic description, the repository README, the CodeClarity NuGet readme, the NuGet gallery description, `docs/codeclarity/user/return-expression-complexity.md`, the current package notes, and the domain note that had left the phrase open. The 0.1 package note still has its original wording. The diagnostic id, the message, and the severity are unchanged.
 
 ## After
 
-Not implemented yet.
+`return a > b && a >= b` still does not report CCCRC001. `return ready ? a : b` still does not report at the default maximum. `return ready ? a + b : a` still reports. A reader of the rule text now sees that `?:` counts and that `&&` and `||` do not, instead of the phrase "conditional operators".
+
+Whether that wording changes what people write was not measured. The warnings themselves did not move.
 
 ## Evidence
 
-At `origin/main` `d6771796304860aed617c6351ed40adcff06729a`, `ReturnExpressionComplexity` increments a score for `ConditionalExpressionSyntax` and not for `&&` or `||`. `SingleCalculationStepIsSimple` keeps `return a > b && a >= b` and `return ready ? a : b` quiet. `NestedCallAndSecondOperatorAreTooComplex` reports `return ready ? a + b : a`. The descriptor description still says "conditional operators". Whether a reader was misled by that phrase was not measured.
+The baseline behavior is the same as recorded before the edit, at `origin/main` `d6771796304860aed617c6351ed40adcff06729a`. `DescriptorNamesTheConditionalOperator` checks that the CCCRC001 description contains `?:` and `&& and || do not count`, and that it does not contain "conditional operators". `SingleCalculationStepIsSimple` and `NestedCallAndSecondOperatorAreTooComplex` still cover the quiet `&&` return, the quiet `?:` return, and the reporting `?:` plus addition.
+
+From `src/sln/Coree.Analyzers.CodeClarity`, `dotnet test --verbosity minimal` passed 127 tests. Coverlet reported 100% line, branch, and method coverage of `Coree.Analyzers.CodeClarity`. Real consumer uptake was not measured.
 
 ## Understood assignment and provenance
 
@@ -83,8 +87,18 @@ Consumers are people reading CCCRC001's description or the CodeClarity package t
 - Integration base: `origin/main` `d6771796304860aed617c6351ed40adcff06729a`.
 - Local branch: `feature/pevo/score-wording-261026`.
 - Worktree: `.worktrees/score-wording`.
-- Issue path: `Issues/open/score-wording-261026.md`.
-- Publication of this issue-only commit is the next step. It is not done yet.
+- Issue path: `Issues/open/score-wording-261026.md` at the issue-only commit. Closure moves that same file to `Issues/done/`.
+- The issue-only commit `a271c72120c7c92851e4a205517fdff560cb88b9` is on `origin/feature/pevo/score-wording-261026`. Publication of the final closure commit, pull request, merge, and worktree cleanup are still pending at this status commit.
+
+## Final outcome
+
+Status: Done. The wording is verified and not merged.
+
+The score is unchanged. The diagnostic description, the repository README, the NuGet readme, the gallery description in `Coree.Analyzers.CodeClarity.csproj`, the user page, the 2026-10-26 package note, and `docs/agent-domain-understanding/context/analyzers.md` now say that `?:` counts and that `&&` and `||` do not. The gallery description and the domain note were the same sentence, found while applying it. The 0.1 package note was left as history. No diagnostic id, message, or severity changed.
+
+`DescriptorNamesTheConditionalOperator` locks the description. The existing quiet `&&` and `?:` cases, and the reporting `?:` plus addition, still pass. From `src/sln/Coree.Analyzers.CodeClarity`, `dotnet test --verbosity minimal` passed 127 tests with 100% line, branch, and method coverage of `Coree.Analyzers.CodeClarity`. Consumer uptake was not measured.
+
+Rollback is reverting this branch.
 
 ## Incidental Discoveries (Out of Scope)
 
