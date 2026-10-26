@@ -15,7 +15,7 @@ namespace Coree.Analyzers.CodeClarity
                 return false;
             }
 
-            // A line comment or preprocessor directive cannot be kept in the one-line spelling this diagnostic recommends.
+            // A line comment, a documentation comment, or a preprocessor directive cannot be kept in the one-line spelling this diagnostic recommends.
             if (ContainsLineComment(parameterList) || ContainsPreprocessorDirective(parameterList))
             {
                 return false;
@@ -34,7 +34,10 @@ namespace Coree.Analyzers.CodeClarity
         {
             foreach (SyntaxTrivia trivia in parameterList.DescendantTrivia())
             {
-                if (trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
+                // /// is documentation trivia, not a // comment, and its span starts after the slashes.
+                // A check for // never sees it. The one-line form still comments out the rest of the signature.
+                if (trivia.IsKind(SyntaxKind.SingleLineCommentTrivia)
+                    || trivia.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia))
                 {
                     return true;
                 }

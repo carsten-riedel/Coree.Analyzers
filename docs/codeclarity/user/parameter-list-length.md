@@ -15,7 +15,18 @@ void M(
 
 The same parameters on one line stay quiet. A longer list that is broken because it does not fit stays quiet.
 
-CCCPL002 stays quiet when the list contains a `//` comment. Putting that list on one line would comment out the rest of the signature. It also stays quiet when the list contains a preprocessor directive, such as `#if`, `#region`, `#nullable`, `#pragma`, or `#line`. A directive has to occupy its own line, so the one-line spelling the diagnostic recommends cannot keep it. The same characters inside a string are ordinary text. A parameter default of `"http://example"` or `"#if true"` can still report.
+CCCPL002 stays quiet when the list contains a `//` comment or a `///` documentation comment. Putting that list on one line would comment out the rest of the signature. This stays quiet:
+
+```csharp
+void M(
+    /// <param name="width">Width in pixels.</param>
+    int width,
+    int height)
+```
+
+A `///` comment on the method, above the parameter list, is not inside the list. A short wrapped list under that comment still reports.
+
+It also stays quiet when the list contains a preprocessor directive, such as `#if`, `#region`, `#nullable`, `#pragma`, or `#line`. A directive has to occupy its own line, so the one-line spelling the diagnostic recommends cannot keep it. The same characters inside a string are ordinary text. A parameter default of `"http://example"`, `"#if true"`, or `"/// width"` can still report.
 
 A block comment does not get that exception. `int /* amplitude */ a` is valid on one line, and a wrapped list that contains it still reports CCCPL002 when the parameters fit.
 
