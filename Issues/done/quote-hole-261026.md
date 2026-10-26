@@ -20,23 +20,25 @@ A curly quote in the text of `@"..."`, `$@"..."`, `"..."`, or `$"..."` already f
 
 ## Change
 
-Escape the literal that contains the character.
+The fixer now escapes the literal that contains the character. `OwningInterpolatedString` skips an interpolated string reached through an interpolation hole, and `IsRawString` and `IsVerbatim` use that owner.
 
-A normal or interpolated string inside an interpolation hole is escaped for that inner literal. A straight double quote there is written as `\"`, including when the outer string is verbatim or raw. A verbatim string inside a hole still doubles the quote. Text that belongs to the outer string is unchanged: `$@"x“y"` still doubles, and `$"""x“y"""` is still not edited.
+A normal string inside a hole is escaped for that inner literal. A straight double quote there is written as `\"`, including when the outer string is verbatim or raw. A verbatim string inside a hole still doubles the quote, including when that hole is in a raw interpolated string. Text that belongs to the outer string is unchanged: `$@"x“y"` still doubles, and `$"""x“y"""` is still not edited.
 
-Reported characters, diagnostic ids, and severity stay as they are. UTF-8 string suffixes are not part of this change. The repository README, the Typography NuGet readme, the package notes, and `docs/typography/user/ascii-replacement.md` say that a hole follows the inner literal.
+Reported characters, diagnostic ids, and severity are unchanged. UTF-8 string suffixes were not part of this change. The repository README, the Typography NuGet readme, the package notes, and `docs/typography/user/ascii-replacement.md` say that a hole follows the inner literal.
 
 ## After
 
-Not implemented yet.
+Applying the fix to `class C { string s = $@"pre { "x“y" } post"; }` writes `$@"pre { "x\"y" } post"`. The inner string still parses, and CTYQM001 is gone from that quote.
+
+Applying it to `class C { string s = $"""pre { "x“y" } post"""; }` writes `$"""pre { "x\"y" } post"""`. A curly quote in the text of `$"""x“y"""` still reports CTYQM001 and is not offered a fix. A verbatim string in that same kind of hole, `$"""pre { @"x“y" } post"""`, still doubles the quote.
+
+The compiler does not apply the edit. Whether a developer uses the fix was not measured.
 
 ## Evidence
 
-At `origin/main` `f8e6c5f3e35f864aad9613843eacd0cee0c16ce9`, `TypographyAsciiReplacement.IsRawString` and `IsVerbatim` walk to the first `InterpolatedStringExpressionSyntax` and use that start token. They do not notice an `InterpolationSyntax` between the flagged token and that string.
+Before the change, at `origin/main` `f8e6c5f3e35f864aad9613843eacd0cee0c16ce9`, `IsRawString` and `IsVerbatim` walked to the first interpolated string and ignored an `InterpolationSyntax` in between. Roslyn 4.14.0 parses the hole quote as a `StringLiteralToken` under that outer string.
 
-Roslyn 4.14.0 parses these tokens as follows. `$@"pre { "“" } post"` puts U+201C in a `StringLiteralToken` whose parents are an interpolation and then an `InterpolatedVerbatimStringStartToken` of `$@"`. `$"""pre { "“" } post"""` puts U+201C in a `StringLiteralToken` under an interpolation whose outer start token is `InterpolatedSingleLineRawStringStartToken` (`$"""`).
-
-`TypographyCharacterFixTests` locks `\"` for a normal string, `""` for a verbatim string, and no fix for a raw string. The same file checks `$"x“y"` and `$@"x“y"` only as text of the interpolated string, not as a hole. `Apply` was not executed on a hole before this issue.
+After the change, from `src/sln/Coree.Analyzers.Typography`, `dotnet test` passed 94 tests. Coverlet reported 100% line, branch, and method coverage of `Coree.Analyzers.Typography`. `QuoteInVerbatimInterpolationHoleIsEscaped`, `QuoteInRawInterpolationHoleIsEscaped`, `VerbatimStringInsideInterpolationHoleDoublesQuote`, `VerbatimStringInsideRawInterpolationHoleDoublesQuote`, `TwoQuotesInOneInterpolationHoleStayInsideTheInnerLiteral`, `RawInterpolatedTextIsNotOfferedAFix`, and `RawTextStaysWhileHoleQuoteIsEscaped` cover the hole. The existing normal, verbatim, raw, and interpolated-text cases still pass. Consumer uptake is unmeasured.
 
 ## Understood assignment and provenance
 
@@ -84,7 +86,7 @@ Exclude B, C, D, E, UTF-8 suffixes, CodeClarity, new diagnostic ids, the reporte
 
 Consumers are C# developers who apply the Typography lightbulb or fix-all on a quote inside an interpolation hole. Diagnostic ids, reported characters, and severity stay. Text of an outer string stays on its current rule. A raw string's own text is still not edited.
 
-Integration target is `origin/main` at `f8e6c5f3e35f864aad9613843eacd0cee0c16ce9`. Local branch: `feature/pevo/quote-hole-261026`. Worktree: `.worktrees/quote-hole`. Early push of this issue commit is the next step and is not done yet.
+Integration target is `origin/main` at `f8e6c5f3e35f864aad9613843eacd0cee0c16ce9`. Local branch: `feature/pevo/quote-hole-261026`. Worktree: `.worktrees/quote-hole`. The early push of the issue commit is recorded in the final outcome. At the time this paragraph was first committed, that push had not been done.
 
 ### Acceptance criteria
 
@@ -95,6 +97,26 @@ Integration target is `origin/main` at `f8e6c5f3e35f864aad9613843eacd0cee0c16ce9
 5. From `src/sln/Coree.Analyzers.Typography`, `dotnet test` passes with the configured 100% line, branch, and method coverage of `Coree.Analyzers.Typography`.
 
 Rollback is reverting the escape helper, the new tests, and the notes that mention interpolation holes.
+
+## Final outcome
+
+Status: Done. The implementation is verified. It is not merged.
+
+The fixer, its tests, and the notes were implemented as selected. A verbatim string inside a raw interpolated hole was locked as well; that is the same inner-literal rule, not a new character set or diagnostic. UTF-8 suffixes, CodeClarity, and the other assessed candidates stayed out.
+
+Commits on `feature/pevo/quote-hole-261026`:
+
+- `f0dbc3620c038f269d3a0d429b54f917bd1c69fb` records this issue. That commit was pushed and `origin/feature/pevo/quote-hole-261026` matched it before the fixer change.
+- `aa70e3856640a64dfbfc786ede816cf6a4f52164` escapes quotes inside interpolation holes.
+- `89574220f2f6eac618f1f36c56ae2043b36fa134` locks a verbatim quote inside a raw hole.
+- `74f11252e159259746ea8267c659802b552e0430` describes the hole rule in the README, the NuGet readme, the user page, and the package notes.
+- `89d5a5544fa4a218c47556bcc645e572773b3378` moved this file from `Issues/open/` to `Issues/done/` before this verified text was committed. The verified Change, After, and Evidence sections are in the following commit. That commit's id is not written here.
+
+Verification: `dotnet test` from `src/sln/Coree.Analyzers.Typography` passed 94 tests, with 100% line, branch, and method coverage of `Coree.Analyzers.Typography`. RS1038 remains the existing Workspaces warning on the analyzer project. Consumer uptake is unmeasured.
+
+Publication of this Done commit, pull-request creation, merge, and worktree cleanup are not done yet.
+
+Rollback is reverting this branch.
 
 ## Incidental Discoveries (Out of Scope)
 
