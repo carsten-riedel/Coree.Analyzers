@@ -1,5 +1,6 @@
 2026-10-26
 
+ - CCCRC001 counts the conditional operator ?: as one step. && and || do not count. Which expressions report is unchanged.
  - CCCPL002 stays quiet when a parameter list contains a /// documentation comment, so it does not recommend a one-line spelling that would comment out the rest of the signature. A /// sequence inside a string can still report. A /// comment above the method is outside the list and can still report.
 
 2026-10-25

@@ -474,6 +474,15 @@ class Meter
             Assert.IsFalse(ReturnTypeComplexityAnalyzer.ReturnsValue(null));
         }
 
+        [TestMethod]
+        public void DescriptorNamesTheConditionalOperator()
+        {
+            string description = new ReturnTypeComplexityAnalyzer().SupportedDiagnostics[0].Description.ToString();
+            StringAssert.Contains(description, "?:");
+            StringAssert.Contains(description, "&& and || do not count");
+            Assert.IsFalse(description.Contains("conditional operators"));
+        }
+
         private static async Task VerifyWithSeverityAsync(string source, string severity, params DiagnosticResult[] expected)
         {
             await VerifyWithConfigAsync(source, severity, null, expected);
