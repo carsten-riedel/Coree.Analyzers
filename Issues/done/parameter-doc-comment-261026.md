@@ -15,19 +15,21 @@ Writing that list on one line leaves the `///` in place. Everything after `///` 
 
 ## Change
 
-CCCPL002 stays quiet when the parameter list contains a `///` documentation comment. A short broken list with no documentation comment still reports. A `///` sequence inside a string still reports. A block comment still reports, because that comment can sit on one line. The length calculation, CCCPL001, the diagnostic id, and the maximum stay as they are.
+CCCPL002 stays quiet when the parameter list contains a `///` documentation comment. That comment is documentation trivia, not a `//` comment, and its span starts after the slashes, so the old check never saw it. A short broken list with no documentation comment still reports. A `///` sequence inside a string still reports. A `///` comment above the method is outside the list and still reports. A block comment still reports, because that comment can sit on one line. The length calculation, CCCPL001, the diagnostic id, and the maximum are unchanged.
 
-The repository README, the NuGet readme, the user page for parameter-list length, the analyzer description, and the package notes say that a documentation comment keeps the list quiet for the same reason a `//` comment does.
+The repository README, the NuGet readme, the user page for parameter-list length, the analyzer description, the package notes, and the parameter-list domain note say this.
 
 ## After
 
-Not implemented yet.
+The list in Before no longer reports CCCPL002. The same list with the documentation comment between `int width` and `int height` no longer reports it either. The diagnostic no longer asks for a one-line spelling that would comment out the rest of the signature. `string note = "/// width"` still reports and says the parameters fit in 39 characters, limit 120. A `///` summary above the method, with the same two parameters wrapped underneath, still reports and says 21 characters. Whether fewer warning-as-error builds now pass was not measured.
 
 ## Evidence
 
-At `origin/main` `f8e6c5f3e35f864aad9613843eacd0cee0c16ce9`, `ParameterListFit.ContainsLineComment` returns true only for `SingleLineCommentTrivia`. A parse of the list above shows the documentation comment as `SingleLineDocumentationCommentTrivia` on the `int` token. The three slashes are not a separate `//` trivia, so the existing check does not see them. `parameter.ToString()` omits that leading trivia, so the measured length is still the parameter text. `LineCommentBetweenParametersStaysQuiet` covers `//` only. Nothing in `ParameterListFitAnalyzerTests` places a `///` comment in the list.
+At `origin/main` `f8e6c5f3e35f864aad9613843eacd0cee0c16ce9`, `ParameterListFit.ContainsLineComment` returned true only for `SingleLineCommentTrivia`. A parse of the list above showed the documentation comment as `SingleLineDocumentationCommentTrivia` on the `int` token. The three slashes were not a separate `//` trivia. `parameter.ToString()` omits that leading trivia, so the measured length was still the parameter text.
 
-The analyzer was not executed on this sample before the change. Consumer benefit is not measured.
+Before the check changed, and with coverage collection disabled, `DocumentationCommentBeforeParameterStaysQuiet` and `DocumentationCommentBetweenParametersStaysQuiet` each failed: one CCCPL002, span `(1,17)-(5,2)`, "fit in 21 characters (limit 120)". `DocumentationCommentInsideStringStillReports` passed on that same run.
+
+After the change, those two lists are quiet. The string case still reports 39 characters. `DocumentationCommentOnTheMethodStillReports` reports 21 characters. From `src/sln/Coree.Analyzers.CodeClarity`, `dotnet test` passed 126 tests. Coverlet reported 100% line, branch, and method coverage for `Coree.Analyzers.CodeClarity`. `dotnet pack` wrote `src/prj/Coree.Analyzers.CodeClarity/bin/Pack/Coree.Analyzers.CodeClarity.1.0.5-g72fb3b3d74.nupkg`. The implementation commit is `c683916a0fc04297cfd412fa4250808edc7888e0`. Consumer benefit is not measured.
 
 ## Understood assignment
 
@@ -88,8 +90,16 @@ Rollback is reverting this branch. No diagnostic id, severity, or maximum change
 - Integration base: `origin/main` `f8e6c5f3e35f864aad9613843eacd0cee0c16ce9`.
 - Local branch: `feature/pevo/parameter-doc-comment-261026`.
 - Worktree: `.worktrees/parameter-doc-comment`.
-- Issue path: `Issues/open/parameter-doc-comment-261026.md`.
-- Early publication of this issue commit is the next step and is not done yet.
+- Issue path: `Issues/done/parameter-doc-comment-261026.md`.
+- The issue-only baseline `72fb3b3d743eafd3a81f6e455f1bbbbef300e50c` is on `origin/feature/pevo/parameter-doc-comment-261026`. Publication of the implementation commit and of this closure is still pending.
+
+## Final outcome
+
+Status: Done. The implementation is verified and ready for review. It is not merged.
+
+`c683916a0fc04297cfd412fa4250808edc7888e0` is the analyzer change. The above-method test was added after the first passing run, to lock the common case where `///` sits on the method and not inside the list. That is the same rule, not a new warning. Rollback is reverting that commit.
+
+This closure commit is the last local commit. Pushing it, opening a pull request, merging, and removing the worktree are not done yet.
 
 ## Incidental Discoveries (Out of Scope)
 
