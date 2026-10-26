@@ -14,7 +14,9 @@ Typography warns when a word processor leaves a special character in source. In 
 
 A comment keeps that character as it is. Inside a normal or interpolated string, a straight double quote is written as `\"`, so the literal does not end early. Inside a verbatim string, it is written as `""`. Inside a character literal, an apostrophe is written as `\'`. A `u8` suffix uses that same escaping: `"..."u8` writes `\"`, and `@"..."u8` writes `""`.
 
-A raw string (`"""`) is left unchanged, including one with a `u8` suffix. The warning still reports there. Changing the quotes that keep a raw string valid depends on its delimiter, and this fix does not guess.
+A literal inside an interpolation hole follows that inner literal. A normal string in a hole of a verbatim or raw interpolated string still writes `\"`. A verbatim string in a hole still writes `""`. The outer string does not decide the escape.
+
+A raw string's own text (`"""`), including one with a `u8` suffix and the text of a raw interpolated string, is left unchanged. The warning still reports there. Changing the quotes that keep a raw string valid depends on its delimiter, and this fix does not guess. A hole inside that raw string is not that text.
 
 Files that are not C# documents can still report these diagnostics. This replacement is only offered for a C# document.
 
