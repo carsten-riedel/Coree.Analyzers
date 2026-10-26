@@ -219,6 +219,42 @@ public record Profile{|#7:(
         }
 
         [TestMethod]
+        public async Task DocumentationCommentBeforeParameterStaysQuiet()
+        {
+            const string source = "class C { void M(\n    /// <param name=\"width\">Width in pixels.</param>\n    int width,\n    int height\n) { } }";
+            await VerifyAsync(source, "warning", null);
+        }
+
+        [TestMethod]
+        public async Task DocumentationCommentBetweenParametersStaysQuiet()
+        {
+            const string source = "class C { void M(\n    int width,\n    /// <param name=\"height\">Height in pixels.</param>\n    int height\n) { } }";
+            await VerifyAsync(source, "warning", null);
+        }
+
+        [TestMethod]
+        public async Task DocumentationCommentOnTheMethodStillReports()
+        {
+            const string source = "class C {\n    /// <summary>Create.</summary>\n    void M(\n        int width,\n        int height\n    ) { } }";
+            var expected = DiagnosticResult
+                .CompilerWarning(ParameterListFitAnalyzer.DiagnosticId)
+                .WithSpan(3, 11, 6, 6)
+                .WithMessage("This parameter list is broken across lines, but the parameters fit in 21 characters (limit 120). Write it on one line, as in M(a, b, c).");
+            await VerifyAsync(source, "warning", null, expected);
+        }
+
+        [TestMethod]
+        public async Task DocumentationCommentInsideStringStillReports()
+        {
+            const string source = "class C { void M(\n    string label,\n    string note = \"/// width\"\n) { } }";
+            var expected = DiagnosticResult
+                .CompilerWarning(ParameterListFitAnalyzer.DiagnosticId)
+                .WithSpan(1, 17, 4, 2)
+                .WithMessage("This parameter list is broken across lines, but the parameters fit in 39 characters (limit 120). Write it on one line, as in M(a, b, c).");
+            await VerifyAsync(source, "warning", null, expected);
+        }
+
+        [TestMethod]
         public async Task PreprocessorIfAroundParameterStaysQuiet()
         {
             const string source = "class C { void M(\n    int a,\n#if true\n    int debugFlag,\n#endif\n    int b\n) { } }";
