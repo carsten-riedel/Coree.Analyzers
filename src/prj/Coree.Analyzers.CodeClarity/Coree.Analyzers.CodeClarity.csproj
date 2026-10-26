@@ -145,6 +145,10 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <!-- Code fixes load in the IDE host, which already has Workspaces. PrivateAssets keeps that reference out of the nupkg. RS1038 warns on the analyzer types because this assembly references Workspaces; command-line builds still load the diagnostics. -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Coree.Analyzers.Typography" Version="1.0.0.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
