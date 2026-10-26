@@ -52,6 +52,8 @@ namespace Coree.Analyzers.CodeClarity
 
         private static bool IsCalculation(BinaryExpressionSyntax binary, SemanticModel model)
         {
+            // && and || are conditional logical operators, not the conditional operator ?:.
+            // They stay uncounted. SingleCalculationStepIsSimple locks both forms.
             SyntaxKind kind = binary.Kind();
             bool arithmetic = kind == SyntaxKind.AddExpression
                 || kind == SyntaxKind.SubtractExpression

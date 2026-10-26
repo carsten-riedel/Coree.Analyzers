@@ -82,6 +82,7 @@ class C
     int Call(int a) { return Bar(a); }
     int Member(int a) { return this.Bar(a); }
     bool Compare(int a, int b) { return a > b && a >= b; }
+    bool Either(int a, int b) { return a > b || a >= b; }
     string Join(string a, string b) { return a + "" "" + b; }
     string Name() { return nameof(C); }
     int Identity(int height) { return height; }
