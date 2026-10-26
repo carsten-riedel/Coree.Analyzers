@@ -1,5 +1,6 @@
 2026-10-26
 
+ - An ellipsis in a character literal is not edited, and CTYEL001 still reports. Three periods are not a character literal. An ellipsis in a string still becomes three periods. An apostrophe in a character literal is still written as \'.
  - A u8 string literal uses the same quote escaping as the string it suffixes. "..."u8 writes a double quote as \", and @"..."u8 writes it as "". A raw string with a u8 suffix is not edited, and the warning still reports.
  - A literal inside an interpolation hole is escaped for that inner literal. A normal string in a hole of a verbatim or raw interpolated string writes a straight double quote as \". A verbatim string in a hole still doubles it. Text of the outer string is unchanged, and a raw string's own text is still not edited.
 

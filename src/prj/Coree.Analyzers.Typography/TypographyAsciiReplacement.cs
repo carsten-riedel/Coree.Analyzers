@@ -141,7 +141,14 @@ namespace Coree.Analyzers.Typography
 
             if (token.IsKind(SyntaxKind.CharacterLiteralToken))
             {
-                return replacement.Replace("'", "\\'");
+                string escaped = replacement.Replace("'", "\\'");
+                // U+2026 becomes "...", which is not a character literal.
+                if (escaped.Length == 1 || escaped == "\\'")
+                {
+                    return escaped;
+                }
+
+                return null;
             }
 
             // "..."u8 and @"..."u8 are Utf8StringLiteralToken, not StringLiteralToken.

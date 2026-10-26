@@ -12,7 +12,7 @@ Typography warns when a word processor leaves a special character in source. In 
 | CTYMN001 | Minus sign (U+2212) | Hyphen (`-`) |
 | CTYNB001 | No-break space (U+00A0), narrow no-break space (U+202F) | Normal space |
 
-A comment keeps that character as it is. Inside a normal or interpolated string, a straight double quote is written as `\"`, so the literal does not end early. Inside a verbatim string, it is written as `""`. Inside a character literal, an apostrophe is written as `\'`. A `u8` suffix uses that same escaping: `"..."u8` writes `\"`, and `@"..."u8` writes `""`.
+A comment keeps that character as it is. Inside a normal or interpolated string, a straight double quote is written as `\"`, so the literal does not end early. Inside a verbatim string, it is written as `""`. Inside a character literal, an apostrophe is written as `\'`. An ellipsis (U+2026) in a character literal is left unchanged, and the warning still reports, because three periods are not a character literal. A `u8` suffix uses that same escaping: `"..."u8` writes `\"`, and `@"..."u8` writes `""`.
 
 A literal inside an interpolation hole follows that inner literal. A normal string in a hole of a verbatim or raw interpolated string still writes `\"`. A verbatim string in a hole still writes `""`. The outer string does not decide the escape.
 
