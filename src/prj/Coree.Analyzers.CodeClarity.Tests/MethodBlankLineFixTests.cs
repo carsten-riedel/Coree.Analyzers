@@ -66,6 +66,14 @@ namespace Coree.Analyzers.CodeClarity.Tests
         }
 
         [TestMethod]
+        public async Task TrailingLineCommentStaysBelowTheBlankLine()
+        {
+            const string source = "class C {\n    void A() { } // stays\n    void B() { }\n}";
+            const string fixedSource = "class C {\n    void A() { }\n\n // stays\n    void B() { }\n}";
+            await VerifyAsync(source, fixedSource, "B");
+        }
+
+        [TestMethod]
         [DataRow("\n")]
         [DataRow("\r\n")]
         [DataRow("\r")]

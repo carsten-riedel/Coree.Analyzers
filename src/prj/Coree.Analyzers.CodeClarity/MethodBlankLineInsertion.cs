@@ -40,16 +40,16 @@ namespace Coree.Analyzers.CodeClarity
             SourceText text = method.SyntaxTree.GetText();
             string gap = text.ToString(TextSpan.FromBounds(previous.Span.End, method.Span.Start));
             string newline = LineEndingBefore(text, previous.Span.End);
-            if (HasLineBreak(gap))
-            {
-                span = new TextSpan(previous.Span.End, 0);
-                insertion = newline;
-                return true;
-            }
-
+            TextLineCollection lines = SourceText.From(gap).Lines;
+            bool firstLineBlank = string.IsNullOrWhiteSpace(lines[0].ToString());
+            // HasBlankLine ignores the first and last lines of the gap. A trailing
+            // comment shares the previous method's line, so one inserted break only
+            // moves that comment down and the warning stays. A second break puts an
+            // empty line above it.
+            bool oneBreakClears = firstLineBlank && HasLineBreak(gap);
             span = new TextSpan(previous.Span.End, 0);
-            insertion = newline + newline;
-            if (IsWhitespace(gap))
+            insertion = oneBreakClears ? newline : newline + newline;
+            if (!oneBreakClears && IsWhitespace(gap))
             {
                 span = TextSpan.FromBounds(previous.Span.End, method.Span.Start);
             }
