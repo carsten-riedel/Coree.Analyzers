@@ -8,4 +8,6 @@ The rule looks only at method declarations that have a block body or an expressi
 
 The severity property is `MethodBlankLineAnalyzerSeverity`. The default is warning.
 
-Evidence: maintainer confirmation on 2026-10-10; src/prj/Coree.Analyzers.CodeClarity/MethodBlankLine.cs; README.md CodeClarity section.
+In a C# document, the editor can insert that blank line after the previous method. A comment, documentation comment, or attribute between the methods stays below the inserted line. Which pairs report does not change.
+
+Evidence: maintainer confirmation on 2026-10-10; src/prj/Coree.Analyzers.CodeClarity/MethodBlankLine.cs; src/prj/Coree.Analyzers.CodeClarity/MethodBlankLineInsertion.cs; README.md CodeClarity section.
