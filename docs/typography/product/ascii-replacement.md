@@ -6,7 +6,7 @@ An en dash, em dash, or minus sign becomes a hyphen. A curly double quote or gui
 
 Inside a normal or interpolated string, a straight double quote is written as `\"`. Inside a verbatim string, it is written as `""`. Inside a character literal, an apostrophe is written as `\'`. A literal inside an interpolation hole follows that inner literal, not the outer string. A `u8` suffix follows the string it belongs to: `"..."u8` writes `\"`, and `@"..."u8` writes `""`.
 
-A raw string's own text, including a `u8` raw string and the text of a raw interpolated string, is left unchanged. The warning still reports there. An ellipsis in a character literal is also left unchanged, and CTYEL001 still reports, because three periods are not a character literal. An ellipsis in a string still becomes three periods. A hyphen or an escaped apostrophe in a character literal is still offered.
+A raw string's own text, including a `u8` raw string and the text of a raw interpolated string, is left unchanged. The warning still reports there. An ellipsis in a character literal is also left unchanged, and CTYEL001 still reports, because three periods are not a character literal. An ellipsis in a string still becomes three periods. A character-literal replacement that is still one character, including a hyphen or an escaped apostrophe, is still offered.
 
 Files that are not C# documents can still report these diagnostics. The replacement is only offered for a C# document.
 
