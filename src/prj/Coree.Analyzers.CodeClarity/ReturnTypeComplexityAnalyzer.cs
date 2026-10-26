@@ -8,7 +8,7 @@ namespace Coree.Analyzers.CodeClarity
 {
     /// <summary>
     /// Warns when a <c>return</c>, <c>yield return</c>, or returned arrow expression exceeds the allowed number of calculation steps.
-    /// The default maximum is one. Extract the extra steps into named locals.
+    /// The default maximum is one. A block names the extra steps as locals. An arrow has to become a block before it can do that.
     /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public sealed class ReturnTypeComplexityAnalyzer : DiagnosticAnalyzer
@@ -24,14 +24,20 @@ namespace Coree.Analyzers.CodeClarity
 
         internal const int DefaultMaximum = 1;
 
+        private const string BlockAdvice = "Extract intermediate calculations into local variables";
+
+        // An arrow expression cannot declare a local. The block sentence would tell the reader
+        // to extract locals in a form that has nowhere to put them.
+        private const string ArrowAdvice = "Move this arrow into a block and extract the extra steps into local variables there";
+
         private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(
             DiagnosticId,
             "Return expression is too complex",
-            "Return expression is too complex. Extract intermediate calculations into local variables.",
+            "Return expression is too complex. {0}.",
             "Clarity",
             DiagnosticSeverity.Warning,
             isEnabledByDefault: true,
-            description: "Counts arithmetic operators (except string concatenation), method calls other than nameof, and the conditional operator ?: in a return, yield return, or returned arrow expression. && and || do not count. A user-defined operator + counts even when one operand is a string. A void arrow, a constructor, a setter, a lambda, and an async method that returns a non-generic Task or ValueTask are not scored. ReturnTypeComplexityAnalyzerMaximum is the allowed score; the default is 1.");
+            description: "Counts arithmetic operators (except string concatenation), method calls other than nameof, and the conditional operator ?: in a return, yield return, or returned arrow expression. && and || do not count. A user-defined operator + counts even when one operand is a string. A void arrow, a constructor, a setter, a lambda, and an async method that returns a non-generic Task or ValueTask are not scored. A return or yield return says to extract the extra steps into local variables. A returned arrow says to move into a block first, because an arrow cannot declare a local. ReturnTypeComplexityAnalyzerMaximum is the allowed score; the default is 1.");
 
         private static readonly DiagnosticDescriptor ErrorRule =
             AnalyzerSeverity.WithSeverity(Rule, DiagnosticSeverity.Error);
@@ -86,7 +92,7 @@ namespace Coree.Analyzers.CodeClarity
                 return;
             }
 
-            ReportIfExceeds(context, expression);
+            ReportIfExceeds(context, expression, BlockAdvice);
         }
 
         private static void AnalyzeMethodArrow(SyntaxNodeAnalysisContext context)
@@ -133,10 +139,10 @@ namespace Coree.Analyzers.CodeClarity
                 return;
             }
 
-            ReportIfExceeds(context, expression);
+            ReportIfExceeds(context, expression, ArrowAdvice);
         }
 
-        private static void ReportIfExceeds(SyntaxNodeAnalysisContext context, ExpressionSyntax expression)
+        private static void ReportIfExceeds(SyntaxNodeAnalysisContext context, ExpressionSyntax expression, string advice)
         {
             AnalyzerConfigOptions options = context.Options.AnalyzerConfigOptionsProvider.GlobalOptions;
             DiagnosticSeverity? severity = AnalyzerSeverity.Read(options, SeverityPropertyName);
@@ -152,7 +158,7 @@ namespace Coree.Analyzers.CodeClarity
             }
 
             DiagnosticDescriptor rule = AnalyzerSeverity.SelectDescriptor(Rule, ErrorRule, InfoRule, severity.Value);
-            context.ReportDiagnostic(Diagnostic.Create(rule, expression.GetLocation()));
+            context.ReportDiagnostic(Diagnostic.Create(rule, expression.GetLocation(), advice));
         }
 
         private static ExpressionSyntax? ValueExpression(ArrowExpressionClauseSyntax? arrow, IMethodSymbol? method)

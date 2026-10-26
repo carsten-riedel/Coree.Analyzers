@@ -110,11 +110,12 @@ class C
         return {|#4:await System.Threading.Tasks.Task.FromResult(a + b)|};
     }
 }";
-            var expected0 = DiagnosticResult.CompilerWarning(ReturnTypeComplexityAnalyzer.DiagnosticId).WithLocation(0);
-            var expected1 = DiagnosticResult.CompilerWarning(ReturnTypeComplexityAnalyzer.DiagnosticId).WithLocation(1);
-            var expected2 = DiagnosticResult.CompilerWarning(ReturnTypeComplexityAnalyzer.DiagnosticId).WithLocation(2);
-            var expected3 = DiagnosticResult.CompilerWarning(ReturnTypeComplexityAnalyzer.DiagnosticId).WithLocation(3);
-            var expected4 = DiagnosticResult.CompilerWarning(ReturnTypeComplexityAnalyzer.DiagnosticId).WithLocation(4);
+            const string blockMessage = "Return expression is too complex. Extract intermediate calculations into local variables.";
+            var expected0 = DiagnosticResult.CompilerWarning(ReturnTypeComplexityAnalyzer.DiagnosticId).WithLocation(0).WithMessage(blockMessage);
+            var expected1 = DiagnosticResult.CompilerWarning(ReturnTypeComplexityAnalyzer.DiagnosticId).WithLocation(1).WithMessage(blockMessage);
+            var expected2 = DiagnosticResult.CompilerWarning(ReturnTypeComplexityAnalyzer.DiagnosticId).WithLocation(2).WithMessage(blockMessage);
+            var expected3 = DiagnosticResult.CompilerWarning(ReturnTypeComplexityAnalyzer.DiagnosticId).WithLocation(3).WithMessage(blockMessage);
+            var expected4 = DiagnosticResult.CompilerWarning(ReturnTypeComplexityAnalyzer.DiagnosticId).WithLocation(4).WithMessage(blockMessage);
             await CSharpAnalyzerVerifier<ReturnTypeComplexityAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(
                 test,
                 expected0,
@@ -369,7 +370,8 @@ class C
         {
             const string source = "class C { System.Collections.Generic.IEnumerable<int> M(int a, int b, int c) { yield return {|#0:a + b + c|}; } }";
             var expected = DiagnosticResult.CompilerWarning(ReturnTypeComplexityAnalyzer.DiagnosticId)
-                .WithLocation(0);
+                .WithLocation(0)
+                .WithMessage("Return expression is too complex. Extract intermediate calculations into local variables.");
             await CSharpAnalyzerVerifier<ReturnTypeComplexityAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(source, expected);
         }
 
@@ -415,12 +417,14 @@ class Meter
     async System.Threading.Tasks.Task<int> Sum(int a, int b, int c) => {|#7:a + b + c|};
     async System.Threading.Tasks.ValueTask<int> SumValue(int a, int b, int c) => {|#8:a + b + c|};
 }";
+            const string arrowMessage = "Return expression is too complex. Move this arrow into a block and extract the extra steps into local variables there.";
             DiagnosticResult[] expected = new DiagnosticResult[9];
             for (int index = 0; index < expected.Length; index++)
             {
                 expected[index] = DiagnosticResult
                     .CompilerWarning(ReturnTypeComplexityAnalyzer.DiagnosticId)
-                    .WithLocation(index);
+                    .WithLocation(index)
+                    .WithMessage(arrowMessage);
             }
 
             await CSharpAnalyzerVerifier<ReturnTypeComplexityAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(source, expected);
