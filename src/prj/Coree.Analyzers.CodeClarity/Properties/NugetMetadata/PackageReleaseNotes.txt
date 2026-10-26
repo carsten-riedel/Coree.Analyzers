@@ -1,5 +1,6 @@
 2026-10-26
 
+ - CCCRC001 on a returned arrow says to move that arrow into a block and extract the extra steps into local variables there. A return or yield return still says to extract those steps into local variables. Which expressions report is unchanged.
  - CCCPL002 stays quiet when a parameter list contains a /// documentation comment, so it does not recommend a one-line spelling that would comment out the rest of the signature. A /// sequence inside a string can still report. A /// comment above the method is outside the list and can still report.
 
 2026-10-25
