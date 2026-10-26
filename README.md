@@ -243,6 +243,8 @@ private bool StaticSegmentClear()
 }
 ```
 
+In a C# document, the editor can insert the missing blank line. It uses the line ending already in the file. A comment, a documentation comment, or an attribute between the methods stays below that line. Two methods on one line are split by that empty line. The warning remains until you apply the fix. Fix-all does this for each CCCMB001 in the document, the project, or the solution.
+
 ### MSBuild properties
 
 Set these on the consuming compile target. The shipped props make them compiler-visible. Severity: `warning`, `error`, `message`, or `off`. An empty, negative, or non-numeric maximum keeps that analyzer's default: 1 calculation step, or 120 characters for CCCPL002.
