@@ -17,21 +17,23 @@ A comment, a documentation comment, or a directive between the parameters also k
 
 ## Change
 
-CCCPL001 will gain a code fix that rewrites a flagged parameter list into the expanded shape: each parameter starts on its own line, and the closing parenthesis stands on the line after the last parameter. The fix is offered only when CCCPL002 would not ask for one line. Tabs, line breaks, and repeated spaces that are only formatting can change. Text inside a parameter, including a block comment and a literal line break, stays. If a comment, a documentation comment, a directive, or other non-whitespace text sits outside the parameters and the rewrite would drop it, the fix is not offered and the warning stays.
+CCCPL001 now has a code fix that rewrites a flagged parameter list into the expanded shape: each parameter starts on its own line, and the closing parenthesis stands on the line after the last parameter. The fix is offered only when CCCPL002 would not ask for one line. Tabs, line breaks, and repeated spaces that are only formatting can change. Text inside a parameter, including a block comment and a literal line break, stays. If a comment, a documentation comment, a directive, or other non-whitespace text sits outside the parameters and the rewrite would drop it, the fix is not offered and the warning stays.
 
 The characters outside the parameter list stay where they are. The compiler does not apply the edit. The warning remains until the fix is applied. Fix-all uses that same edit for each CCCPL001 in the document, the project, or the solution that this fix can rewrite.
 
-Which lists report does not change. The repository README, the CodeClarity NuGet readme, the package notes, and the CodeClarity user and product pages for this shape will say when the editor can expand the list.
+Which lists report does not change. The repository README, the CodeClarity NuGet readme, the package notes, and the CodeClarity user and product pages for this shape say when the editor can expand the list.
 
 ## After
 
-Not implemented yet.
+Applying the fix to the six-parameter list in Before puts each parameter on its own line and puts `)` on the following line. CCCPL001 is gone from that list. A constructor, a local function, and a primary constructor that report the same way expand the same way. A short list that CCCPL002 reports, such as `float a, float b, float c`, is not offered this fix. A block comment or a literal line break inside a parameter stays. A comment, documentation comment, or directive between the parameters keeps the fix from being offered. Characters outside the parameter list stay where they are. The compiler does not apply the edit. Whether a developer applies the fix was not measured.
 
 ## Evidence
 
 At `origin/main` `14ccdee7a2ae1b66d99339f6fcf4d5078986fddd`, `ParameterListLayoutAnalyzer` reports CCCPL001 when `ParameterListLayout.IsDisallowed` is true. Its message names the one-line shape and the one-parameter-per-line shape. `ParameterListLayoutAnalyzerTests.MixedLayoutsReport` expects that warning for packed and broken lists, including a constructor and a primary constructor. `ParameterListFit.UsesBreakButFits` is false when the joined length is over the maximum, and also when the list contains a line comment, a documentation comment, a preprocessor directive, or a literal line break. A search of `src/prj/Coree.Analyzers.CodeClarity` finds `MethodBlankLineFixProvider` and no code fix for CCCPL001.
 
 `feature/pevo/parameter-list-join-261028` is published and its open issue claims the one-line edit for lists CCCPL002 reports. This issue does not take that edit.
+
+After the fixer, from `src/sln/Coree.Analyzers.CodeClarity`, `dotnet test --verbosity minimal -m:1` passed 173 tests. Coverlet reported 100% line, branch, and method coverage of `Coree.Analyzers.CodeClarity`. The build that ran those tests reported RS1038 for the Workspaces reference and 0 test failures. Implementation commit: `319e862a75fa276fffcee025fa2b1ec87b54293d`. Consumer uptake was not measured.
 
 ## Understood assignment and provenance
 
@@ -79,7 +81,13 @@ Acceptance:
 
 Rollback is reverting the fixer, its tests, and the notes.
 
-Integration base: `origin/main` `14ccdee7a2ae1b66d99339f6fcf4d5078986fddd`. Local branch: `feature/pevo/parameter-list-shape-261028`. Worktree: `.worktrees/parameter-list-shape`. Early publication of this issue-only commit is the next step, before product edits.
+Integration base: `origin/main` `14ccdee7a2ae1b66d99339f6fcf4d5078986fddd`. Local branch: `feature/pevo/parameter-list-shape-261028`. Worktree: `.worktrees/parameter-list-shape`. The issue-only baseline was published before the product edits.
+
+Status: Done. The expanded-list fix is implemented and the checks above passed. Done means verified and ready for review, not merged.
+
+Publication of this closure commit, pull-request creation, merge, and worktree cleanup are pending. The remote branch still points at the issue-only commit until that publication.
+
+Rollback remains reverting the fixer, its tests, and the notes.
 
 ## Incidental Discoveries (Out of Scope)
 
