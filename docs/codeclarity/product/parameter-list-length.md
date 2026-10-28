@@ -1,6 +1,6 @@
 # Parameter list length
 
-CodeClarity diagnostic CCCPL002 reports a parameter list that is broken across lines when the parameters would still fit on one line. It applies to a method, local function, constructor, or primary constructor. The default severity is warning. The property for that severity is `ParameterListFitAnalyzerSeverity`. The limit is `ParameterListFitAnalyzerMaximum`. The default is 120. An empty, negative, or non-numeric maximum keeps that default.
+CodeClarity diagnostic CCCPL002 reports a parameter list that is broken across lines when the parameters would still fit on one line. It applies to a method, local function, constructor, operator, conversion operator, or primary constructor. A conversion operator has one parameter, so CCCPL001 stays quiet on it and a broken list that still fits reports CCCPL002. The default severity is warning. The property for that severity is `ParameterListFitAnalyzerSeverity`. The limit is `ParameterListFitAnalyzerMaximum`. The default is 120. An empty, negative, or non-numeric maximum keeps that default.
 
 The length joins the parameters with a comma and a space. Tabs, line breaks, and repeated spaces outside tokens collapse. Whitespace inside a literal stays. Parentheses are not counted. At the default, `float a, float b, float c` reports when the list is broken across lines, and the same parameters on one line stay quiet. A list that does not fit stays quiet.
 

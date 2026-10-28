@@ -1,6 +1,6 @@
 # Parameter list length
 
-CodeClarity diagnostic CCCPL002 warns when a parameter list is broken across lines even though the parameters would still fit on one line. It applies to a method, local function, constructor, or primary constructor.
+CodeClarity diagnostic CCCPL002 warns when a parameter list is broken across lines even though the parameters would still fit on one line. It applies to a method, local function, constructor, operator, conversion operator, or primary constructor. A broken conversion operator whose single parameter still fits reports CCCPL002.
 
 The measured length joins the parameters with a comma and a space. Tabs, line breaks, and repeated spaces outside tokens collapse. Whitespace inside a literal stays, because it belongs to the default value. Parentheses are not counted. `ParameterListFitAnalyzerMaximum` sets the limit. The default is 120. An empty, negative, or non-numeric maximum keeps that default.
 

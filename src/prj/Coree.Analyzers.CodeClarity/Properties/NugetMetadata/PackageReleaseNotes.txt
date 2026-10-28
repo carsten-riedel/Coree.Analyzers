@@ -1,5 +1,6 @@
 2026-10-28
 
+ - CCCPL001 and CCCPL002 look at operator and conversion-operator parameter lists with the same shape and length rules as a method. A conversion operator has one parameter, so only CCCPL002 can report it. The existing one-line and expanded edits apply. Calls, indexers, delegates, and lambdas stay out.
  - CCCPL002 can write a fitting parameter list on one line. Formatting whitespace outside tokens collapses, and whitespace inside a literal stays. A block comment the length measurement keeps stays on that line. A comment the measurement does not include is left in place, and the warning stays. The compiler does not apply the edit. Which lists report is unchanged.
  - CCCPL001 can put each parameter on its own line and put the closing parenthesis on the following line, when that list is not one CCCPL002 would write on one line. A comment, documentation comment, or directive between the parameters keeps the fix from being offered. Text inside a parameter stays. Which lists report is unchanged.
 

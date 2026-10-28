@@ -1,6 +1,6 @@
 # Parameter list layout
 
-CCCPL001 allows two shapes for a parameter list on a method, local function, constructor, or primary constructor.
+CCCPL001 allows two shapes for a parameter list on a method, local function, constructor, operator, conversion operator, or primary constructor.
 
 The one-line shape keeps the opening parenthesis, every parameter, and the closing parenthesis on the same line.
 
@@ -8,9 +8,9 @@ The list shape puts the opening parenthesis at the end of the signature line and
 
 On 2026-10-10 the maintainer withdrew shapes this rule had been accepting. A packed parameter line under the declaration name reports. So does a one-line list whose closing parenthesis drops to the next line, a list whose first parameter stays on the signature line, and a list whose closing parenthesis shares the last parameter line.
 
-Calls, indexers, delegates, and lambdas stay out of the rule. The wider declaration set, beyond methods and record primary constructors, was reported with the implementation. Each of those kinds was not confirmed on its own.
+Calls, indexers, delegates, and lambdas stay out of the rule. An operator and a conversion operator are in it. A conversion operator has one parameter, so CCCPL001 stays quiet on it. The wider declaration set, beyond methods and record primary constructors, was reported with the implementation. Each of those kinds was not confirmed on its own.
 
-CCCPL002 is a separate analyzer. It reports a parameter list that is broken across lines when the parameters would still fit on one line. The length joins the parameters with `, ` after formatting whitespace collapses. Whitespace inside literals stays. A list that contains a `//` comment, a `///` documentation comment, a preprocessor directive, or a literal line break stays quiet, because the one-line recommendation cannot keep that text. A block comment can remain on that one line, so `int /* amplitude */ a` still reports. An escaped `\n` in a regular string can still report. Parentheses are not counted. `ParameterListFitAnalyzerMaximum` defaults to 120. The two CCCPL001 shapes stay allowed; a short list form can report CCCPL002 while CCCPL001 stays quiet.
+CCCPL002 is a separate analyzer. It reports a parameter list on those same declarations that is broken across lines when the parameters would still fit on one line. The length joins the parameters with `, ` after formatting whitespace collapses. Whitespace inside literals stays. A list that contains a `//` comment, a `///` documentation comment, a preprocessor directive, or a literal line break stays quiet, because the one-line recommendation cannot keep that text. A block comment can remain on that one line, so `int /* amplitude */ a` still reports. An escaped `\n` in a regular string can still report. Parentheses are not counted. `ParameterListFitAnalyzerMaximum` defaults to 120. The two CCCPL001 shapes stay allowed; a short list form can report CCCPL002 while CCCPL001 stays quiet.
 
 In a C# document, the editor can write that one-line spelling. A comment that the measurement omits is not deleted, and the warning stays. Which lists report does not change.
 

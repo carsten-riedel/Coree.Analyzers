@@ -1,6 +1,6 @@
 # Parameter list layout
 
-CodeClarity diagnostic CCCPL001 is a shape rule for a parameter list. It reports a method, local function, constructor, or primary constructor whose list is neither one line, parentheses included, nor one parameter per line with the closing parenthesis on the line after the last parameter ends. Calls, indexers, delegates, and lambdas stay out of it. An empty list and a single parameter stay quiet. The default severity is warning. The property is `ParameterListLayoutAnalyzerSeverity`.
+CodeClarity diagnostic CCCPL001 is a shape rule for a parameter list. It reports a method, local function, constructor, operator, conversion operator, or primary constructor whose list is neither one line, parentheses included, nor one parameter per line with the closing parenthesis on the line after the last parameter ends. Calls, indexers, delegates, and lambdas stay out of it. An empty list and a single parameter stay quiet. A conversion operator has one parameter, so CCCPL001 stays quiet on it. The default severity is warning. The property is `ParameterListLayoutAnalyzerSeverity`.
 
 A parameter may span lines. An attribute or a default on earlier lines of that parameter does not by itself report. A later parameter that starts on the earlier parameter's last line does. A closing parenthesis on the last parameter's line does.
 

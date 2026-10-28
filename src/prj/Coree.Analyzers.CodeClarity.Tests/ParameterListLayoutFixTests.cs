@@ -229,6 +229,14 @@ namespace Coree.Analyzers.CodeClarity.Tests
         }
 
         [TestMethod]
+        public async Task ShortOperatorThatFitsRegistersNoExpandAction()
+        {
+            const string source = "struct Meter { public static bool operator ==(\n    Meter left, Meter right) { return true; } }";
+            AssertUnchanged(source);
+            Assert.AreEqual(0, await ActionCountAsync(source));
+        }
+
+        [TestMethod]
         public void CommentBetweenParametersIsNotOfferedAFix()
         {
             AssertUnchanged("class C { void M(\n    int a, // width\n    int b) { } }");

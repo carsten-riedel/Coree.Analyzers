@@ -27,6 +27,60 @@ namespace Coree.Analyzers.CodeClarity.Tests
         }
 
         [TestMethod]
+        public async Task OperatorAndConversionOperatorJoin()
+        {
+            const string source = @"
+struct Meter
+{
+    public static bool operator =={|#0:(
+        Meter left, Meter right)|}
+    {
+        return true;
+    }
+
+    public static bool operator !=(Meter left, Meter right)
+    {
+        return false;
+    }
+
+    public override bool Equals(object other) => false;
+    public override int GetHashCode() => 0;
+
+    public static explicit operator int{|#1:(
+        Meter value)|}
+    {
+        return 0;
+    }
+}
+";
+            const string fixedSource = @"
+struct Meter
+{
+    public static bool operator ==(Meter left, Meter right)
+    {
+        return true;
+    }
+
+    public static bool operator !=(Meter left, Meter right)
+    {
+        return false;
+    }
+
+    public override bool Equals(object other) => false;
+    public override int GetHashCode() => 0;
+
+    public static explicit operator int(Meter value)
+    {
+        return 0;
+    }
+}
+";
+            await VerifyAsync(source, fixedSource);
+            await CSharpAnalyzerVerifier<ParameterListFitAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(fixedSource);
+            await CSharpAnalyzerVerifier<ParameterListLayoutAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(fixedSource);
+        }
+
+        [TestMethod]
         public async Task ConstructorLocalFunctionAndPrimaryConstructorJoin()
         {
             const string source = @"

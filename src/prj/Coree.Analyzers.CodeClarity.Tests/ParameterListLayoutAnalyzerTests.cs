@@ -304,6 +304,55 @@ two",
         }
 
         [TestMethod]
+        public async Task OperatorsUseTheSameShapes()
+        {
+            const string test = @"
+struct Meter
+{
+    public static bool operator =={|#0:(
+        Meter left, Meter right)|}
+    {
+        return true;
+    }
+
+    public static bool operator !=(Meter left, Meter right)
+    {
+        return false;
+    }
+
+    public override bool Equals(object other) => false;
+    public override int GetHashCode() => 0;
+
+    public static Meter operator +(Meter left, Meter right) => default;
+
+    public static Meter operator -(
+        Meter left,
+        Meter right
+    )
+    {
+        return default;
+    }
+
+    public static explicit operator int(
+        Meter value)
+    {
+        return 0;
+    }
+
+    public static Meter operator ~(
+        Meter value)
+    {
+        return default;
+    }
+}
+";
+            var expected = DiagnosticResult
+                .CompilerWarning(ParameterListLayoutAnalyzer.DiagnosticId)
+                .WithLocation(0);
+            await CSharpAnalyzerVerifier<ParameterListLayoutAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(test, expected);
+        }
+
+        [TestMethod]
         public async Task SeverityErrorReportsError()
         {
             const string source = "class C { void M(int a, int b,\n    int c) { } }";
