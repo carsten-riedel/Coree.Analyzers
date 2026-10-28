@@ -22,19 +22,27 @@ CCCPL001 and CCCPL002 register methods, constructors, local functions, and prima
 
 ## Change
 
-CCCPL001 and CCCPL002 will use their existing shape and fit rules on `operator` and conversion-operator parameter lists. A binary operator with the mixed list in Before will report CCCPL001 and, because those two parameters still fit, CCCPL002. The editor will offer the one-line join it already uses for CCCPL002, and it will not expand a list that CCCPL002 wants on one line. A broken conversion operator whose single parameter still fits will report CCCPL002 only. A one-line operator stays quiet. A list that does not fit, or that contains a `//` comment, a `///` documentation comment, a preprocessor directive, or a literal line break, stays quiet for CCCPL002, the same as a method.
+CCCPL001 and CCCPL002 use their existing shape and fit rules on `operator` and conversion-operator parameter lists. A binary operator with the mixed list in Before reports CCCPL001 and, because those two parameters still fit, CCCPL002. The editor offers the one-line join it already uses for CCCPL002, and it does not expand a list that CCCPL002 wants on one line. A broken conversion operator whose single parameter still fits reports CCCPL002 only. A one-line operator stays quiet. A list that does not fit, or that contains a `//` comment, a `///` documentation comment, a preprocessor directive, or a literal line break, stays quiet for CCCPL002, the same as a method. A unary operator is the same one-parameter case as the conversion operator.
 
-The repository README, the CodeClarity NuGet readme, the package notes, and the CodeClarity user and product pages that name this declaration set will name operators. Which shapes and which lengths report does not change for methods, local functions, constructors, or primary constructors.
+The repository README, the CodeClarity NuGet readme, the package notes, the CodeClarity user and product pages, and the parameter-list domain topic name operators in this declaration set. Which shapes and which lengths report does not change for methods, local functions, constructors, or primary constructors.
 
 ## After
 
-Not implemented yet.
+The operator in Before reports CCCPL001 and CCCPL002. Joining it produces `public static bool operator ==(Meter left, Meter right)`, and both warnings are gone from that list. The expand edit is not offered for it, because the parameters still fit.
+
+The conversion operator in Before reports CCCPL002 and does not report CCCPL001. Joining it produces `public static explicit operator int(Meter value)`, and CCCPL002 is gone. A broken unary `operator ~` does the same: CCCPL002 only, because it has one parameter.
+
+`public static Meter operator +(Meter left, Meter right)` reports neither diagnostic. A broken `operator +` that contains `//` does not report CCCPL002. The compiler does not apply either edit. Whether a developer applies the fix was not measured.
 
 ## Evidence
 
-At `origin/main` `5891bb9d89b448b2d3f4ec4a193085a218d61c6a`, `ParameterListLayoutAnalyzer.Initialize` and `ParameterListFitAnalyzer.Initialize` register `MethodDeclaration`, `ConstructorDeclaration`, `LocalFunctionStatement`, and the class, struct, record, and record-struct declarations. They do not register `OperatorDeclaration` or `ConversionOperatorDeclaration`. `ReturnTypeComplexityAnalyzer.Initialize` registers both operator kinds. `ParameterListLayout.IsDisallowed` returns false when a list has fewer than two parameters, so a conversion operator cannot report CCCPL001. `ParameterListFit.UsesBreakButFits` does not require two parameters, so a broken one-parameter list can report CCCPL002. The layout and join fixes find a `ParameterListSyntax` from the diagnostic span, without checking the parent declaration.
+Before the edit, at `origin/main` `5891bb9d89b448b2d3f4ec4a193085a218d61c6a`, `ParameterListLayoutAnalyzer.Initialize` and `ParameterListFitAnalyzer.Initialize` registered `MethodDeclaration`, `ConstructorDeclaration`, `LocalFunctionStatement`, and the class, struct, record, and record-struct declarations. They did not register `OperatorDeclaration` or `ConversionOperatorDeclaration`. `ReturnTypeComplexityAnalyzer.Initialize` already registered both operator kinds. `ParameterListLayout.IsDisallowed` returns false when a list has fewer than two parameters. `ParameterListFit.UsesBreakButFits` does not require two parameters. The layout and join fixes find a `ParameterListSyntax` from the diagnostic span, without checking the parent declaration.
 
-The published scope names methods, local functions, constructors, and primary constructors. `docs/codeclarity/product/parameter-list-layout.md` says calls, indexers, delegates, and lambdas stay out. It does not say operators stay out. No open issue, pull request, or remote branch claims this outcome. `git ls-remote --heads origin` on 2026-10-28 showed only `refs/heads/main`.
+`git ls-remote --heads origin` on 2026-10-28 showed only `refs/heads/main`.
+
+After the edit, `OperatorsUseTheSameShapes` expects CCCPL001 only on the mixed `operator ==`. The one-line `operator +`, the expanded `operator -`, the broken conversion, and the broken unary `operator ~` stay quiet for CCCPL001. `OperatorsThatFitReport` expects CCCPL002 on the mixed `==`, the expanded `-`, the conversion, and the unary `~`, and not on the one-line `+`. `OperatorLineCommentStaysQuiet` expects no CCCPL002 when the operator list contains `//`. `OperatorAndConversionOperatorJoin` joins the mixed `==` and the conversion, then both analyzers stay quiet on that result. `ShortOperatorThatFitsRegistersNoExpandAction` expects no expand edit for the short mixed `==`.
+
+From `src/sln/Coree.Analyzers.CodeClarity`, `dotnet test -m:1` passed 192 tests. Coverlet reported 100% line, branch, and method coverage of `Coree.Analyzers.CodeClarity`. `dotnet build --no-restore -m:1` succeeded with 0 errors and the six existing DebugHost sample warnings: CCCNS001, CCCMB001, CCCRC001, two CCCPL002, and one CCCPL001. DebugHost has no operator, so those warnings are unchanged. `dotnet pack --no-restore -m:1` wrote `src/prj/Coree.Analyzers.CodeClarity/bin/Pack/Coree.Analyzers.CodeClarity.1.0.21-gb212f82100.nupkg` with the analyzer dll under `analyzers/dotnet/cs`, props under `build/` and `buildTransitive/`, the readme, and no `lib` group. That package's release notes include the operator bullet. Implementation commit: `b212f82100104331a38b75c2c19199a73a47579f`. Issue-only commit: `e5be136dbe5a3ba54337b4aad6bb2f2dd803e647`, published to `origin/feature/pevo/operator-lists-261028` before the product edit. Consumer uptake was not measured.
 
 ## Understood assignment and provenance
 
@@ -90,11 +98,19 @@ Consumers are C# developers who write `operator` or conversion-operator signatur
 
 ## Baseline and execution
 
-- Status: open. Not implemented.
+- Status: Done. Implementation verified against the acceptance criteria. Not merged.
 - Integration target: `origin/main` at `5891bb9d89b448b2d3f4ec4a193085a218d61c6a`, refreshed on 2026-10-28.
 - Branch: `feature/pevo/operator-lists-261028`
 - Worktree: `.worktrees/operator-lists`
-- Early push: pending. Final publication, review merge, and worktree cleanup: pending.
+- Issue-only commit `e5be136dbe5a3ba54337b4aad6bb2f2dd803e647` was published before the product edit. Publication of this closure commit, review merge, and worktree cleanup: pending.
+
+## Final outcome
+
+Status: Done. The implementation is verified and ready for review. It is not merged.
+
+The mixed `operator ==` in Before reports CCCPL001 and CCCPL002, and the one-line join removes both. The broken conversion reports only CCCPL002, and the join removes it. A one-line operator stays quiet. A `//` comment keeps CCCPL002 quiet. Calls, indexers, delegates, and lambdas stay out. Rollback is reverting `b212f82100104331a38b75c2c19199a73a47579f`.
+
+Publication of this closure commit, a pull request, and removal of `.worktrees/operator-lists` are pending. The remote branch already contains the issue-only commit.
 
 ## Incidental Discoveries (Out of Scope)
 
