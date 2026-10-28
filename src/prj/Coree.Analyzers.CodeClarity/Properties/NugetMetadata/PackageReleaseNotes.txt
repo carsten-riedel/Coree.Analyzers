@@ -1,3 +1,7 @@
+2026-10-28
+
+ - CCCPL001 can put each parameter on its own line and put the closing parenthesis on the following line, when that list is not one CCCPL002 would write on one line. A comment, documentation comment, or directive between the parameters keeps the fix from being offered. Text inside a parameter stays. Which lists report is unchanged.
+
 2026-10-26
 
  - CCCMB001 can insert the blank line it asks for. A comment, documentation comment, or attribute between the methods stays below that line. Two methods on one line are split by that empty line. The warning still reports until the fix is applied.
