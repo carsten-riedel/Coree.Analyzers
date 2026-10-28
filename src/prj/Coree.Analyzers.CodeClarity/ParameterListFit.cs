@@ -30,6 +30,21 @@ namespace Coree.Analyzers.CodeClarity
             return JoinedLength(parameterList.Parameters) <= maximum;
         }
 
+        internal static string OneLineList(ParameterListSyntax parameterList)
+        {
+            return "(" + JoinedText(parameterList.Parameters) + ")";
+        }
+
+        // The measured spelling uses parameter.ToString(), which omits leading and trailing trivia.
+        // A comment that lives only in that trivia is not in the one-line text. Replacing the list
+        // would delete it, so the warning stays and no fix is offered.
+        internal static bool OneLineKeepsText(ParameterListSyntax parameterList, string joined)
+        {
+            string originalSignificant = Significant(parameterList.ToString());
+            string joinedSignificant = Significant(joined);
+            return originalSignificant == joinedSignificant;
+        }
+
         private static bool ContainsLineComment(ParameterListSyntax parameterList)
         {
             foreach (SyntaxTrivia trivia in parameterList.DescendantTrivia())
@@ -96,24 +111,43 @@ namespace Coree.Analyzers.CodeClarity
 
         internal static int JoinedLength(SeparatedSyntaxList<ParameterSyntax> parameters)
         {
-            int length = 0;
+            return JoinedText(parameters).Length;
+        }
+
+        internal static string JoinedText(SeparatedSyntaxList<ParameterSyntax> parameters)
+        {
+            var builder = new StringBuilder();
             for (int index = 0; index < parameters.Count; index++)
             {
                 if (index > 0)
                 {
-                    length += 2;
+                    builder.Append(", ");
                 }
 
-                length += Normalize(parameters[index]).Length;
+                builder.Append(Normalize(parameters[index]));
             }
 
-            return length;
+            return builder.ToString();
         }
 
         private static bool SpansMoreThanOneLine(ParameterListSyntax parameterList)
         {
             FileLinePositionSpan span = parameterList.GetLocation().GetLineSpan();
             return span.StartLinePosition.Line != span.EndLinePosition.Line;
+        }
+
+        private static string Significant(string text)
+        {
+            var builder = new StringBuilder(text.Length);
+            foreach (char character in text)
+            {
+                if (!char.IsWhiteSpace(character))
+                {
+                    builder.Append(character);
+                }
+            }
+
+            return builder.ToString();
         }
 
         private static string Normalize(ParameterSyntax parameter)

@@ -107,7 +107,7 @@ namespace Coree.Analyzers.CodeClarity
             context.ReportDiagnostic(Diagnostic.Create(rule, parameterList.GetLocation(), length, maximum));
         }
 
-        private static int ReadMaximum(AnalyzerConfigOptions options)
+        internal static int ReadMaximum(AnalyzerConfigOptions options)
         {
             string? read;
             if (!options.TryGetValue("build_property." + MaximumPropertyName, out read) || string.IsNullOrWhiteSpace(read))

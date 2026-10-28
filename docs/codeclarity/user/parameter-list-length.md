@@ -42,3 +42,7 @@ void M(
 The line break is part of the string, so the one-line spelling would change it. The same is true of a raw string and of an interpolated verbatim or raw string. CR, LF, CRLF, next line (U+0085), line separator (U+2028), and paragraph separator (U+2029) are the breaks that count. An escaped `\n` in a regular string is still one source line. `string value = "select\nid"` can still report when the list is wrapped and the parameters fit.
 
 CCCPL001 is a separate shape rule. A list can satisfy that shape and still report CCCPL002. A directive or a `//` comment does not turn CCCPL001 off.
+
+In a C# document, the editor can write a list that reports CCCPL002 on one line. It uses that same measured spelling. A block comment the measurement keeps stays on the line, and a line break inside that comment collapses to a space. A comment the measurement does not include stays in the file, the list is not rewritten, and CCCPL002 still reports. The compiler does not apply the change. The warning remains until you apply the fix. Fix-all does this for each CCCPL002 in the document, the project, or the solution.
+
+This is the behavior of the fixer in this repository. It does not say how often people apply it.
