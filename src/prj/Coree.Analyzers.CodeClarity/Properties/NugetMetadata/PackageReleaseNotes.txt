@@ -1,3 +1,7 @@
+2026-10-28
+
+ - CCCPL002 can write a fitting parameter list on one line. Formatting whitespace outside tokens collapses, and whitespace inside a literal stays. A block comment the length measurement keeps stays on that line. A comment the measurement does not include is left in place, and the warning stays. The compiler does not apply the edit. Which lists report is unchanged.
+
 2026-10-26
 
  - CCCMB001 can insert the blank line it asks for. A comment, documentation comment, or attribute between the methods stays below that line. Two methods on one line are split by that empty line. The warning still reports until the fix is applied.
