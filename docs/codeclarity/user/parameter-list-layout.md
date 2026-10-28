@@ -1,6 +1,6 @@
 # Parameter list layout
 
-CodeClarity diagnostic CCCPL001 warns when a parameter list is neither of two shapes. It applies to a method, local function, constructor, or primary constructor. Calls, indexers, delegates, and lambdas stay out of it. An empty list and a single parameter stay quiet.
+CodeClarity diagnostic CCCPL001 warns when a parameter list is neither of two shapes. It applies to a method, local function, constructor, operator, conversion operator, or primary constructor. Calls, indexers, delegates, and lambdas stay out of it. An empty list and a single parameter stay quiet. A conversion operator has one parameter, so this warning stays quiet on it.
 
 One shape keeps the opening parenthesis, every parameter, and the closing parenthesis on the same line.
 

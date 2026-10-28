@@ -54,7 +54,9 @@ namespace Coree.Analyzers.CodeClarity
             context.RegisterSyntaxNodeAction(
                 AnalyzeMethod,
                 SyntaxKind.MethodDeclaration,
-                SyntaxKind.ConstructorDeclaration);
+                SyntaxKind.ConstructorDeclaration,
+                SyntaxKind.OperatorDeclaration,
+                SyntaxKind.ConversionOperatorDeclaration);
             context.RegisterSyntaxNodeAction(AnalyzeLocalFunction, SyntaxKind.LocalFunctionStatement);
             context.RegisterSyntaxNodeAction(
                 AnalyzeType,

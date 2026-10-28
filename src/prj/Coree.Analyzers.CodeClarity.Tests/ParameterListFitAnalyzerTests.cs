@@ -337,6 +337,77 @@ public record Profile{|#7:(
         }
 
         [TestMethod]
+        public async Task OperatorsThatFitReport()
+        {
+            const string test = @"
+struct Meter
+{
+    public static bool operator =={|#0:(
+        Meter left, Meter right)|}
+    {
+        return true;
+    }
+
+    public static bool operator !=(Meter left, Meter right)
+    {
+        return false;
+    }
+
+    public override bool Equals(object other) => false;
+    public override int GetHashCode() => 0;
+
+    public static Meter operator +(Meter left, Meter right) => default;
+
+    public static Meter operator -{|#1:(
+        Meter left,
+        Meter right
+    )|}
+    {
+        return default;
+    }
+
+    public static explicit operator int{|#2:(
+        Meter value)|}
+    {
+        return 0;
+    }
+
+    public static Meter operator ~{|#3:(
+        Meter value)|}
+    {
+        return default;
+    }
+}
+";
+            DiagnosticResult[] expected = new DiagnosticResult[4];
+            for (int index = 0; index < expected.Length; index++)
+            {
+                expected[index] = DiagnosticResult
+                    .CompilerWarning(ParameterListFitAnalyzer.DiagnosticId)
+                    .WithLocation(index);
+            }
+
+            await CSharpAnalyzerVerifier<ParameterListFitAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(test, expected);
+        }
+
+        [TestMethod]
+        public async Task OperatorLineCommentStaysQuiet()
+        {
+            const string test = @"
+struct Meter
+{
+    public static Meter operator +(
+        Meter left, // note
+        Meter right)
+    {
+        return default;
+    }
+}
+";
+            await CSharpAnalyzerVerifier<ParameterListFitAnalyzer, DefaultVerifier>.VerifyAnalyzerAsync(test);
+        }
+
+        [TestMethod]
         public async Task SeverityErrorReportsError()
         {
             const string source = "class C { void M(\n    int a,\n    int b\n) { } }";
