@@ -9,3 +9,5 @@
 2026-10-26 19:12:51Z [S-c3e8] [observed] Typography leaves U+2026 in a character literal unedited and still reports CTYEL001, because three periods are not a character literal. A string ellipsis still becomes three periods. Evidence: src/prj/Coree.Analyzers.Typography/TypographyAsciiReplacement.cs; src/prj/Coree.Analyzers.Typography.Tests/TypographyCharacterFixTests.cs.
 
 2026-10-26 19:22:12Z [S-c4b1] [observed] CCCMB001 can insert one blank line before the later method. A comment or attribute between the methods stays below that line, and the warning remains until the fix is applied. Evidence: src/prj/Coree.Analyzers.CodeClarity/MethodBlankLineFixProvider.cs; docs/codeclarity/user/method-blank-line.md.
+
+2026-10-28 18:33:23Z [S-e331] [observed] CCCPL001 can put each parameter on its own line when CCCPL002 does not report that list. A comment, documentation comment, or directive between the parameters keeps that edit from being offered. Evidence: src/prj/Coree.Analyzers.CodeClarity/ParameterListLayoutFix.cs; docs/codeclarity/user/parameter-list-layout.md.
